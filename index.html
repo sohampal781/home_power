@@ -1174,11 +1174,18 @@
                     historyTime: []
                 };
                 
-                // Pre-fill graph with zeros so it doesn't look empty initially
                 const now = new Date();
                 for(let i=0; i<30; i++) {
                     const d = new Date(now.getTime() - (30-i)*1000);
-                    state.detectedDevices[deviceId].historyTime.push(d.toLocaleTimeString([], {minute: '2-digit', second:'2-digit'}));
+                    state.detectedDevices[deviceId].historyTime.push(
+                        d.toLocaleTimeString('en-IN', {
+                            timeZone: 'Asia/Kolkata', 
+                            hour: '2-digit', 
+                            minute: '2-digit', 
+                            second: '2-digit',
+                            hour12: true
+                        })
+                    );
                     state.detectedDevices[deviceId].historyCurrent.push(0);
                 }
             }
@@ -1667,7 +1674,7 @@
                             ticks: { font: { family: 'Inter', size: 11 }, color: '#64748b' }
                         }, 
                         x: { 
-                            title: { display: true, text: 'Indian Standard Time (IST)', color: '#64748b', font: { family: 'Inter', weight: 'bold', size: 12 } },
+                            title: { display: true, text: 'Time (IST)', color: '#64748b', font: { family: 'Inter', weight: 'bold', size: 12 } },
                             grid: { display: true, color: 'rgba(0,0,0,0.03)', borderDash: [5, 5], drawBorder: false },
                             ticks: { maxTicksLimit: 6, font: { family: 'Inter', size: 11 }, color: '#94a3b8' } 
                         } 
