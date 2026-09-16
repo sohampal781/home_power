@@ -11,11 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* ==========================================================
-           PREMIUM DESIGN SYSTEM (VARIABLES)
-           ========================================================== */
         :root {
-            /* Colors */
             --bg-body: #f1f5f9;
             --surface: #ffffff;
             --sidebar-bg: #0f172a;
@@ -29,7 +25,6 @@
             --border-light: #e2e8f0;
             --border-dark: #334155;
 
-            /* Brand & Status Colors */
             --primary: #2563eb;
             --primary-hover: #1d4ed8;
             --success: #10b981;
@@ -37,7 +32,6 @@
             --warning: #f59e0b;
             --info: #0ea5e9;
 
-            /* Shadows & Metrics */
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -49,9 +43,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
 
-        /* ==========================================================
-           SIDEBAR
-           ========================================================== */
+        /* SIDEBAR */
         #sidebar { 
             width: var(--sidebar-width); background: var(--sidebar-bg); 
             display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100;
@@ -79,9 +71,7 @@
         .stat-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
         .stat-value { font-size: 28px; font-weight: 700; color: var(--text-light); }
 
-        /* ==========================================================
-           MAIN CONTENT
-           ========================================================== */
+        /* MAIN CONTENT */
         #main-content { margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px 50px; width: calc(100% - var(--sidebar-width)); }
 
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
@@ -92,24 +82,23 @@
             display: flex; align-items: center; gap: 10px; padding: 10px 20px; 
             background: var(--surface); border-radius: 30px; box-shadow: var(--shadow-sm);
             font-weight: 600; font-size: 14px; color: var(--text-main); border: 1px solid var(--border-light);
+            transition: all 0.3s ease;
         }
         .pulse-dot { width: 10px; height: 10px; border-radius: 50%; }
         .dot-online { background: var(--success); box-shadow: 0 0 0 rgba(16, 185, 129, 0.4); animation: pulse-green 2s infinite; }
-        .dot-offline { background: var(--danger); box-shadow: 0 0 0 rgba(239, 68, 68, 0.4); animation: pulse-red 2s infinite; }
+        .dot-offline { background: var(--danger); }
         
         @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.7); } 70% { box-shadow: 0 0 0 10px rgba(16,185,129,0); } 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); } }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); } 70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
 
-        /* ==========================================================
-           CARDS & GRIDS
-           ========================================================== */
+        /* CARDS & GRIDS */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 24px; }
         .card { 
             background: var(--surface); border-radius: var(--radius-lg); padding: 24px; 
             box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.3s;
         }
         .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .card.card-offline { border-color: rgba(239, 68, 68, 0.3); }
 
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
         .room-name { font-size: 22px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
@@ -118,12 +107,10 @@
         .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
         .metric-box { background: var(--bg-body); padding: 16px; border-radius: var(--radius-md); display: flex; flex-direction: column; }
         .metric-label { font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-        .metric-val { font-size: 26px; font-weight: 700; color: var(--text-main); }
+        .metric-val { font-size: 26px; font-weight: 700; color: var(--text-main); transition: color 0.3s; }
         .metric-val span { font-size: 16px; font-weight: 500; color: var(--text-muted); }
 
-        /* ==========================================================
-           LISTS & BUTTONS
-           ========================================================== */
+        /* LISTS & BUTTONS */
         .list-item { 
             display: flex; justify-content: space-between; align-items: center; 
             padding: 20px 24px; background: var(--surface); border-radius: var(--radius-md); 
@@ -148,6 +135,7 @@
 
         .text-success { color: var(--success) !important; }
         .text-danger { color: var(--danger) !important; }
+        .text-muted { color: var(--text-muted) !important; }
 
         .toast { 
             position: fixed; bottom: 30px; right: 30px; background: var(--sidebar-bg); color: white; 
@@ -203,12 +191,9 @@
     </div>
 
     <script>
-        // STRICT AUTHENTICATION TOKEN
         const EXPECTED_TOKEN = "MRPSP_AUTH_999";
         const MQTT_BROKER = "wss://test.mosquitto.org:8081/mqtt";
         const STORAGE_KEY = "SECURE_BMS_DEVICES";
-        
-        // UNIQUE FEATURE: Cloud Save Topic (Makes data persist across devices!)
         const CONFIG_TOPIC = "mrpsp/secure_bms/system/cloud_config";
 
         const state = {
@@ -221,25 +206,26 @@
         };
 
         function initApp() {
-            // 1. Load from local fallback initially
             const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) state.registeredDevices = JSON.parse(stored);
-            
+            if (stored) {
+                try { state.registeredDevices = JSON.parse(stored); } catch(e) {}
+            }
             connectMQTT();
             renderScreen();
         }
 
-        // Saves locally AND to the MQTT Cloud (Retained)
         function saveRegistrations() {
             const configJson = JSON.stringify(state.registeredDevices);
             localStorage.setItem(STORAGE_KEY, configJson);
             
             if (state.mqttConnected) {
-                // Publish with { retain: true }. This means ANY new device opening the website
-                // will instantly receive this file from the cloud!
                 state.mqttClient.publish(CONFIG_TOPIC, configJson, { retain: true });
             }
             updateSidebarStats();
+        }
+
+        function isRegistered(id) {
+            return state.registeredDevices.some(d => d.device_id === id);
         }
 
         function connectMQTT() {
@@ -250,11 +236,8 @@
                 state.mqttConnected = true;
                 setSystemStatus(true, "CLOUD CONNECTED");
                 
-                // Subscribe to device data
                 state.mqttClient.subscribe("mrpsp/secure_bms/+/data");
                 state.mqttClient.subscribe("mrpsp/secure_bms/+/status");
-                
-                // Subscribe to the Cloud Config (to sync across devices)
                 state.mqttClient.subscribe(CONFIG_TOPIC);
             });
 
@@ -267,12 +250,11 @@
         }
 
         function handleMqttMessage(topic, message) {
-            // CLOUD SYNC FEATURE: Receive registered devices from cloud
             if (topic === CONFIG_TOPIC) {
                 try {
                     const cloudConfig = JSON.parse(message);
                     state.registeredDevices = cloudConfig;
-                    localStorage.setItem(STORAGE_KEY, message); // Update local cache
+                    localStorage.setItem(STORAGE_KEY, message);
                     updateSidebarStats();
                     if (state.currentScreen === 'dashboard' || state.currentScreen === 'registered') {
                         renderScreen();
@@ -288,10 +270,18 @@
             const type = parts[3];     
 
             if (!state.detectedDevices[deviceId]) {
+                const regInfo = state.registeredDevices.find(r => r.device_id === deviceId);
                 state.detectedDevices[deviceId] = {
-                    device_id: deviceId, block_name: "Unknown Block",
-                    status: 'OFFLINE', supply: 'OFF', fault: 'NO',
-                    voltage: 0, current: 0, power: 0, rssi: 0
+                    device_id: deviceId,
+                    block_name: regInfo ? regInfo.block_name : "Unknown Block",
+                    status: 'OFFLINE',
+                    supply: 'OFF',
+                    fault: 'NO',
+                    voltage: 0.0,
+                    current: 0.0,
+                    power: 0.0,
+                    rssi: 0,
+                    lastSeen: 0
                 };
             }
 
@@ -300,11 +290,11 @@
             if (type === 'data') {
                 try {
                     const data = JSON.parse(message);
-                    
-                    // SECURITY CHECK
                     if (data.token !== EXPECTED_TOKEN) return; 
 
+                    device.lastSeen = Date.now();
                     device.status = 'ONLINE'; 
+
                     if (data.block_name) device.block_name = data.block_name;
                     if (data.supply) device.supply = data.supply;
                     if (data.voltage !== undefined) device.voltage = data.voltage;
@@ -314,42 +304,48 @@
                     
                 } catch (e) { return; }
             } else if (type === 'status') {
-                device.status = message.trim().toUpperCase();
+                const newStatus = message.trim().toUpperCase();
+                device.status = newStatus;
+                if (newStatus === 'ONLINE') {
+                    device.lastSeen = Date.now();
+                } else {
+                    device.lastSeen = 0;
+                    device.voltage = 0.0;
+                    device.current = 0.0;
+                    device.power = 0.0;
+                }
             }
 
             updateUI(deviceId);
         }
 
-       function publishCommand(deviceId, command) {
-    if(!state.mqttConnected) { 
-        showToast("Error: Cloud Disconnected"); 
-        return; 
-    }
+        function publishCommand(deviceId, command) {
+            if(!state.mqttConnected) { showToast("Error: Cloud Disconnected"); return; }
 
-    // 1. INSTANT OPTIMISTIC UI: Update the screen before the ESP even answers
-    const dev = state.detectedDevices[deviceId];
-    if (dev) {
-        if (command === "ON") {
-            dev.supply = "ON";
-            dev.voltage = 230.0;
-            dev.current = 1.5;
-            dev.power = 345.0;
-        } else if (command === "OFF") {
-            dev.supply = "OFF";
-            dev.voltage = 0.0;
-            dev.current = 0.0;
-            dev.power = 0.0;
+            const dev = state.detectedDevices[deviceId];
+            if (dev && dev.status === 'ONLINE') {
+                if (command === "ON") {
+                    dev.supply = "ON";
+                    dev.voltage = 230.0;
+                    dev.current = 1.5;
+                    dev.power = 345.0;
+                } else if (command === "OFF") {
+                    dev.supply = "OFF";
+                    dev.voltage = 0.0;
+                    dev.current = 0.0;
+                    dev.power = 0.0;
+                }
+                updateUI(deviceId);
+            }
+
+            const topic = `mrpsp/secure_bms/${deviceId}/command`;
+            state.mqttClient.publish(topic, command);
+            showToast(`Command ${command} sent`);
         }
-        updateUI(deviceId); // Re-renders the card instantly with zero delay
-    }
 
-    // 2. Send the command over MQTT
-    const topic = `mrpsp/secure_bms/${deviceId}/command`;
-    state.mqttClient.publish(topic, command);
-    showToast(`Command ${command} executed`);
-}
-
-        // Smart DOM Updater (No Flickering)
+        // ============================================================
+        // SMART UI UPDATE (NEVER REMOVES REGISTERED CARDS)
+        // ============================================================
         function updateUI(deviceId) {
             updateSidebarStats();
             const dev = state.detectedDevices[deviceId];
@@ -357,33 +353,67 @@
 
             if (state.currentScreen === 'dashboard' && isRegistered(deviceId)) {
                 let card = document.getElementById(`card-${deviceId}`);
-                if (dev.status === 'ONLINE') {
-                    if (card) {
-                        document.getElementById(`v-${deviceId}`).innerHTML = `${dev.voltage.toFixed(1)} <span>V</span>`;
-                        document.getElementById(`c-${deviceId}`).innerHTML = `${dev.current.toFixed(2)} <span>A</span>`;
-                        document.getElementById(`p-${deviceId}`).innerHTML = `${dev.power.toFixed(1)} <span>W</span>`;
-                        
-                        const supplyEl = document.getElementById(`s-${deviceId}`);
-                        supplyEl.innerText = dev.supply;
-                        supplyEl.className = `metric-val ${dev.supply === 'ON' ? 'text-success' : 'text-danger'}`;
-                    } else {
-                        renderScreen();
+                
+                // If card is not in DOM yet, build it
+                if (!card) {
+                    const grid = document.getElementById('grid');
+                    if (grid) {
+                        grid.insertAdjacentHTML('beforeend', createCard(dev));
+                        checkDashboardEmpty();
                     }
-                } else if (card) {
-                    card.remove(); 
+                    return;
                 }
-                checkDashboardEmpty();
+
+                // Card exists: Update values without removing it
+                const isOnline = dev.status === 'ONLINE';
+
+                // 1. Update Card border style
+                if (isOnline) {
+                    card.classList.remove('card-offline');
+                } else {
+                    card.classList.add('card-offline');
+                }
+
+                // 2. Update Status Badge
+                const badge = document.getElementById(`badge-${deviceId}`);
+                const dot = document.getElementById(`dot-${deviceId}`);
+                const txt = document.getElementById(`txt-status-${deviceId}`);
+                if (badge && dot && txt) {
+                    badge.style.background = isOnline ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)';
+                    badge.style.color = isOnline ? 'var(--success)' : 'var(--danger)';
+                    dot.className = `pulse-dot ${isOnline ? 'dot-online' : 'dot-offline'}`;
+                    txt.innerText = isOnline ? 'ONLINE' : 'OFFLINE';
+                }
+
+                // 3. Update Metrics
+                const vEl = document.getElementById(`v-${deviceId}`);
+                const cEl = document.getElementById(`c-${deviceId}`);
+                const pEl = document.getElementById(`p-${deviceId}`);
+                const sEl = document.getElementById(`s-${deviceId}`);
+
+                if (vEl) vEl.innerHTML = `${dev.voltage.toFixed(1)} <span>V</span>`;
+                if (cEl) cEl.innerHTML = `${dev.current.toFixed(2)} <span>A</span>`;
+                if (pEl) pEl.innerHTML = `${dev.power.toFixed(1)} <span>W</span>`;
+                if (sEl) {
+                    sEl.innerText = isOnline ? dev.supply : 'OFFLINE';
+                    sEl.className = `metric-val ${isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted'}`;
+                }
             }
             else if (state.currentScreen === 'room_detail' && state.selectedDeviceId === deviceId) {
+                const isOnline = dev.status === 'ONLINE';
+                
                 document.getElementById('rd-v').innerHTML = `${dev.voltage.toFixed(1)} <span>V</span>`;
                 document.getElementById('rd-c').innerHTML = `${dev.current.toFixed(2)} <span>A</span>`;
                 document.getElementById('rd-p').innerHTML = `${dev.power.toFixed(1)} <span>W</span>`;
                 
                 const s = document.getElementById('rd-supply');
-                s.innerText = dev.supply;
-                s.className = `metric-val ${dev.supply === 'ON' ? 'text-success' : 'text-danger'}`;
+                if (s) {
+                    s.innerText = isOnline ? dev.supply : 'OFFLINE';
+                    s.className = `metric-val ${isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted'}`;
+                }
                 
-                document.getElementById('rd-offline').className = dev.status === 'ONLINE' ? 'hidden' : '';
+                const offlineAlert = document.getElementById('rd-offline');
+                if (offlineAlert) offlineAlert.className = isOnline ? 'hidden' : '';
             }
             else if (state.currentScreen === 'register') {
                 const list = document.getElementById('reg-list');
@@ -391,10 +421,36 @@
             }
         }
 
+        // ============================================================
+        // WATCHDOG TIMER (2.5 SECONDS TIMEOUT)
+        // ============================================================
+        const OFFLINE_TIMEOUT_MS = 2500;
+
+        setInterval(() => {
+            const now = Date.now();
+            let stateChanged = false;
+
+            Object.keys(state.detectedDevices).forEach(id => {
+                const dev = state.detectedDevices[id];
+                if (dev.status === 'ONLINE' && (now - dev.lastSeen > OFFLINE_TIMEOUT_MS)) {
+                    dev.status = 'OFFLINE';
+                    dev.voltage = 0.0;
+                    dev.current = 0.0;
+                    dev.power = 0.0;
+                    stateChanged = true;
+                    updateUI(id); // Updates card to OFFLINE in-place without removing it!
+                }
+            });
+
+            if (stateChanged) {
+                updateSidebarStats();
+            }
+        }, 1000);
+
         // --- NAVIGATION & RENDERING ---
         function navigate(screen, params = null) {
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            if (event && event.currentTarget) event.currentTarget.classList.add('active');
             state.currentScreen = screen;
             state.selectedDeviceId = params;
             renderScreen();
@@ -410,45 +466,67 @@
             if (state.currentScreen === 'system') renderSystem(container);
         }
 
+        // ============================================================
+        // DASHBOARD: ALWAYS RENDERS ALL REGISTERED BLOCKS
+        // ============================================================
         function renderDashboard(container) {
-            let html = `<div id="grid" class="grid"></div>`;
-            container.innerHTML = html;
+            container.innerHTML = `<div id="grid" class="grid"></div>`;
+            const grid = document.getElementById('grid');
             
-            let grid = document.getElementById('grid');
-            let count = 0;
+            if (state.registeredDevices.length === 0) {
+                container.innerHTML = `
+                    <div id="empty-dash" class="empty-state">
+                        <i class="ph ph-plugs empty-icon"></i>
+                        <h3>No Authorized Blocks</h3>
+                        <p>Go to "Detect Controllers" in the sidebar to add your hardware blocks.</p>
+                    </div>
+                `;
+                return;
+            }
+
             state.registeredDevices.forEach(reg => {
-                const dev = state.detectedDevices[reg.device_id];
-                if (dev && dev.status === 'ONLINE') {
-                    grid.innerHTML += createCard(dev);
-                    count++;
+                // Fetch live data or initialize fallback offline card
+                let dev = state.detectedDevices[reg.device_id];
+                if (!dev) {
+                    dev = {
+                        device_id: reg.device_id,
+                        block_name: reg.block_name || reg.device_id,
+                        status: 'OFFLINE',
+                        supply: 'OFF',
+                        fault: 'NO',
+                        voltage: 0.0,
+                        current: 0.0,
+                        power: 0.0,
+                        rssi: 0,
+                        lastSeen: 0
+                    };
+                    state.detectedDevices[reg.device_id] = dev;
                 }
+                grid.innerHTML += createCard(dev);
             });
-            
-            container.innerHTML += `
-                <div id="empty-dash" class="empty-state ${count > 0 ? 'hidden' : ''}">
-                    <i class="ph ph-plugs empty-icon"></i>
-                    <h3>No Active Controllers</h3>
-                    <p>Make sure your authorized ESP blocks are powered on and connected to WiFi.</p>
-                </div>
-            `;
         }
 
         function createCard(dev) {
+            const isOnline = dev.status === 'ONLINE';
+
             return `
-            <div class="card" id="card-${dev.device_id}">
+            <div class="card ${isOnline ? '' : 'card-offline'}" id="card-${dev.device_id}">
                 <div class="card-header">
                     <div>
                         <div class="room-name">${dev.block_name}</div>
                         <div class="hw-id">${dev.device_id}</div>
                     </div>
-                    <div class="sys-status" style="padding: 6px 12px; border:none; background: rgba(16,185,129,0.1); color: var(--success);">
-                        <div class="pulse-dot dot-online"></div> ONLINE
+                    <div class="sys-status" id="badge-${dev.device_id}" style="padding: 6px 12px; border:none; background: ${isOnline ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)'}; color: ${isOnline ? 'var(--success)' : 'var(--danger)'};">
+                        <div class="pulse-dot ${isOnline ? 'dot-online' : 'dot-offline'}" id="dot-${dev.device_id}"></div>
+                        <span id="txt-status-${dev.device_id}">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
                     </div>
                 </div>
                 <div class="metrics-grid">
                     <div class="metric-box">
                         <div class="metric-label"><i class="ph-fill ph-lightning"></i> Supply</div>
-                        <div class="metric-val ${dev.supply === 'ON' ? 'text-success' : 'text-danger'}" id="s-${dev.device_id}">${dev.supply}</div>
+                        <div class="metric-val ${isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted'}" id="s-${dev.device_id}">
+                            ${isOnline ? dev.supply : 'OFFLINE'}
+                        </div>
                     </div>
                     <div class="metric-box">
                         <div class="metric-label"><i class="ph-fill ph-gauge"></i> Power</div>
@@ -508,8 +586,8 @@
 
         function regESP(id, name) {
             state.registeredDevices.push({ device_id: id, block_name: name });
-            saveRegistrations(); // Saves locally AND to cloud!
-            showToast(`${name} added to cloud config`);
+            saveRegistrations();
+            showToast(`${name} added to dashboard`);
             renderScreen();
         }
 
@@ -517,7 +595,7 @@
             container.innerHTML = `
                 <div style="margin-bottom: 24px;">
                     <h2 class="header-title" style="font-size:22px;">Authorized Hardware</h2>
-                    <p class="subtitle">These devices are synced across all your dashboards.</p>
+                    <p class="subtitle">These blocks permanently remain on your dashboard.</p>
                 </div>
                 <div id="auth-list"></div>
             `;
@@ -525,14 +603,18 @@
             
             if (state.registeredDevices.length === 0) {
                 list.innerHTML = `<div class="empty-state"><i class="ph ph-shield-warning empty-icon"></i><h3>No hardware authorized</h3></div>`;
+                return;
             }
             
             state.registeredDevices.forEach(reg => {
+                const live = state.detectedDevices[reg.device_id];
+                const isOnline = live && live.status === 'ONLINE';
+
                 list.innerHTML += `
                 <div class="list-item">
                     <div class="list-info">
                         <h3>${reg.block_name}</h3>
-                        <p>${reg.device_id}</p>
+                        <p>${reg.device_id} &bull; <span class="${isOnline ? 'text-success' : 'text-danger'}">${isOnline ? 'ONLINE' : 'OFFLINE'}</span></p>
                     </div>
                     <button class="btn btn-danger" onclick="delESP('${reg.device_id}')">
                         <i class="ph-bold ph-trash"></i> Revoke
@@ -543,8 +625,8 @@
 
         function delESP(id) {
             state.registeredDevices = state.registeredDevices.filter(d => d.device_id !== id);
-            saveRegistrations(); // Updates cloud instantly!
-            showToast("Access revoked from cloud");
+            saveRegistrations();
+            showToast("Access revoked");
             renderScreen();
         }
 
@@ -552,6 +634,8 @@
             const dev = state.detectedDevices[state.selectedDeviceId];
             if (!dev) return;
             
+            const isOnline = dev.status === 'ONLINE';
+
             container.innerHTML = `
                 <button class="btn btn-outline" style="margin-bottom: 24px;" onclick="navigate('dashboard')">
                     <i class="ph-bold ph-arrow-left"></i> Back to Dashboard
@@ -563,20 +647,20 @@
                             <h2 class="room-name" style="font-size:32px;">${dev.block_name}</h2>
                             <div class="hw-id">${dev.device_id}</div>
                         </div>
-                        <div class="sys-status" style="background: ${dev.status==='ONLINE'?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)'}; border:none;">
-                            <div class="pulse-dot ${dev.status==='ONLINE'?'dot-online':'dot-offline'}"></div> 
-                            <span class="${dev.status==='ONLINE'?'text-success':'text-danger'}">${dev.status}</span>
+                        <div class="sys-status" style="background: ${isOnline ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)'}; border:none;">
+                            <div class="pulse-dot ${isOnline ? 'dot-online' : 'dot-offline'}"></div> 
+                            <span class="${isOnline ? 'text-success' : 'text-danger'}">${dev.status}</span>
                         </div>
                     </div>
                     
-                    <div id="rd-offline" class="${dev.status === 'ONLINE' ? 'hidden' : ''}" style="background: rgba(239,68,68,0.1); color: var(--danger); padding: 16px; border-radius: 8px; margin: 20px 0; font-weight: 600; display:flex; align-items:center; gap:10px;">
-                        <i class="ph-bold ph-warning-circle" style="font-size:24px;"></i> DEVICE DISCONNECTED
+                    <div id="rd-offline" class="${isOnline ? 'hidden' : ''}" style="background: rgba(239,68,68,0.1); color: var(--danger); padding: 16px; border-radius: 8px; margin: 20px 0; font-weight: 600; display:flex; align-items:center; gap:10px;">
+                        <i class="ph-bold ph-warning-circle" style="font-size:24px;"></i> CONTROLLER HARDWARE CURRENTLY DISCONNECTED
                     </div>
 
                     <div class="metrics-grid" style="grid-template-columns: repeat(4, 1fr); margin-top:24px;">
                         <div class="metric-box">
                             <div class="metric-label"><i class="ph-fill ph-lightning"></i> Supply</div>
-                            <div class="metric-val ${dev.supply === 'ON' ? 'text-success' : 'text-danger'}" id="rd-supply">${dev.supply}</div>
+                            <div class="metric-val ${isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted'}" id="rd-supply">${isOnline ? dev.supply : 'OFFLINE'}</div>
                         </div>
                         <div class="metric-box">
                             <div class="metric-label"><i class="ph-fill ph-gauge"></i> Power</div>
@@ -609,113 +693,23 @@
                 <h2 class="header-title" style="font-size:22px; margin-bottom: 24px;">System Configuration</h2>
                 <div class="grid">
                     <div class="card">
-                        <h3 style="margin-bottom: 16px; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-cloud-check" color="var(--primary)"></i> Cloud Sync Status</h3>
-                        <p style="color: var(--text-muted); margin-bottom: 20px;">Your authorized devices are securely saved to the MQTT broker. You can access this dashboard from any device and your settings will automatically load.</p>
+                        <h3 style="margin-bottom: 16px; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-cloud-check" style="color:var(--primary)"></i> Cloud Sync Status</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 20px;">Your registered blocks are synchronized across all connected browsers and devices.</p>
                         <div class="metric-box">
-                            <div class="metric-label">Synced Devices</div>
+                            <div class="metric-label">Registered Blocks</div>
                             <div class="metric-val">${state.registeredDevices.length}</div>
                         </div>
                     </div>
                     <div class="card">
-                        <h3 style="margin-bottom: 16px; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-lock-key" color="var(--success)"></i> Security Firewall</h3>
-                        <p style="color: var(--text-muted); margin-bottom: 20px;">Strict token matching is enforced. Any ESP device broadcasting without the secret token is instantly blocked and ignored.</p>
+                        <h3 style="margin-bottom: 16px; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-lock-key" style="color:var(--success)"></i> Watchdog & Security</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 20px;">2.5s Watchdog active. Disconnected controllers are immediately flagged as OFFLINE without leaving the dashboard.</p>
                         <div class="sys-status" style="justify-content:center; background: rgba(16,185,129,0.1); color: var(--success); border:none;">
-                            FIREWALL ACTIVE
+                            WATCHDOG ACTIVE
                         </div>
                     </div>
                 </div>
             `;
         }
-        // Inside handleMqttMessage: Record timestamp on every incoming packet
-function handleMqttMessage(topic, message) {
-    if (topic === CONFIG_TOPIC) {
-        try {
-            const cloudConfig = JSON.parse(message);
-            state.registeredDevices = cloudConfig;
-            localStorage.setItem(STORAGE_KEY, message);
-            updateSidebarStats();
-            if (state.currentScreen === 'dashboard' || state.currentScreen === 'registered') {
-                renderScreen();
-            }
-        } catch(e) {}
-        return;
-    }
-
-    const parts = topic.split("/");
-    if (parts.length !== 4) return;
-    
-    const deviceId = parts[2]; 
-    const type = parts[3];     
-
-    if (!state.detectedDevices[deviceId]) {
-        state.detectedDevices[deviceId] = {
-            device_id: deviceId, block_name: "Unknown Block",
-            status: 'OFFLINE', supply: 'OFF', fault: 'NO',
-            voltage: 0, current: 0, power: 0, rssi: 0,
-            lastSeen: 0
-        };
-    }
-
-    const device = state.detectedDevices[deviceId];
-
-    if (type === 'data') {
-        try {
-            const data = JSON.parse(message);
-            if (data.token !== EXPECTED_TOKEN) return; 
-
-            // Update last seen timestamp & mark ONLINE
-            device.lastSeen = Date.now();
-            device.status = 'ONLINE'; 
-
-            if (data.block_name) device.block_name = data.block_name;
-            if (data.supply) device.supply = data.supply;
-            if (data.voltage !== undefined) device.voltage = data.voltage;
-            if (data.current !== undefined) device.current = data.current;
-            if (data.power !== undefined) device.power = data.power;
-            if (data.rssi !== undefined) device.rssi = data.rssi;
-            
-        } catch (e) { return; }
-    } else if (type === 'status') {
-        const newStatus = message.trim().toUpperCase();
-        device.status = newStatus;
-        if (newStatus === 'ONLINE') {
-            device.lastSeen = Date.now();
-        } else {
-            device.lastSeen = 0; // Force immediate offline
-        }
-    }
-
-    updateUI(deviceId);
-}
-
-// ============================================================
-// WATCHDOG TIMER: CHECKS EVERY 1 SECOND FOR DISCONNECTED DEVICES
-// ============================================================
-const OFFLINE_TIMEOUT_MS = 2500; // 2.5 seconds timeout (telemetry arrives every 500ms)
-
-setInterval(() => {
-    const now = Date.now();
-    let stateChanged = false;
-
-    Object.keys(state.detectedDevices).forEach(id => {
-        const dev = state.detectedDevices[id];
-        
-        // If device was online but hasn't sent data in 2.5 seconds
-        if (dev.status === 'ONLINE' && (now - dev.lastSeen > OFFLINE_TIMEOUT_MS)) {
-            dev.status = 'OFFLINE';
-            dev.voltage = 0.0;
-            dev.current = 0.0;
-            dev.power = 0.0;
-            stateChanged = true;
-            updateUI(id);
-        }
-    });
-
-    if (stateChanged) {
-        updateSidebarStats();
-        checkDashboardEmpty();
-    }
-}, 1000);
 
         // --- UTILS ---
         function setSystemStatus(isOnline, text) {
@@ -724,9 +718,9 @@ setInterval(() => {
         }
         function updateSidebarStats() {
             const count = state.registeredDevices.filter(r => state.detectedDevices[r.device_id]?.status === 'ONLINE').length;
-            document.getElementById("sidebar-online-count").innerText = count;
+            const el = document.getElementById("sidebar-online-count");
+            if (el) el.innerText = count;
         }
-        function isRegistered(id) { return state.registeredDevices.some(d => d.device_id === id); }
         function checkDashboardEmpty() {
             const e = document.getElementById('empty-dash');
             const g = document.getElementById('grid');
