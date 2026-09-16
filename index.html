@@ -1194,46 +1194,50 @@
 
             // 4. Process Data Payload
             if (type === 'data') {
-                try {
-                    const data = JSON.parse(message);
-                    
-                    // Match the new ultra-short "t" key for token
-                    if (data.t !== CONFIG.EXPECTED_TOKEN) return; 
+    try {
+        const data = JSON.parse(message);
+        if (data.t !== CONFIG.EXPECTED_TOKEN) return;
 
-                    dev.lastSeen = Date.now();
-                    dev.status = 'ONLINE'; 
-                    
-                    // Map the ultra-short keys back to our dashboard
-                    if (data.n) dev.block_name = data.n;
-                    if (data.s !== undefined) dev.supply = data.s === 1 ? 'ON' : 'OFF';
-                    if (data.v !== undefined) dev.voltage = parseFloat(data.v);
-                    if (data.c !== undefined) dev.current = parseFloat(data.c);
-                    if (data.l !== undefined) dev.limit = parseFloat(data.l);
-                    if (data.tt !== undefined) dev.tol_time = parseInt(data.tt);
-                    if (data.f) dev.fault = data.f;
+        dev.lastSeen = Date.now();
+        dev.status = 'ONLINE';
 
-                    // Calculate power locally on the PC/Phone to save Wi-Fi bandwidth!
-                    dev.power = dev.voltage * dev.current;
+        // Key decompression mapping
+        if (data.n) dev.block_name = data.n;
+        if (data.s !== undefined) dev.supply = (data.s === 1) ? 'ON' : 'OFF';
+        if (data.f) dev.fault = data.f;
+        if (data.v !== undefined) dev.voltage = parseFloat(data.v);
+        if (data.c !== undefined) dev.current = parseFloat(data.c);
+        if (data.l !== undefined) dev.limit = parseFloat(data.l);
+        if (data.tt !== undefined) dev.tol_time = parseInt(data.tt);
 
-                    // Update Graph Arrays
-                    if (!dev.lastGraphUpdate || (Date.now() - dev.lastGraphUpdate) >= 1000) {
-                        dev.lastGraphUpdate = Date.now();
-                        const timeStr = new Date().dev.historyTime.push(new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }));
-                        
-                        dev.historyCurrent.push(dev.current);
-                        dev.historyTime.push(timeStr);
-                        
-                        if (dev.historyCurrent.length > CONFIG.MAX_GRAPH_POINTS) {
-                            dev.historyCurrent.shift();
-                            dev.historyTime.shift();
-                        }
-                    }
-                } catch (e) { 
-                    console.warn("[MQTT] JSON parse failed. Ignoring broken payload:", message);
-                    // We don't crash, we just safely ignore the broken packet.
-                    return; 
-                }
-            } 
+        dev.power = dev.voltage * dev.current;
+
+        // Ensure telemetry arrays exist
+        if (!Array.isArray(dev.historyCurrent)) dev.historyCurrent = [];
+        if (!Array.isArray(dev.historyTime)) dev.historyTime = [];
+
+        if (!dev.lastGraphUpdate || (Date.now() - dev.lastGraphUpdate) >= 1000) {
+            dev.lastGraphUpdate = Date.now();
+            dev.historyCurrent.push(dev.current);
+            dev.historyTime.push(new Date().toLocaleTimeString('en-IN', {
+                timeZone: 'Asia/Kolkata',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            }));
+
+            if (dev.historyCurrent.length > CONFIG.MAX_GRAPH_POINTS) {
+                dev.historyCurrent.shift();
+                dev.historyTime.shift();
+            }
+        }
+        updateDomForDevice(deviceId);
+    } catch (err) {
+        // Drop malformed packets silently without throwing console noise
+        return;
+    }
+}
             // 5. Process Status Payload (LWT)
             else if (type === 'status') {
                 const newStatus = message.trim().toUpperCase();
