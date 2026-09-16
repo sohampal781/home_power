@@ -808,6 +808,31 @@
         .login-card .input-group { text-align: left; margin-bottom: 16px; }
         .login-card input { width: 100%; }
         .login-card .btn { width: 100%; margin-top: 12px; padding: 14px; font-size: 16px;}
+        /* ==========================================================================
+           INNOVATIVE IST CLOCK & GRAPH GLOW
+           ========================================================================== */
+        .ist-clock-pill {
+            display: flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            padding: 8px 16px; border-radius: 30px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+            font-family: 'Inter', monospace;
+            cursor: default; transition: all 0.3s ease;
+        }
+        .ist-clock-pill:hover {
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+            border-color: rgba(56, 189, 248, 0.6);
+        }
+        .ist-clock-pulse {
+            width: 8px; height: 8px; background: #38bdf8; border-radius: 50%;
+            box-shadow: 0 0 8px #38bdf8; animation: pulse-cyan 2s infinite;
+        }
+        @keyframes pulse-cyan {
+            0% { box-shadow: 0 0 0 0 rgba(56,189,248,0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(56,189,248,0); }
+            100% { box-shadow: 0 0 0 0 rgba(56,189,248,0); }
+        }
     </style>
 </head>
 <body>
@@ -883,6 +908,12 @@
                     <div class="pulse-dot dot-offline" id="system-status-dot"></div>
                     <span id="system-status-text">DISCONNECTED</span>
                 </div>
+                <div class="ist-clock-pill">
+                    <div class="ist-clock-pulse"></div>
+                    <span id="ist-date" style="color: #94a3b8; font-size: 13px; font-weight: 600; margin-right: 4px;">Loading...</span>
+                    <span id="ist-time" style="font-weight: 800; color: #ffffff; font-size: 15px; letter-spacing: 0.5px;">--:--:--</span>
+                    <span style="color: #38bdf8; font-size: 11px; font-weight: 800; margin-left: 2px;">IST</span>
+                </div
             </div>
         </div>
         
@@ -1580,63 +1611,66 @@
         function initializeChart(dev) {
             const ctx = document.getElementById('currentChart').getContext('2d');
             
-            // Create Gradient Fill for premium look
-            const gradientFill = ctx.createLinearGradient(0, 0, 0, 350);
-            gradientFill.addColorStop(0, 'rgba(37, 99, 235, 0.4)');
-            gradientFill.addColorStop(1, 'rgba(37, 99, 235, 0.0)');
+            // Create Deep Neon Gradient Fill
+            const gradFill = ctx.createLinearGradient(0, 0, 0, 350);
+            gradFill.addColorStop(0, 'rgba(56, 189, 248, 0.4)'); // Bright Cyan top
+            gradFill.addColorStop(1, 'rgba(37, 99, 235, 0.0)');  // Transparent Blue bottom
 
             currentChartInstance = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: dev.historyTime,
-                    datasets: [{
-                        label: ' Current Draw (Amps)',
-                        data: dev.historyCurrent,
-                        borderColor: '#2563eb',
-                        backgroundColor: gradientFill,
-                        borderWidth: 3,
-                        fill: true,
-                        pointRadius: 0,
+                data: { 
+                    labels: dev.historyTime, 
+                    datasets: [{ 
+                        label: 'Current (Amps)',
+                        data: dev.historyCurrent, 
+                        borderColor: '#38bdf8', // Neon Cyan line
+                        backgroundColor: gradFill, 
+                        borderWidth: 3, 
+                        fill: true, 
+                        pointRadius: 0, 
                         pointHoverRadius: 6,
                         pointHoverBackgroundColor: '#ffffff',
-                        pointHoverBorderColor: '#2563eb',
-                        pointHoverBorderWidth: 2,
-                        tension: 0.4 // Smooth bezier curves
-                    }]
+                        pointHoverBorderColor: '#38bdf8',
+                        pointHoverBorderWidth: 3,
+                        tension: 0.4 // Ultra-smooth curves
+                    }] 
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: false, // Turn off core animations for real-time performance
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
-                    scales: {
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    animation: false, 
+                    interaction: { mode: 'index', intersect: false },
+                    scales: { 
                         y: { 
                             beginAtZero: true, 
-                            suggestedMax: dev.limit + 1,
+                            suggestedMax: dev.limit + 1, 
+                            title: { display: true, text: 'Current Draw (Amps)', color: '#64748b', font: { family: 'Inter', weight: 'bold', size: 12 } },
                             grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
-                            ticks: { font: { family: 'Inter', size: 11 } }
-                        },
+                            ticks: { font: { family: 'Inter', size: 11 }, color: '#64748b' }
+                        }, 
                         x: { 
-                            grid: { display: false, drawBorder: false },
-                            ticks: { maxTicksLimit: 8, maxRotation: 0, font: { family: 'Inter', size: 11 }, color: '#94a3b8' }
-                        }
-                    },
+                            title: { display: true, text: 'Indian Standard Time (IST)', color: '#64748b', font: { family: 'Inter', weight: 'bold', size: 12 } },
+                            grid: { display: true, color: 'rgba(0,0,0,0.03)', borderDash: [5, 5], drawBorder: false },
+                            ticks: { maxTicksLimit: 6, font: { family: 'Inter', size: 11 }, color: '#94a3b8' } 
+                        } 
+                    }, 
                     plugins: { 
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
                             titleFont: { family: 'Inter', size: 13, weight: 'bold' },
-                            bodyFont: { family: 'Inter', size: 14 },
-                            padding: 12,
-                            cornerRadius: 8,
-                            displayColors: false
+                            bodyFont: { family: 'Inter', size: 14, weight: 'bold' },
+                            titleColor: '#94a3b8',
+                            bodyColor: '#38bdf8', // Cyan tooltip text
+                            padding: 12, cornerRadius: 8, displayColors: false,
+                            callbacks: {
+                                label: function(context) { return context.parsed.y + ' Amps'; }
+                            }
                         }
-                    }
+                    } 
                 }
             });
+           
         }
 
         // --- REGISTRATION & ADMIN RENDERERS ---
@@ -1992,6 +2026,27 @@
             document.getElementById('global-modal').classList.remove('active');
             pendingAction = null;
         }
+        // --- ADVANCED IST CLOCK TICKER ---
+        function runISTClock() {
+            const timeEl = document.getElementById('ist-time');
+            const dateEl = document.getElementById('ist-date');
+            
+            if (timeEl && dateEl) {
+                const now = new Date();
+                
+                // Format Date (e.g. "Wed, Sep 16 •")
+                dateEl.innerText = now.toLocaleDateString('en-IN', {
+                    timeZone: 'Asia/Kolkata', weekday: 'short', month: 'short', day: 'numeric'
+                }) + ' •';
+                
+                // Format Time (e.g. "11:58:04 PM")
+                timeEl.innerText = now.toLocaleTimeString('en-IN', {
+                    timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+                });
+            }
+        }
+        setInterval(runISTClock, 1000); 
+        runISTClock();
 
         // --- CSV Export Engine ---
         function exportDataToCSV(deviceId) {
