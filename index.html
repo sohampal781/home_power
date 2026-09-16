@@ -37,7 +37,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            font-size: 18px; /* Large default font */
+            font-size: 18px; 
             display: flex;
             min-height: 100vh;
             overflow-x: hidden;
@@ -209,7 +209,6 @@
             background: var(--card-bg);
         }
 
-        /* Remote Control Section */
         .control-panel {
             display: flex;
             gap: 15px;
@@ -234,12 +233,10 @@
             z-index: 1000;
         }
 
-        /* Utility */
         .hidden { display: none !important; }
         .text-online { color: var(--online-color); font-weight: bold; }
         .text-offline { color: var(--offline-color); font-weight: bold; }
         
-        /* Message Area */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -247,7 +244,6 @@
         }
         .empty-state-icon { font-size: 64px; margin-bottom: 20px; }
 
-        /* Responsive */
         @media (max-width: 1024px) {
             :root { --sidebar-width: 240px; }
             .grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
@@ -298,9 +294,7 @@
         </div>
 
         <!-- SCREEN CONTAINER -->
-        <div id="screen-container">
-            <!-- Screens will be rendered here dynamically via JS -->
-        </div>
+        <div id="screen-container"></div>
     </main>
 
     <!-- TOAST NOTIFICATION -->
@@ -308,12 +302,9 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        /* ==========================================================
-           1. APPLICATION STATE (Centralized Store)
-           ========================================================== */
         const state = {
-            registeredDevices: [], // Array of { device_id, name } loaded from localStorage
-            detectedDevices: {},   // Live map: device_id -> { device_id, name, status, voltage, current, power, fault, rssi, ip, lastSeen }
+            registeredDevices: [], 
+            detectedDevices: {},   
             currentScreen: 'dashboard',
             selectedDeviceId: null,
             mqttClient: null,
@@ -322,15 +313,10 @@
             alarms: []
         };
 
-        // Configuration
         const MQTT_BROKER = "wss://test.mosquitto.org:8081/mqtt";
         const STORAGE_KEY = "MRPSP_REGISTERED_DEVICES";
         
-        /* ==========================================================
-           2. INITIALIZATION & STORAGE
-           ========================================================== */
         function initApp() {
-            // Load registered devices from LocalStorage
             const stored = localStorage.getItem(STORAGE_KEY);
             if (stored) {
                 try {
@@ -341,13 +327,8 @@
                 }
             }
 
-            // Connect MQTT
             connectMQTT();
-            
-            // Render initial screen
             renderScreen();
-            
-            // Add a system event
             addEvent("SYSTEM", "BMS Dashboard Initialized");
         }
 
@@ -360,9 +341,6 @@
             return state.registeredDevices.some(d => d.device_id === deviceId);
         }
 
-        /* ==========================================================
-           3. MQTT COMMUNICATION
-           ========================================================== */
         function connectMQTT() {
             updateSystemStatus(false, "CONNECTING...");
             
@@ -373,11 +351,10 @@
                 updateSystemStatus(true, "SYSTEM ONLINE");
                 addEvent("SYSTEM", "MQTT Connected");
                 
-                // Subscribe to wildcards as required
-                state.mqttClient.subscribe("mrpsp/building01/devices/+/data");
-                state.mqttClient.subscribe("mrpsp/building01/devices/+/status");
+                // UPDATED: Now subscribing to building02
+                state.mqttClient.subscribe("mrpsp/building02/devices/+/data");
+                state.mqttClient.subscribe("mrpsp/building02/devices/+/status");
                 
-                // Re-render current screen to update connection state visuals if needed
                 if(state.currentScreen === 'dashboard' || state.currentScreen === 'system') {
                     renderScreen(); 
                 }
@@ -397,14 +374,13 @@
         }
 
         function handleMqttMessage(topic, message) {
-            // Topic format: mrpsp/building01/devices/{DEVICE_NAME}/data
+            // Topic format: mrpsp/building02/devices/{DEVICE_NAME}/data
             const parts = topic.split("/");
             if (parts.length !== 5) return;
             
             const deviceId = parts[3];
-            const type = parts[4]; // 'data' or 'status'
+            const type = parts[4]; 
 
-            // Initialize device in state if not exists
             if (!state.detectedDevices[deviceId]) {
                 state.detectedDevices[deviceId] = {
                     device_id: deviceId,
@@ -462,7 +438,6 @@
                 addEvent(deviceId, `Controller ${device.status}`);
             }
 
-            // CRITICAL: Update the UI without navigation/refresh
             updateUIGraciously(deviceId);
         }
 
@@ -471,28 +446,25 @@
                 showToast("Cannot send command: MQTT Offline");
                 return;
             }
-            const topic = `mrpsp/building01/devices/${deviceId}/command`;
+            // UPDATED: Publishing commands to building02
+            const topic = `mrpsp/building02/devices/${deviceId}/command`;
             state.mqttClient.publish(topic, command);
             showToast(`Command sent: ${command}`);
             addEvent(deviceId, `Command Sent: ${command}`);
         }
 
-        /* ==========================================================
-           4. STATE & EVENT HELPERS
-           ========================================================== */
         function addEvent(device, msg) {
             const time = new Date().toLocaleTimeString();
             state.events.unshift({ time, device, msg });
             if (state.events.length > 50) state.events.pop();
             
             if (state.currentScreen === 'events') {
-                renderScreen(); // Safe to re-render events list
+                renderScreen(); 
             }
         }
 
         function addAlarm(device, fault, current) {
             const time = new Date().toLocaleTimeString();
-            // Check if active alarm already exists for this device
             const existing = state.alarms.find(a => a.device === device);
             if (!existing) {
                 state.alarms.unshift({ device, fault, current, time });
@@ -503,25 +475,18 @@
             }
         }
 
-        /* ==========================================================
-           5. GRACEFUL DOM UPDATES (NO REFRESH/NAVIGATION)
-           ========================================================== */
-        // This function updates specific elements on the current page if they exist
         function updateUIGraciously(deviceId) {
             updateSidebarStats();
             const deviceData = state.detectedDevices[deviceId];
             if (!deviceData) return;
 
-            // SCENARIO 1: We are on Dashboard
             if (state.currentScreen === 'dashboard') {
-                // If it's registered, it should be on the dashboard
                 if (isRegistered(deviceId)) {
                     const cardId = `dash-card-${deviceId}`;
                     let cardEl = document.getElementById(cardId);
                     
                     if (deviceData.status === 'ONLINE') {
                         if (cardEl) {
-                            // Update existing card DOM safely
                             setElementText(`${cardId}-voltage`, deviceData.voltage.toFixed(1) + ' V');
                             setElementText(`${cardId}-current`, deviceData.current.toFixed(2) + ' A');
                             setElementText(`${cardId}-power`, deviceData.power.toFixed(1) + ' W');
@@ -531,15 +496,11 @@
                             updateStatusClass(`${cardId}-status-dot`, 'dot-online');
                             updateTextClass(`${cardId}-status`, 'text-online');
                         } else {
-                            // Device just came online, but we are on dashboard. Append card dynamically.
                             appendDashboardCard(deviceData);
                             checkDashboardEmptyState();
                         }
                     } else {
-                        // Offline
                         if (cardEl) {
-                            // Remove card from dashboard when offline, as per requirements:
-                            // "Remove that device from the ONLINE room grid."
                             cardEl.remove();
                             checkDashboardEmptyState();
                         }
@@ -547,9 +508,7 @@
                 }
             }
             
-            // SCENARIO 2: We are on Room Detail for THIS specific room
             else if (state.currentScreen === 'room_detail' && state.selectedDeviceId === deviceId) {
-                // Update specific elements in room detail
                 setElementText('rd-voltage', deviceData.voltage.toFixed(1) + ' V');
                 setElementText('rd-current', deviceData.current.toFixed(2) + ' A');
                 setElementText('rd-power', deviceData.power.toFixed(1) + ' W');
@@ -575,23 +534,19 @@
                 }
             }
 
-            // SCENARIO 3: We are on Register ESP screen
             else if (state.currentScreen === 'register') {
-                // We just safely re-render the list container without changing screen state
                 const listContainer = document.getElementById('register-list-container');
                 if (listContainer) {
                     listContainer.innerHTML = buildRegisterListHTML();
                 }
             }
             
-            // SCENARIO 4: We are on System screen
             else if (state.currentScreen === 'system') {
                 setElementText('sys-detected', Object.keys(state.detectedDevices).length);
                 setElementText('sys-online', getOnlineRegisteredCount());
             }
         }
 
-        // DOM helper functions
         function setElementText(id, text) {
             const el = document.getElementById(id);
             if (el) el.innerText = text;
@@ -630,11 +585,7 @@
             setTimeout(() => { toast.style.opacity = 0; }, 3000);
         }
 
-        /* ==========================================================
-           6. NAVIGATION & RENDERING
-           ========================================================== */
         function navigate(screenName, params = null) {
-            // Update active menu item
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             const items = document.querySelectorAll('.nav-item');
             if (screenName === 'dashboard') items[0].classList.add('active');
@@ -657,7 +608,7 @@
 
         function renderScreen() {
             const container = document.getElementById("screen-container");
-            container.innerHTML = ""; // Clear current
+            container.innerHTML = ""; 
 
             switch (state.currentScreen) {
                 case 'dashboard': renderDashboard(container); break;
@@ -669,12 +620,7 @@
                 case 'system': renderSystem(container); break;
             }
         }
-
-        /* ==========================================================
-           7. SPECIFIC SCREEN RENDERS
-           ========================================================== */
         
-        // --- DASHBOARD ---
         function renderDashboard(container) {
             container.innerHTML = `<h2 class="page-title">Monitoring Dashboard</h2>`;
             
@@ -704,7 +650,6 @@
 
             container.appendChild(grid);
 
-            // Empty state container
             const emptyState = document.createElement("div");
             emptyState.id = "dash-empty-state";
             emptyState.className = "empty-state " + (onlineCount > 0 ? "hidden" : "");
@@ -775,7 +720,6 @@
             }
         }
 
-        // --- REGISTER ESP ---
         function renderRegister(container) {
             container.innerHTML = `
                 <h2 class="page-title">Register ESP Controller</h2>
@@ -808,7 +752,6 @@
 
             detectedIds.forEach(id => {
                 const device = state.detectedDevices[id];
-                // Do not show if already registered
                 if (!isRegistered(id)) {
                     count++;
                     const statusClass = device.status === 'ONLINE' ? 'text-online' : 'text-offline';
@@ -836,12 +779,10 @@
             const device = state.detectedDevices[deviceId];
             if (!device) return;
             
-            // Do not navigate, just update DOM
             document.getElementById("register-selection").classList.remove("hidden");
             setElementText("sel-device-id", device.device_id);
             setElementText("sel-device-name", device.name);
             
-            // Store temporarily on the button object
             document.getElementById("btn-register-action").dataset.regId = device.device_id;
             document.getElementById("btn-register-action").dataset.regName = device.name;
         }
@@ -856,14 +797,12 @@
                 saveRegistrations();
                 showToast(`Registered ${deviceName} successfully`);
                 
-                // Hide selection box and rebuild list without refreshing page
                 document.getElementById("register-selection").classList.add("hidden");
                 const listContainer = document.getElementById('register-list-container');
                 if (listContainer) listContainer.innerHTML = buildRegisterListHTML();
             }
         }
 
-        // --- REGISTERED ESPs ---
         function renderRegistered(container) {
             container.innerHTML = `
                 <h2 class="page-title">Registered ESPs</h2>
@@ -904,7 +843,6 @@
                 state.registeredDevices = state.registeredDevices.filter(d => d.device_id !== deviceId);
                 saveRegistrations();
                 
-                // Remove from DOM without full render
                 const el = document.getElementById(`reg-item-${deviceId}`);
                 if (el) el.remove();
                 
@@ -917,12 +855,10 @@
             }
         }
 
-        // --- ROOM DETAIL ---
         function renderRoomDetail(container) {
             const deviceId = state.selectedDeviceId;
             let deviceData = state.detectedDevices[deviceId];
             
-            // Fallback if accessed via direct state manipulation but no data
             if (!deviceData) {
                 const regInfo = state.registeredDevices.find(d => d.device_id === deviceId);
                 deviceData = {
@@ -991,7 +927,6 @@
             `;
         }
 
-        // --- ALARMS ---
         function renderAlarms(container) {
             container.innerHTML = `
                 <h2 class="page-title">Active Alarms</h2>
@@ -1017,7 +952,6 @@
             });
         }
 
-        // --- EVENTS ---
         function renderEvents(container) {
             container.innerHTML = `
                 <h2 class="page-title">System Events</h2>
@@ -1051,7 +985,6 @@
             container.innerHTML += evHtml;
         }
 
-        // --- SYSTEM ---
         function renderSystem(container) {
             const detectedCount = Object.keys(state.detectedDevices).length;
             const regCount = state.registeredDevices.length;
@@ -1099,7 +1032,6 @@
                 </div>
             `;
 
-            // Setup clock for System page
             if (window.sysClock) clearInterval(window.sysClock);
             window.sysClock = setInterval(() => {
                 if (state.currentScreen === 'system') {
@@ -1110,7 +1042,6 @@
             }, 1000);
         }
 
-        // Start App on Load
         window.onload = initApp;
 
     </script>
