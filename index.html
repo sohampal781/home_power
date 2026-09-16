@@ -1121,7 +1121,8 @@
                         }
                     }
                 } catch (e) { 
-                    console.error("[MQTT] Failed to parse JSON data payload.");
+                    console.warn("[MQTT] JSON parse failed. Ignoring broken payload:", message);
+                    // We don't crash, we just safely ignore the broken packet.
                     return; 
                 }
             } 
