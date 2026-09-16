@@ -1,13 +1,8 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>MRPSP Electrical SCADA</title>
 
@@ -20,54 +15,50 @@
 }
 
 body {
-
     margin: 0;
-
-    background: #071018;
-
-    color: #ffffff;
-
+    background: #061018;
+    color: #dce8ef;
     font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
 }
 
-/* ==================================================
-   HEADER
-================================================== */
+/* =====================================================
+   TOP SCADA HEADER
+===================================================== */
 
-.header {
+.topbar {
 
-    background: #0d1822;
+    height: 65px;
 
-    border-bottom: 2px solid #263b4d;
+    background: #0b171f;
 
-    padding: 18px 25px;
+    border-bottom: 1px solid #304452;
 
     display: flex;
 
-    justify-content: space-between;
-
     align-items: center;
 
-    flex-wrap: wrap;
+    justify-content: space-between;
 
+    padding: 0 18px;
 }
 
-.title {
+.brand {
 
-    font-size: 28px;
+    font-size: 22px;
 
-    font-weight: bold;
+    font-weight: 700;
 
+    letter-spacing: 1px;
 }
 
-.subtitle {
+.sub {
 
-    color: #8fa6b8;
+    font-size: 11px;
 
-    font-size: 13px;
+    color: #8197a5;
 
-    margin-top: 4px;
-
+    margin-top: 3px;
 }
 
 .connection {
@@ -76,125 +67,133 @@ body {
 
     align-items: center;
 
-    gap: 8px;
+    gap: 9px;
 
     font-weight: bold;
-
 }
 
-.dot {
+.lamp {
 
-    width: 13px;
+    width: 12px;
 
-    height: 13px;
+    height: 12px;
 
     border-radius: 50%;
 
     background: #777;
-
 }
 
-/* ==================================================
-   SYSTEM BAR
-================================================== */
+/* =====================================================
+   MAIN LAYOUT
+===================================================== */
 
-.systembar {
+.layout {
 
     display: grid;
 
     grid-template-columns:
-        repeat(auto-fit, minmax(180px, 1fr));
+        210px
+        minmax(500px, 1fr)
+        285px;
 
-    gap: 10px;
-
-    padding: 15px 20px;
-
-    background: #0a141d;
-
+    min-height: calc(100vh - 65px);
 }
 
-.info {
+/* =====================================================
+   LEFT DEVICE PANEL
+===================================================== */
 
-    background: #111f2b;
+.left {
+
+    background: #09151d;
+
+    border-right: 1px solid #304452;
+}
+
+.section-title {
+
+    height: 38px;
+
+    padding: 11px 12px;
+
+    background: #0e202b;
+
+    border-bottom: 1px solid #304452;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    letter-spacing: .7px;
+}
+
+.device {
 
     padding: 12px;
 
-    border: 1px solid #263b4d;
+    border-bottom: 1px solid #203541;
 
+    cursor: pointer;
 }
 
-.info-title {
+.device:hover {
 
-    color: #7f96a8;
+    background: #10232e;
+}
+
+.device.selected {
+
+    background: #152b38;
+}
+
+.devline {
+
+    display: flex;
+
+    justify-content: space-between;
+}
+
+.green {
+
+    color: #4ee27a;
+}
+
+.red {
+
+    color: #ff5252;
+}
+
+.yellow {
+
+    color: #ffd35c;
+}
+
+.muted {
+
+    color: #758c9b;
+}
+
+.tiny {
 
     font-size: 11px;
 
-}
-
-.info-value {
+    color: #7e95a3;
 
     margin-top: 5px;
-
-    font-size: 18px;
-
-    font-weight: bold;
-
 }
 
-/* ==================================================
-   DASHBOARD
-================================================== */
+/* =====================================================
+   CENTER SCADA AREA
+===================================================== */
 
-.dashboard {
+.center {
 
-    padding: 20px;
+    padding: 15px;
 
+    overflow: auto;
 }
 
-.dashboard-title {
-
-    font-size: 20px;
-
-    margin-bottom: 15px;
-
-}
-
-/* ==================================================
-   ROOM GRID
-================================================== */
-
-.room-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(auto-fit, minmax(280px, 1fr));
-
-    gap: 16px;
-
-}
-
-/* ==================================================
-   ROOM CARD
-================================================== */
-
-.room {
-
-    background: #101d28;
-
-    border: 1px solid #294052;
-
-    border-radius: 5px;
-
-    overflow: hidden;
-
-}
-
-.room-header {
-
-    background: #172735;
-
-    padding: 13px 15px;
+.toolbar {
 
     display: flex;
 
@@ -202,269 +201,400 @@ body {
 
     align-items: center;
 
+    margin-bottom: 12px;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
 }
 
-.room-name {
-
-    font-size: 20px;
-
-    font-weight: bold;
-
-}
-
-.online {
-
-    color: #43e66e;
-
-}
-
-.offline {
-
-    color: #ff4d4d;
-
-}
-
-/* ==================================================
-   SUPPLY
-================================================== */
-
-.supply {
-
-    padding: 20px;
-
-    text-align: center;
-
-}
-
-.supply-status {
-
-    font-size: 25px;
-
-    font-weight: bold;
-
-}
-
-.supply-on {
-
-    color: #36e66b;
-
-}
-
-.supply-off {
-
-    color: #ff4545;
-
-}
-
-/* ==================================================
-   ELECTRICAL LINE
-================================================== */
-
-.electrical {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    margin: 12px 0 20px;
-
-}
-
-.line {
-
-    width: 80px;
-
-    height: 4px;
-
-    background: #555;
-
-}
-
-.line.active {
-
-    background: #36e66b;
-
-}
-
-.breaker {
-
-    width: 38px;
-
-    height: 38px;
-
-    border: 3px solid #aaa;
-
-    transform: rotate(45deg);
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-}
-
-.breaker span {
-
-    transform: rotate(-45deg);
-
-    font-size: 12px;
-
-}
-
-/* ==================================================
-   VALUES
-================================================== */
-
-.values {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
-    gap: 8px;
-
-    padding: 0 15px 15px;
-
-}
-
-.value {
-
-    background: #0a141c;
-
-    border: 1px solid #263b4d;
-
-    padding: 10px;
-
-    text-align: center;
-
-}
-
-.value-label {
-
-    color: #7890a3;
-
-    font-size: 11px;
-
-}
-
-.value-number {
+.toolbar b {
 
     font-size: 18px;
-
-    font-weight: bold;
-
-    margin-top: 5px;
-
 }
 
-/* ==================================================
-   CONTROLS
-================================================== */
+.toolbar span {
 
-.controls {
-
-    display: flex;
-
-    gap: 8px;
-
-    padding: 0 15px 15px;
-
+    color: #7f96a5;
 }
 
 button {
 
-    flex: 1;
+    background: #18303e;
 
-    padding: 11px;
+    color: #dce8ef;
 
-    border: none;
+    border: 1px solid #3a5665;
+
+    padding: 8px 12px;
 
     cursor: pointer;
-
-    font-weight: bold;
-
-    color: white;
-
-    background: #253b4d;
-
 }
 
 button:hover {
 
-    background: #36566d;
-
+    background: #234253;
 }
 
-/* ==================================================
-   FOOTER
-================================================== */
+/* =====================================================
+   ELECTRICAL SINGLE LINE DIAGRAM
+===================================================== */
 
-.footer {
+.mimic {
 
-    margin: 20px;
+    background: #07131b;
 
-    padding: 15px;
+    border: 1px solid #304452;
 
-    background: #101d28;
+    min-height: 520px;
 
-    border: 1px solid #263b4d;
+    position: relative;
 
+    padding: 25px;
 }
 
-.footer-title {
+/* MAIN BUS */
 
-    font-size: 18px;
+.busbar {
 
-    margin-bottom: 10px;
+    height: 8px;
 
+    background: #687983;
+
+    position: relative;
+
+    margin:
+
+        55px
+        45px
+        75px;
 }
 
-#events {
+.busbar.live {
 
-    font-size: 13px;
+    background: #36d879;
 
-    color: #9fb0bd;
+    box-shadow:
 
-    max-height: 180px;
-
-    overflow-y: auto;
-
+        0 0 7px
+        #36d879;
 }
 
-.event {
+.buslabel {
 
-    padding: 6px;
+    position: absolute;
 
-    border-bottom: 1px solid #1e303e;
+    top: -30px;
 
+    left: 0;
+
+    font-size: 12px;
+
+    color: #a9bac4;
+}
+
+/* =====================================================
+   FEEDERS
+===================================================== */
+
+.feeders {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(145px,1fr)
+        );
+
+    gap: 25px 18px;
+}
+
+.feeder {
+
+    position: relative;
+
+    text-align: center;
+
+    min-height: 155px;
+
+    cursor: pointer;
+}
+
+/* FEEDER LINE */
+
+.feederline {
+
+    height: 55px;
+
+    width: 4px;
+
+    background: #596b75;
+
+    margin: auto;
+}
+
+.feederline.live {
+
+    background: #36d879;
+}
+
+/* =====================================================
+   BREAKER SYMBOL
+===================================================== */
+
+.breaker {
+
+    width: 44px;
+
+    height: 44px;
+
+    border: 3px solid #aab7bd;
+
+    margin:
+
+        -2px
+        auto
+        8px;
+
+    position: relative;
+
+    background: #0b1921;
+}
+
+.breaker:after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 28px;
+
+    height: 3px;
+
+    background: #aab7bd;
+
+    left: 5px;
+
+    top: 18px;
+
+    transform:
+
+        rotate(-42deg);
+}
+
+.breaker.closed:after {
+
+    background: #36d879;
+}
+
+.breaker.open:after {
+
+    background: #ff5252;
+}
+
+.feedername {
+
+    font-size: 16px;
+
+    font-weight: 700;
+}
+
+.reading {
+
+    font-size: 12px;
+
+    color: #91a6b2;
+
+    margin-top: 6px;
+
+    line-height: 1.6;
+}
+
+.statusbox {
+
+    display: inline-block;
+
+    padding: 3px 7px;
+
+    border: 1px solid #38515f;
+
+    font-size: 10px;
+
+    margin-top: 6px;
+}
+
+.fault {
+
+    border-color: #7d3030;
+
+    color: #ff6666;
+}
+
+/* =====================================================
+   RIGHT PANEL
+===================================================== */
+
+.right {
+
+    background: #09151d;
+
+    border-left: 1px solid #304452;
+}
+
+.panel {
+
+    padding: 12px;
+
+    border-bottom: 1px solid #263b48;
+}
+
+/* =====================================================
+   KPI
+===================================================== */
+
+.kpi {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 7px;
+
+    margin-top: 8px;
+}
+
+.k {
+
+    background: #0d1d27;
+
+    border: 1px solid #263e4b;
+
+    padding: 8px;
+}
+
+.k label {
+
+    display: block;
+
+    color: #738a98;
+
+    font-size: 10px;
+}
+
+.k strong {
+
+    display: block;
+
+    font-size: 17px;
+
+    margin-top: 3px;
+}
+
+/* =====================================================
+   ALARM LOG
+===================================================== */
+
+.alarmrow {
+
+    padding: 9px 2px;
+
+    border-bottom: 1px solid #203541;
+
+    font-size: 12px;
+}
+
+.footerbar {
+
+    padding: 8px 12px;
+
+    border-top: 1px solid #304452;
+
+    color: #708692;
+
+    font-size: 11px;
+
+    background: #08131a;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media(max-width:950px) {
+
+    .layout {
+
+        grid-template-columns:
+            180px
+            1fr;
+    }
+
+    .right {
+
+        grid-column: 1 / -1;
+
+        border-left: 0;
+
+        border-top: 1px solid #304452;
+    }
+}
+
+@media(max-width:650px) {
+
+    .layout {
+
+        display: block;
+    }
+
+    .left,
+    .right {
+
+        border: 0;
+
+        border-bottom: 1px solid #304452;
+    }
+
+    .center {
+
+        padding: 9px;
+    }
+
+    .mimic {
+
+        padding: 12px;
+    }
+
+    .busbar {
+
+        margin-left: 10px;
+
+        margin-right: 10px;
+    }
 }
 
 </style>
 
 </head>
 
-
 <body>
 
 
-<!-- =================================================
+<!-- =====================================================
      HEADER
-================================================= -->
+===================================================== -->
 
-<div class="header">
+<header class="topbar">
 
     <div>
 
-        <div class="title">
+        <div class="brand">
             MRPSP ELECTRICAL SCADA
         </div>
 
-        <div class="subtitle">
-            REMOTE BUILDING POWER MONITORING SYSTEM
+        <div class="sub">
+            BUILDING 01 • DISTRIBUTION MONITORING & CONTROL
         </div>
 
     </div>
@@ -472,467 +602,677 @@ button:hover {
 
     <div class="connection">
 
-        <div id="mqttDot"
-             class="dot"></div>
+        <span
+            id="lamp"
+            class="lamp">
+        </span>
 
-        <span id="mqttStatus">
-            CONNECTING
+        <span id="conn">
+            MQTT OFFLINE
         </span>
 
     </div>
 
+</header>
+
+
+<!-- =====================================================
+     MAIN LAYOUT
+===================================================== -->
+
+<div class="layout">
+
+
+<!-- =====================================================
+     LEFT PANEL
+===================================================== -->
+
+<aside class="left">
+
+    <div class="section-title">
+
+        DEVICE / FEEDER LIST
+
+    </div>
+
+
+    <div id="devices">
+
+        <div class="device muted">
+
+            Waiting for ESP...
+
+        </div>
+
+    </div>
+
+
+    <div class="footerbar">
+
+        AUTO DISCOVERY: MQTT WILDCARD
+
+    </div>
+
+</aside>
+
+
+
+<!-- =====================================================
+     CENTER
+===================================================== -->
+
+<main class="center">
+
+
+    <div class="toolbar">
+
+        <div>
+
+            <b>
+                ONE-LINE ELECTRICAL MIMIC
+            </b>
+
+            <br>
+
+            <span id="selectedText">
+                No feeder selected
+            </span>
+
+        </div>
+
+
+        <button id="refresh">
+
+            Refresh View
+
+        </button>
+
+    </div>
+
+
+
+    <!-- =================================================
+         SINGLE LINE
+    ================================================== -->
+
+    <div class="mimic">
+
+
+        <!-- MAIN BUS -->
+
+        <div
+            class="busbar"
+            id="mainbus">
+
+            <div class="buslabel">
+
+                BUILDING MAIN BUS /
+                INCOMING SUPPLY
+
+            </div>
+
+        </div>
+
+
+        <!-- ROOM FEEDERS -->
+
+        <div
+            id="feeders"
+            class="feeders">
+        </div>
+
+
+    </div>
+
+
+</main>
+
+
+
+<!-- =====================================================
+     RIGHT PANEL
+===================================================== -->
+
+<aside class="right">
+
+
+    <!-- SYSTEM SUMMARY -->
+
+    <div class="section-title">
+
+        SYSTEM SUMMARY
+
+    </div>
+
+
+    <div class="panel">
+
+
+        <div class="kpi">
+
+
+            <div class="k">
+
+                <label>
+                    ONLINE
+                </label>
+
+                <strong id="online">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="k">
+
+                <label>
+                    SUPPLY ON
+                </label>
+
+                <strong id="active">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="k">
+
+                <label>
+                    TOTAL POWER
+                </label>
+
+                <strong id="power">
+                    0 W
+                </strong>
+
+            </div>
+
+
+            <div class="k">
+
+                <label>
+                    LAST UPDATE
+                </label>
+
+                <strong id="last">
+                    --
+                </strong>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- SELECTED FEEDER -->
+
+    <div class="section-title">
+
+        SELECTED FEEDER
+
+    </div>
+
+
+    <div
+        id="selected"
+        class="panel">
+
+        Select a room from the
+        left panel.
+
+    </div>
+
+
+
+    <!-- ALARM LOG -->
+
+    <div class="section-title">
+
+        ALARM / EVENT LOG
+
+    </div>
+
+
+    <div
+        id="alarms"
+        class="panel">
+    </div>
+
+
+</aside>
+
+
 </div>
 
-
-<!-- =================================================
-     SYSTEM INFORMATION
-================================================= -->
-
-<div class="systembar">
-
-    <div class="info">
-
-        <div class="info-title">
-            SYSTEM
-        </div>
-
-        <div class="info-value">
-            BUILDING 01
-        </div>
-
-    </div>
-
-
-    <div class="info">
-
-        <div class="info-title">
-            DEVICES ONLINE
-        </div>
-
-        <div class="info-value"
-             id="deviceCount">
-            0
-        </div>
-
-    </div>
-
-
-    <div class="info">
-
-        <div class="info-title">
-            TOTAL POWER
-        </div>
-
-        <div class="info-value"
-             id="totalPower">
-            0 W
-        </div>
-
-    </div>
-
-
-    <div class="info">
-
-        <div class="info-title">
-            LAST UPDATE
-        </div>
-
-        <div class="info-value"
-             id="lastUpdate">
-            --
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- =================================================
-     DASHBOARD
-================================================= -->
-
-<div class="dashboard">
-
-    <div class="dashboard-title">
-        ROOM MONITORING
-    </div>
-
-    <div id="roomGrid"
-         class="room-grid">
-    </div>
-
-</div>
-
-
-<!-- =================================================
-     EVENTS
-================================================= -->
-
-<div class="footer">
-
-    <div class="footer-title">
-        EVENT / ALARM LOG
-    </div>
-
-    <div id="events">
-    </div>
-
-</div>
 
 
 <script>
 
-/* ==================================================
+/* =====================================================
    MQTT CONFIGURATION
-================================================== */
+===================================================== */
 
 const MQTT_URL =
     "wss://test.mosquitto.org:8081/mqtt";
 
 
-const BASE_TOPIC =
+const BASE =
     "mrpsp/building01/devices/";
 
 
-/* ==================================================
+/* =====================================================
    DEVICE DATABASE
-================================================== */
+===================================================== */
 
 const devices = {};
 
 
-/* ==================================================
+let selected = null;
+
+
+/* =====================================================
    MQTT CONNECTION
-================================================== */
+===================================================== */
 
-const client = mqtt.connect(MQTT_URL, {
+const client = mqtt.connect(
 
-    clientId:
-        "MRPSP_SCADA_" +
-        Math.random()
-            .toString(16)
-            .substring(2),
+    MQTT_URL,
 
-    clean: true,
+    {
 
-    connectTimeout: 10000,
+        clientId:
 
-    reconnectPeriod: 3000
+            "MRPSP_HMI_" +
 
-});
+            Math.random()
+                .toString(16)
+                .slice(2),
 
+        clean: true,
 
-/* ==================================================
-   MQTT CONNECTED
-================================================== */
+        reconnectPeriod: 3000,
 
-client.on("connect", function() {
-
-    document.getElementById(
-        "mqttStatus"
-    ).innerText = "MQTT ONLINE";
-
-
-    document.getElementById(
-        "mqttDot"
-    ).style.background = "#36e66b";
-
-
-    /*
-       Subscribe to EVERY device
-    */
-
-    client.subscribe(
-        BASE_TOPIC + "+/data"
-    );
-
-
-    client.subscribe(
-        BASE_TOPIC + "+/status"
-    );
-
-
-    addEvent(
-        "SCADA connected to MQTT broker"
-    );
-
-});
-
-
-/* ==================================================
-   MQTT ERROR
-================================================== */
-
-client.on("error", function(error) {
-
-    console.log(error);
-
-    document.getElementById(
-        "mqttStatus"
-    ).innerText = "MQTT ERROR";
-
-});
-
-
-/* ==================================================
-   MQTT DISCONNECTED
-================================================== */
-
-client.on("offline", function() {
-
-    document.getElementById(
-        "mqttStatus"
-    ).innerText = "MQTT OFFLINE";
-
-
-    document.getElementById(
-        "mqttDot"
-    ).style.background = "#ff4545";
-
-});
-
-
-/* ==================================================
-   MQTT MESSAGE
-================================================== */
-
-client.on("message", function(topic, message) {
-
-    const payload =
-        message.toString();
-
-
-    /*
-       Extract ROOM_XX
-    */
-
-    const parts =
-        topic.split("/");
-
-
-    const deviceName =
-        parts[3];
-
-
-    const type =
-        parts[4];
-
-
-    /* ==============================================
-       STATUS
-    ============================================== */
-
-    if (type === "status") {
-
-        updateStatus(
-            deviceName,
-            payload
-        );
-
-        return;
-    }
-
-
-    /* ==============================================
-       DATA
-    ============================================== */
-
-    if (type === "data") {
-
-        try {
-
-            const data =
-                JSON.parse(payload);
-
-
-            updateDevice(
-                data
-            );
-
-        }
-
-        catch(error) {
-
-            console.log(
-                "Invalid JSON:",
-                payload
-            );
-
-        }
+        connectTimeout: 10000
 
     }
 
-});
+);
 
 
-/* ==================================================
-   UPDATE DEVICE
-================================================== */
+/* =====================================================
+   EVENT LOG
+===================================================== */
 
-function updateDevice(data) {
-
-    const id =
-        data.device_id;
-
-
-    if (!devices[id]) {
-
-        devices[id] = {
-
-            id: id,
-
-            status: "ONLINE",
-
-            voltage: 0,
-
-            current: 0,
-
-            power: 0,
-
-            rssi: 0,
-
-            lastSeen: Date.now()
-
-        };
-
-    }
-
-
-    devices[id].status =
-        "ONLINE";
-
-
-    devices[id].voltage =
-        Number(data.voltage);
-
-
-    devices[id].current =
-        Number(data.current);
-
-
-    devices[id].power =
-        Number(data.power);
-
-
-    devices[id].rssi =
-        Number(data.rssi);
-
-
-    devices[id].supply =
-        data.status;
-
-
-    devices[id].lastSeen =
-        Date.now();
-
-
-    renderDashboard();
-
-
-    document.getElementById(
-        "lastUpdate"
-    ).innerText =
-        new Date()
-            .toLocaleTimeString();
-
-}
-
-
-/* ==================================================
-   UPDATE STATUS
-================================================== */
-
-function updateStatus(
-    deviceName,
-    status
+function log(
+    text,
+    level = "INFO"
 ) {
 
-    if (!devices[deviceName]) {
-
-        devices[deviceName] = {
-
-            id: deviceName,
-
-            status: status,
-
-            voltage: 0,
-
-            current: 0,
-
-            power: 0,
-
-            rssi: 0,
-
-            lastSeen: Date.now()
-
-        };
-
-    }
-
-
-    devices[deviceName].status =
-        status;
-
-
-    if (status === "ONLINE") {
-
-        devices[deviceName].lastSeen =
-            Date.now();
-
-        addEvent(
-            deviceName +
-            " connected"
+    const e =
+        document.createElement(
+            "div"
         );
 
+
+    e.className =
+        "alarmrow";
+
+
+    let color =
+        "muted";
+
+
+    if (
+        level === "FAULT"
+    ) {
+
+        color =
+            "fault";
+
     }
 
-    else {
 
-        addEvent(
-            deviceName +
-            " OFFLINE"
-        );
+    if (
+        level === "WARN"
+    ) {
+
+        color =
+            "yellow";
 
     }
 
 
-    renderDashboard();
+    e.innerHTML =
+
+        `<span class="${color}">
+
+            ${new Date()
+                .toLocaleTimeString()}
+
+        </span>
+
+        &nbsp;
+
+        ${escapeHtml(text)}`;
+
+
+    document
+        .getElementById("alarms")
+        .prepend(e);
+
+
+    while (
+
+        document
+            .getElementById("alarms")
+            .children.length > 60
+
+    ) {
+
+        document
+            .getElementById("alarms")
+            .lastChild
+            .remove();
+
+    }
 
 }
 
 
-/* ==================================================
-   OFFLINE TIMEOUT
-================================================== */
+/* =====================================================
+   MQTT CONNECTED
+===================================================== */
 
-setInterval(function() {
+client.on(
+    "connect",
+    function() {
 
-    const now =
-        Date.now();
+        document
+            .getElementById("conn")
+            .textContent =
+            "MQTT ONLINE";
 
 
-    for (
-        const id in devices
+        document
+            .getElementById("lamp")
+            .style.background =
+            "#36d879";
+
+
+        /*
+         * Automatic discovery
+         */
+
+        client.subscribe(
+            BASE + "+/data"
+        );
+
+
+        client.subscribe(
+            BASE + "+/status"
+        );
+
+
+        log(
+            "SCADA communication established"
+        );
+
+    }
+);
+
+
+/* =====================================================
+   MQTT OFFLINE
+===================================================== */
+
+client.on(
+    "offline",
+    function() {
+
+        document
+            .getElementById("conn")
+            .textContent =
+            "MQTT OFFLINE";
+
+
+        document
+            .getElementById("lamp")
+            .style.background =
+            "#ff5252";
+
+
+        log(
+            "MQTT communication lost",
+            "FAULT"
+        );
+
+    }
+);
+
+
+/* =====================================================
+   MQTT MESSAGE
+===================================================== */
+
+client.on(
+    "message",
+    function(
+        topic,
+        message
     ) {
 
+
+        const parts =
+            topic.split("/");
+
+
         if (
-            now -
-            devices[id].lastSeen
-            > 10000
+            parts.length < 5
         ) {
 
+            return;
+
+        }
+
+
+        const deviceName =
+            parts[3];
+
+
+        const type =
+            parts[4];
+
+
+        /* =============================================
+           CREATE DEVICE
+        ============================================= */
+
+        if (
+            !devices[deviceName]
+        ) {
+
+            devices[deviceName] = {
+
+                id:
+                    deviceName,
+
+                status:
+                    "OFFLINE",
+
+                supply:
+                    "OFF",
+
+                voltage:
+                    0,
+
+                current:
+                    0,
+
+                power:
+                    0,
+
+                rssi:
+                    0,
+
+                lastSeen:
+                    0
+
+            };
+
+        }
+
+
+        /* =============================================
+           STATUS MESSAGE
+        ============================================= */
+
+        if (
+            type === "status"
+        ) {
+
+
+            const status =
+                message
+                    .toString()
+                    .trim();
+
+
+            const oldStatus =
+                devices[deviceName]
+                    .status;
+
+
+            devices[deviceName]
+                .status =
+                status;
+
+
             if (
-                devices[id].status
-                !== "OFFLINE"
+                status === "ONLINE"
             ) {
 
-                devices[id].status =
-                    "OFFLINE";
+                devices[deviceName]
+                    .lastSeen =
+                    Date.now();
+
+            }
 
 
-                addEvent(
-                    id +
-                    " communication lost"
+            if (
+                oldStatus !== status
+            ) {
+
+                if (
+                    status === "OFFLINE"
+                ) {
+
+                    log(
+                        deviceName +
+                        " communication OFFLINE",
+                        "FAULT"
+                    );
+
+                }
+
+                else {
+
+                    log(
+                        deviceName +
+                        " communication ONLINE"
+                    );
+
+                }
+
+            }
+
+
+            render();
+
+        }
+
+
+        /* =============================================
+           DATA MESSAGE
+        ============================================= */
+
+        if (
+            type === "data"
+        ) {
+
+
+            try {
+
+                const data =
+                    JSON.parse(
+                        message.toString()
+                    );
+
+
+                devices[deviceName]
+                    .id =
+                    data.device_id ||
+                    deviceName;
+
+
+                devices[deviceName]
+                    .status =
+                    "ONLINE";
+
+
+                devices[deviceName]
+                    .supply =
+                    data.status ||
+                    "OFF";
+
+
+                devices[deviceName]
+                    .voltage =
+                    Number(
+                        data.voltage
+                    ) || 0;
+
+
+                devices[deviceName]
+                    .current =
+                    Number(
+                        data.current
+                    ) || 0;
+
+
+                devices[deviceName]
+                    .power =
+                    Number(
+                        data.power
+                    ) || 0;
+
+
+                devices[deviceName]
+                    .rssi =
+                    Number(
+                        data.rssi
+                    ) || 0;
+
+
+                devices[deviceName]
+                    .lastSeen =
+                    Date.now();
+
+
+                render();
+
+            }
+
+            catch(error) {
+
+                log(
+                    "Invalid data from " +
+                    deviceName,
+                    "FAULT"
                 );
 
             }
@@ -941,108 +1281,273 @@ setInterval(function() {
 
     }
 
-
-    renderDashboard();
-
-}, 3000);
+);
 
 
-/* ==================================================
-   RENDER DASHBOARD
-================================================== */
+/* =====================================================
+   COMMUNICATION TIMEOUT
+===================================================== */
 
-function renderDashboard() {
+setInterval(
 
-    const grid =
-        document.getElementById(
-            "roomGrid"
-        );
+    function() {
 
 
-    grid.innerHTML = "";
+        const now =
+            Date.now();
 
 
-    let onlineCount = 0;
+        Object
+            .values(devices)
+            .forEach(
 
-    let totalPower = 0;
-
-
-    const ids =
-        Object.keys(devices)
-        .sort();
+                function(d) {
 
 
-    ids.forEach(function(id) {
+                    if (
 
-        const d =
-            devices[id];
+                        d.lastSeen &&
 
+                        now -
+                        d.lastSeen >
 
-        if (
-            d.status === "ONLINE"
-        ) {
+                        5000 &&
 
-            onlineCount++;
+                        d.status !==
+                        "OFFLINE"
 
-            totalPower +=
-                Number(d.power || 0);
-
-        }
+                    ) {
 
 
-        const card =
-            document.createElement(
-                "div"
+                        d.status =
+                            "OFFLINE";
+
+
+                        log(
+
+                            d.id +
+                            " communication timeout",
+
+                            "FAULT"
+
+                        );
+
+                    }
+
+                }
+
             );
 
 
-        card.className =
-            "room";
+        render();
 
 
-        const online =
-            d.status === "ONLINE";
+    },
+
+    2000
+
+);
 
 
-        const supplyOn =
-            d.supply === "ON";
+/* =====================================================
+   SELECT DEVICE
+===================================================== */
+
+function selectDevice(
+    id
+) {
+
+    selected =
+        id;
 
 
-        card.innerHTML = `
+    document
+        .getElementById(
+            "selectedText"
+        )
+        .textContent =
+        id;
 
-            <div class="room-header">
 
-                <div class="room-name">
-                    ${d.id}
+    render();
+
+}
+
+
+/* =====================================================
+   RENDER
+===================================================== */
+
+function render() {
+
+
+    const list =
+        document
+            .getElementById(
+                "devices"
+            );
+
+
+    const feeders =
+        document
+            .getElementById(
+                "feeders"
+            );
+
+
+    list.innerHTML =
+        "";
+
+
+    feeders.innerHTML =
+        "";
+
+
+    let online =
+        0;
+
+
+    let active =
+        0;
+
+
+    let totalPower =
+        0;
+
+
+    const array =
+        Object
+            .values(devices)
+            .sort(
+
+                function(a,b) {
+
+                    return a.id
+                        .localeCompare(
+                            b.id
+                        );
+
+                }
+
+            );
+
+
+    /* =============================================
+       NO DEVICES
+    ============================================= */
+
+    if (
+        array.length === 0
+    ) {
+
+        list.innerHTML =
+
+            `<div class="device muted">
+
+                Waiting for ESP...
+
+            </div>`;
+
+    }
+
+
+    /* =============================================
+       DEVICES
+    ============================================= */
+
+    array.forEach(
+
+        function(d) {
+
+
+            const isOnline =
+                d.status ===
+                "ONLINE";
+
+
+            const supplyOn =
+                d.supply ===
+                "ON";
+
+
+            if (
+                isOnline
+            ) {
+
+                online++;
+
+                totalPower +=
+                    d.power;
+
+            }
+
+
+            if (
+                isOnline &&
+                supplyOn
+            ) {
+
+                active++;
+
+            }
+
+
+            /* =====================================
+               LEFT DEVICE LIST
+            ===================================== */
+
+            const item =
+                document
+                    .createElement(
+                        "div"
+                    );
+
+
+            item.className =
+                "device";
+
+
+            if (
+                selected ===
+                d.id
+            ) {
+
+                item.classList
+                    .add(
+                        "selected"
+                    );
+
+            }
+
+
+            item.innerHTML =
+
+                `<div class="devline">
+
+                    <b>
+                        ${escapeHtml(
+                            d.id
+                        )}
+                    </b>
+
+                    <span class="${
+                        isOnline
+                        ? "green"
+                        : "red"
+                    }">
+
+                        ● ${
+                            isOnline
+                            ? "ONLINE"
+                            : "OFFLINE"
+                        }
+
+                    </span>
+
                 </div>
 
-                <div class="${
-                    online
-                    ? "online"
-                    : "offline"
-                }">
 
-                    ● ${
-                        online
-                        ? "ONLINE"
-                        : "OFFLINE"
-                    }
-
-                </div>
-
-            </div>
-
-
-            <div class="supply">
-
-                <div class="
-                    supply-status
-                    ${
-                        supplyOn
-                        ? "supply-on"
-                        : "supply-off"
-                    }
-                ">
+                <div class="tiny">
 
                     ${
                         supplyOn
@@ -1050,260 +1555,360 @@ function renderDashboard() {
                         : "SUPPLY OFF"
                     }
 
-                </div>
+                    •
+
+                    ${
+                        d.voltage
+                            .toFixed(1)
+                    } V
+
+                    •
+
+                    ${
+                        d.power
+                            .toFixed(1)
+                    } W
+
+                </div>`;
 
 
-                <div class="electrical">
+            item.onclick =
+                function() {
 
-                    <div class="
-                        line
-                        ${
-                            supplyOn
-                            ? "active"
-                            : ""
-                        }
-                    "></div>
+                    selectDevice(
+                        d.id
+                    );
+
+                };
 
 
-                    <div class="breaker">
-
-                        <span>
-                            CB
-                        </span>
-
-                    </div>
+            list.appendChild(
+                item
+            );
 
 
-                    <div class="
-                        line
-                        ${
-                            supplyOn
-                            ? "active"
-                            : ""
-                        }
-                    "></div>
+            /* =====================================
+               CENTER FEEDER
+            ===================================== */
 
-                </div>
-
-            </div>
+            const feeder =
+                document
+                    .createElement(
+                        "div"
+                    );
 
 
-            <div class="values">
-
-                <div class="value">
-
-                    <div class="value-label">
-                        VOLTAGE
-                    </div>
-
-                    <div class="value-number">
-                        ${d.voltage.toFixed(1)} V
-                    </div>
-
-                </div>
+            feeder.className =
+                "feeder";
 
 
-                <div class="value">
-
-                    <div class="value-label">
-                        CURRENT
-                    </div>
-
-                    <div class="value-number">
-                        ${d.current.toFixed(2)} A
-                    </div>
-
-                </div>
+            const live =
+                isOnline &&
+                supplyOn;
 
 
-                <div class="value">
+            const state =
 
-                    <div class="value-label">
-                        POWER
-                    </div>
+                !isOnline
+                ? "OFFLINE"
 
-                    <div class="value-number">
-                        ${d.power.toFixed(1)} W
-                    </div>
+                :
 
-                </div>
+                supplyOn
+                ? "ON"
 
-            </div>
+                : "OFF";
 
 
-            <div class="values">
+            feeder.innerHTML =
 
-                <div class="value">
+                `<div class="feederline ${
+                    live
+                    ? "live"
+                    : ""
+                }"></div>
 
-                    <div class="value-label">
-                        RSSI
-                    </div>
 
-                    <div class="value-number">
-                        ${d.rssi} dBm
-                    </div>
+                <div class="breaker ${
+                    live
+                    ? "closed"
+                    : "open"
+                }"></div>
+
+
+                <div class="feedername">
+
+                    ${escapeHtml(
+                        d.id
+                    )}
 
                 </div>
 
 
-                <div class="value">
+                <div class="reading">
 
-                    <div class="value-label">
-                        DEVICE
-                    </div>
+                    ${
+                        d.voltage
+                            .toFixed(1)
+                    } V
 
-                    <div class="value-number">
-                        ESP8266
-                    </div>
+                    <br>
 
-                </div>
+                    ${
+                        d.current
+                            .toFixed(2)
+                    } A
 
+                    <br>
 
-                <div class="value">
-
-                    <div class="value-label">
-                        STATUS
-                    </div>
-
-                    <div class="value-number">
-                        ${d.status}
-                    </div>
+                    ${
+                        d.power
+                            .toFixed(1)
+                    } W
 
                 </div>
 
-            </div>
+
+                <div class="statusbox ${
+                    live
+                    ? ""
+                    : "fault"
+                }">
+
+                    ${state}
+
+                </div>`;
 
 
-            <div class="controls">
+            feeder.onclick =
+                function() {
 
-                <button
-                    onclick="sendCommand(
-                        '${d.id}',
-                        'ON'
-                    )">
+                    selectDevice(
+                        d.id
+                    );
 
-                    SUPPLY ON
-
-                </button>
+                };
 
 
-                <button
-                    onclick="sendCommand(
-                        '${d.id}',
-                        'OFF'
-                    )">
+            feeders.appendChild(
+                feeder
+            );
 
-                    SUPPLY OFF
+        }
 
-                </button>
-
-            </div>
-
-        `;
+    );
 
 
-        grid.appendChild(card);
+    /* =============================================
+       SUMMARY
+    ============================================= */
 
-    });
+    document
+        .getElementById(
+            "online"
+        )
+        .textContent =
+        online;
 
 
-    document.getElementById(
-        "deviceCount"
-    ).innerText =
-        onlineCount;
+    document
+        .getElementById(
+            "active"
+        )
+        .textContent =
+        active;
 
 
-    document.getElementById(
-        "totalPower"
-    ).innerText =
-        totalPower.toFixed(1)
+    document
+        .getElementById(
+            "power"
+        )
+        .textContent =
+
+        totalPower
+            .toFixed(1)
+
         + " W";
 
-}
 
+    document
+        .getElementById(
+            "last"
+        )
+        .textContent =
 
-/* ==================================================
-   SEND COMMAND
-================================================== */
+        online > 0
 
-function sendCommand(
-    device,
-    command
-) {
+        ?
 
-    const topic =
-        BASE_TOPIC +
-        device +
-        "/command";
-
-
-    client.publish(
-        topic,
-        command
-    );
-
-
-    addEvent(
-        "Command sent: " +
-        device +
-        " → " +
-        command
-    );
-
-}
-
-
-/* ==================================================
-   EVENT LOG
-================================================== */
-
-function addEvent(text) {
-
-    const events =
-        document.getElementById(
-            "events"
-        );
-
-
-    const event =
-        document.createElement(
-            "div"
-        );
-
-
-    event.className =
-        "event";
-
-
-    event.innerText =
         new Date()
-        .toLocaleTimeString()
-        + "  "
-        + text;
+            .toLocaleTimeString()
+
+        :
+
+        "--";
 
 
-    events.prepend(event);
+    /* =============================================
+       MAIN BUS
+    ============================================= */
+
+    document
+        .getElementById(
+            "mainbus"
+        )
+        .className =
+
+        "busbar " +
+
+        (
+            online > 0
+            ? "live"
+            : ""
+        );
 
 
-    /*
-       Keep last 50 events
-    */
+    /* =============================================
+       SELECTED DEVICE
+    ============================================= */
 
-    while (
-        events.children.length
-        > 50
+    if (
+        selected &&
+        devices[selected]
     ) {
 
-        events.removeChild(
-            events.lastChild
-        );
+
+        const d =
+            devices[selected];
+
+
+        document
+            .getElementById(
+                "selected"
+            )
+            .innerHTML =
+
+            `<b>
+                ${escapeHtml(d.id)}
+            </b>
+
+            <br><br>
+
+            Communication:
+
+            <span class="${
+                d.status === "ONLINE"
+                ? "green"
+                : "red"
+            }">
+
+                ${d.status}
+
+            </span>
+
+            <br><br>
+
+            Supply:
+
+            <b>
+                ${d.supply}
+            </b>
+
+            <br>
+
+            Voltage:
+
+            <b>
+                ${d.voltage.toFixed(1)} V
+            </b>
+
+            <br>
+
+            Current:
+
+            <b>
+                ${d.current.toFixed(2)} A
+            </b>
+
+            <br>
+
+            Power:
+
+            <b>
+                ${d.power.toFixed(1)} W
+            </b>
+
+            <br>
+
+            Wi-Fi RSSI:
+
+            <b>
+                ${d.rssi} dBm
+            </b>`;
 
     }
 
 }
 
+
+/* =====================================================
+   REFRESH
+===================================================== */
+
+document
+    .getElementById(
+        "refresh"
+    )
+    .onclick =
+    render;
+
+
+/* =====================================================
+   HTML SECURITY
+===================================================== */
+
+function escapeHtml(
+    value
+) {
+
+    return String(value)
+
+        .replace(
+            /[&<>"']/g,
+
+            function(m) {
+
+                return {
+
+                    "&":
+                        "&amp;",
+
+                    "<":
+                        "&lt;",
+
+                    ">":
+                        "&gt;",
+
+                    '"':
+                        "&quot;",
+
+                    "'":
+                        "&#039;"
+
+                }[m];
+
+            }
+
+        );
+
+}
+
+
+/* INITIAL RENDER */
+
+render();
+
 </script>
 
 </body>
-
 </html>
