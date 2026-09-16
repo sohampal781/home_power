@@ -883,8 +883,8 @@
             MQTT_BROKER: "wss://test.mosquitto.org:8081/mqtt",
             STORAGE_KEY: "SECURE_BMS_DEVICES",
             CLOUD_CONFIG_TOPIC: "mrpsp/secure_bms/system/cloud_config",
-            MAX_GRAPH_POINTS: 240, // 4 minutes at 1 update per second
-            OFFLINE_TIMEOUT_MS: 3000 // 3 seconds grace period before marking offline
+            MAX_GRAPH_POINTS: 240, 
+            OFFLINE_TIMEOUT_MS: 15000 // Increased to 8 seconds to prevent false offlines
         };
 
         const state = {
