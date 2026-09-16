@@ -1016,21 +1016,6 @@
                 adminOnly.forEach(el => el.classList.add('hidden'));
             }
         }
-        function updateRoleUI() {
-            const toggleBtn = document.getElementById('role-toggle');
-            const adminOnlyElements = document.querySelectorAll('.admin-only');
-
-            if (state.userRole === 'admin') {
-                toggleBtn.classList.add('admin-active');
-                toggleBtn.innerHTML = '<i class="ph-fill ph-shield-star"></i> <span>Administrator</span>';
-                adminOnlyElements.forEach(el => el.classList.remove('hidden'));
-            } else {
-                toggleBtn.classList.remove('admin-active');
-                toggleBtn.innerHTML = '<i class="ph-fill ph-user"></i> <span>Standard User</span>';
-                adminOnlyElements.forEach(el => el.classList.add('hidden'));
-            }
-        }
-
         /**
          * ==========================================================================
          * 4. CLOUD SYNCHRONIZATION & STORAGE
