@@ -3,153 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BMS</title>
+    <title>MRPSP | Enterprise Secure BMS</title>
     
-    <!-- External Libraries for Premium UI -->
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --bg-body: #f1f5f9;
-            --surface: #ffffff;
-            --sidebar-bg: #0f172a;
-            --sidebar-hover: #1e293b;
-            
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --text-light: #f8fafc;
-            --text-sidebar-dim: #94a3b8;
-
-            --border-light: #e2e8f0;
-            --border-dark: #334155;
-
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #0ea5e9;
-
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --sidebar-width: 280px;
+            --bg-body: #f1f5f9; --surface: #ffffff; --sidebar-bg: #0f172a; --sidebar-hover: #1e293b;
+            --text-main: #0f172a; --text-muted: #64748b; --text-light: #f8fafc; --text-sidebar-dim: #94a3b8;
+            --border-light: #e2e8f0; --border-dark: #334155;
+            --primary: #2563eb; --primary-hover: #1d4ed8; --success: #10b981; --danger: #ef4444;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05); --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --radius-md: 12px; --radius-lg: 16px; --sidebar-width: 280px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
 
         /* SIDEBAR */
-        #sidebar { 
-            width: var(--sidebar-width); background: var(--sidebar-bg); 
-            display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100;
-            color: var(--text-sidebar-dim); transition: all 0.3s ease;
-        }
-        .brand { 
-            padding: 30px 25px; border-bottom: 1px solid var(--border-dark); 
-            display: flex; align-items: center; gap: 12px; 
-        }
+        #sidebar { width: var(--sidebar-width); background: var(--sidebar-bg); display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; color: var(--text-sidebar-dim); }
+        .brand { padding: 30px 25px; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; gap: 12px; }
         .brand i { font-size: 32px; color: var(--primary); }
-        .brand h2 { font-size: 20px; color: var(--text-light); font-weight: 700; line-height: 1.2; letter-spacing: 0.5px; }
-
+        .brand h2 { font-size: 20px; color: var(--text-light); font-weight: 700; line-height: 1.2; }
         .nav-menu { padding: 20px 0; flex-grow: 1; list-style: none; }
-        .nav-item { 
-            padding: 16px 25px; margin: 4px 12px; border-radius: 8px;
-            font-size: 15px; font-weight: 500; cursor: pointer; 
-            display: flex; align-items: center; gap: 14px; 
-            transition: all 0.2s ease;
-        }
+        .nav-item { padding: 16px 25px; margin: 4px 12px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: all 0.2s; }
         .nav-item i { font-size: 22px; }
         .nav-item:hover { background: var(--sidebar-hover); color: var(--text-light); }
         .nav-item.active { background: var(--primary); color: var(--text-light); box-shadow: var(--shadow-md); }
-
         .sidebar-footer { padding: 25px; border-top: 1px solid var(--border-dark); background: rgba(0,0,0,0.1); }
-        .stat-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-        .stat-value { font-size: 28px; font-weight: 700; color: var(--text-light); }
-
+        
         /* MAIN CONTENT */
         #main-content { margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px 50px; width: calc(100% - var(--sidebar-width)); }
-
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-        .header-title { font-size: 28px; font-weight: 700; color: var(--text-main); margin-bottom: 6px; letter-spacing: -0.5px; }
-        .subtitle { font-size: 15px; color: var(--text-muted); }
+        .header-title { font-size: 28px; font-weight: 700; color: var(--text-main); margin-bottom: 6px; }
+        .sys-status { display: flex; align-items: center; gap: 10px; padding: 10px 20px; background: var(--surface); border-radius: 30px; box-shadow: var(--shadow-sm); font-weight: 600; font-size: 14px; border: 1px solid var(--border-light); }
         
-        .sys-status { 
-            display: flex; align-items: center; gap: 10px; padding: 10px 20px; 
-            background: var(--surface); border-radius: 30px; box-shadow: var(--shadow-sm);
-            font-weight: 600; font-size: 14px; color: var(--text-main); border: 1px solid var(--border-light);
-            transition: all 0.3s ease;
-        }
+        /* ROLE TOGGLE */
+        .role-badge { display: flex; align-items: center; gap: 8px; background: #fef3c7; color: #d97706; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 14px; cursor: pointer; border: 1px solid #fde68a; transition: all 0.2s; }
+        .role-badge.admin-active { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+
         .pulse-dot { width: 10px; height: 10px; border-radius: 50%; }
         .dot-online { background: var(--success); box-shadow: 0 0 0 rgba(16, 185, 129, 0.4); animation: pulse-green 2s infinite; }
         .dot-offline { background: var(--danger); }
-        
         @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.7); } 70% { box-shadow: 0 0 0 10px rgba(16,185,129,0); } 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); } }
 
-        /* CARDS & GRIDS */
+        /* CARDS & UI */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 24px; }
-        .card { 
-            background: var(--surface); border-radius: var(--radius-lg); padding: 24px; 
-            box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);
-            transition: transform 0.2s, box-shadow 0.2s, border-color 0.3s;
-        }
-        .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-        .card.card-offline { border-color: rgba(239, 68, 68, 0.3); }
-
+        .card { background: var(--surface); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); }
+        .card-offline { border-color: rgba(239, 68, 68, 0.3); }
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-        .room-name { font-size: 22px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
+        .room-name { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
         .hw-id { font-size: 13px; color: var(--text-muted); font-family: monospace; background: var(--bg-body); padding: 4px 8px; border-radius: 4px; }
-
+        
         .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-        .metric-box { background: var(--bg-body); padding: 16px; border-radius: var(--radius-md); display: flex; flex-direction: column; }
+        .metric-box { background: var(--bg-body); padding: 16px; border-radius: var(--radius-md); }
         .metric-label { font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-        .metric-val { font-size: 26px; font-weight: 700; color: var(--text-main); transition: color 0.3s; }
+        .metric-val { font-size: 26px; font-weight: 700; }
         .metric-val span { font-size: 16px; font-weight: 500; color: var(--text-muted); }
 
-        /* LISTS & BUTTONS */
-        .list-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 20px 24px; background: var(--surface); border-radius: var(--radius-md); 
-            margin-bottom: 12px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);
-        }
-        .list-info h3 { font-size: 18px; margin-bottom: 6px; color: var(--text-main); }
-        .list-info p { font-size: 13px; color: var(--text-muted); font-family: monospace; }
-
-        .btn { 
-            padding: 12px 24px; font-size: 14px; font-weight: 600; border: none; border-radius: 8px; 
-            cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; 
-            transition: all 0.2s ease;
-        }
-        .btn-primary { background: var(--primary); color: white; box-shadow: 0 2px 4px rgba(37,99,235,0.2); }
-        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn { padding: 12px 24px; font-size: 14px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
-        .btn-success:hover { background: #059669; }
         .btn-danger { background: rgba(239,68,68,0.1); color: var(--danger); }
-        .btn-danger:hover { background: var(--danger); color: white; }
-        .btn-outline { background: transparent; border: 1px solid var(--border-light); color: var(--text-main); }
-        .btn-outline:hover { background: var(--bg-body); }
-
+        .btn-outline { background: transparent; border: 1px solid var(--border-light); }
+        
+        .admin-panel { background: #fff5f5; border: 1px solid #fed7d7; padding: 20px; border-radius: var(--radius-md); margin-top: 20px; }
+        .input-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; }
+        .input-group input { padding: 10px; border: 1px solid var(--border-light); border-radius: 6px; font-size: 16px; }
+        
+        .graph-container { background: var(--surface); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-light); margin-top: 24px; height: 350px; }
+        
         .text-success { color: var(--success) !important; }
         .text-danger { color: var(--danger) !important; }
         .text-muted { color: var(--text-muted) !important; }
-
-        .toast { 
-            position: fixed; bottom: 30px; right: 30px; background: var(--sidebar-bg); color: white; 
-            padding: 16px 24px; border-radius: 12px; font-weight: 500; box-shadow: var(--shadow-lg); 
-            display: flex; align-items: center; gap: 12px; transform: translateY(100px); opacity: 0; 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000;
-        }
-        .toast.show { transform: translateY(0); opacity: 1; }
-
         .hidden { display: none !important; }
         .empty-state { text-align: center; padding: 80px 20px; }
         .empty-icon { font-size: 64px; color: var(--border-light); margin-bottom: 20px; }
-        .empty-state h3 { font-size: 20px; color: var(--text-main); margin-bottom: 8px; }
-        .empty-state p { color: var(--text-muted); }
+
+        .toast { position: fixed; bottom: 30px; right: 30px; background: var(--sidebar-bg); color: white; padding: 16px 24px; border-radius: 12px; font-weight: 500; display: flex; align-items: center; gap: 12px; transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; }
+        .toast.show { transform: translateY(0); opacity: 1; }
     </style>
 </head>
 <body>
@@ -162,12 +97,12 @@
         <ul class="nav-menu">
             <li class="nav-item active" onclick="navigate('dashboard')"><i class="ph ph-squares-four"></i> Dashboard</li>
             <li class="nav-item" onclick="navigate('register')"><i class="ph ph-radar"></i> Detect Controllers</li>
-            <li class="nav-item" onclick="navigate('registered')"><i class="ph ph-shield-check"></i> Authorized Blocks</li>
+            <li class="nav-item admin-only hidden" onclick="navigate('registered')"><i class="ph ph-shield-check"></i> Authorized Blocks</li>
             <li class="nav-item" onclick="navigate('system')"><i class="ph ph-sliders"></i> System Config</li>
         </ul>
         <div class="sidebar-footer">
-            <div class="stat-label">Online Controllers</div>
-            <div class="stat-value" id="sidebar-online-count">0</div>
+            <div style="font-size: 12px; text-transform: uppercase; color: var(--text-sidebar-dim); margin-bottom: 5px;">Online Controllers</div>
+            <div style="font-size: 28px; font-weight: 700; color: var(--text-light);" id="sidebar-online-count">0</div>
         </div>
     </aside>
 
@@ -177,9 +112,14 @@
                 <h1 class="header-title">Enterprise Dashboard</h1>
                 <div class="subtitle">Cloud-Synced Secure Electrical Management</div>
             </div>
-            <div class="sys-status">
-                <div class="pulse-dot dot-offline" id="system-status-dot"></div>
-                <span id="system-status-text">DISCONNECTED</span>
+            <div style="display: flex; gap: 15px;">
+                <div class="role-badge" id="role-toggle" onclick="toggleRole()">
+                    <i class="ph-fill ph-user"></i> <span id="role-text">Standard User</span>
+                </div>
+                <div class="sys-status">
+                    <div class="pulse-dot dot-offline" id="system-status-dot"></div>
+                    <span id="system-status-text">DISCONNECTED</span>
+                </div>
             </div>
         </div>
         <div id="screen-container"></div>
@@ -195,6 +135,7 @@
         const MQTT_BROKER = "wss://test.mosquitto.org:8081/mqtt";
         const STORAGE_KEY = "SECURE_BMS_DEVICES";
         const CONFIG_TOPIC = "mrpsp/secure_bms/system/cloud_config";
+        const MAX_GRAPH_POINTS = 240; // 4 minutes at 1 update per second
 
         const state = {
             registeredDevices: [], 
@@ -202,30 +143,51 @@
             currentScreen: 'dashboard',
             selectedDeviceId: null,
             mqttClient: null,
-            mqttConnected: false
+            mqttConnected: false,
+            userRole: localStorage.getItem('bms_role') || 'user' // 'user' or 'admin'
         };
+
+        let currentChartInstance = null;
 
         function initApp() {
             const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                try { state.registeredDevices = JSON.parse(stored); } catch(e) {}
-            }
+            if (stored) { try { state.registeredDevices = JSON.parse(stored); } catch(e) {} }
+            
+            updateRoleUI();
             connectMQTT();
             renderScreen();
+        }
+
+        // ROLE MANAGEMENT
+        function toggleRole() {
+            state.userRole = state.userRole === 'admin' ? 'user' : 'admin';
+            localStorage.setItem('bms_role', state.userRole);
+            updateRoleUI();
+            renderScreen();
+            showToast(`Switched to ${state.userRole.toUpperCase()} mode`);
+        }
+
+        function updateRoleUI() {
+            const toggleBtn = document.getElementById('role-toggle');
+            const toggleTxt = document.getElementById('role-text');
+            const adminOnlyElements = document.querySelectorAll('.admin-only');
+
+            if (state.userRole === 'admin') {
+                toggleBtn.classList.add('admin-active');
+                toggleBtn.innerHTML = '<i class="ph-fill ph-shield-star"></i> <span>Administrator</span>';
+                adminOnlyElements.forEach(el => el.classList.remove('hidden'));
+            } else {
+                toggleBtn.classList.remove('admin-active');
+                toggleBtn.innerHTML = '<i class="ph-fill ph-user"></i> <span>Standard User</span>';
+                adminOnlyElements.forEach(el => el.classList.add('hidden'));
+                if (state.currentScreen === 'registered') navigate('dashboard');
+            }
         }
 
         function saveRegistrations() {
             const configJson = JSON.stringify(state.registeredDevices);
             localStorage.setItem(STORAGE_KEY, configJson);
-            
-            if (state.mqttConnected) {
-                state.mqttClient.publish(CONFIG_TOPIC, configJson, { retain: true });
-            }
-            updateSidebarStats();
-        }
-
-        function isRegistered(id) {
-            return state.registeredDevices.some(d => d.device_id === id);
+            if (state.mqttConnected) state.mqttClient.publish(CONFIG_TOPIC, configJson, { retain: true });
         }
 
         function connectMQTT() {
@@ -235,7 +197,6 @@
             state.mqttClient.on("connect", () => {
                 state.mqttConnected = true;
                 setSystemStatus(true, "CLOUD CONNECTED");
-                
                 state.mqttClient.subscribe("mrpsp/secure_bms/+/data");
                 state.mqttClient.subscribe("mrpsp/secure_bms/+/status");
                 state.mqttClient.subscribe(CONFIG_TOPIC);
@@ -246,213 +207,176 @@
                 setSystemStatus(false, "DISCONNECTED");
             });
 
-            state.mqttClient.on("message", (topic, payload) => handleMqttMessage(topic, payload.toString()));
+            state.mqttClient.on("message", (topic, message) => handleMqttMessage(topic, message.toString()));
         }
 
         function handleMqttMessage(topic, message) {
             if (topic === CONFIG_TOPIC) {
                 try {
-                    const cloudConfig = JSON.parse(message);
-                    state.registeredDevices = cloudConfig;
+                    state.registeredDevices = JSON.parse(message);
                     localStorage.setItem(STORAGE_KEY, message);
-                    updateSidebarStats();
-                    if (state.currentScreen === 'dashboard' || state.currentScreen === 'registered') {
-                        renderScreen();
-                    }
+                    if (state.currentScreen === 'dashboard' || state.currentScreen === 'registered') renderScreen();
                 } catch(e) {}
                 return;
             }
 
             const parts = topic.split("/");
             if (parts.length !== 4) return;
-            
             const deviceId = parts[2]; 
             const type = parts[3];     
 
             if (!state.detectedDevices[deviceId]) {
                 const regInfo = state.registeredDevices.find(r => r.device_id === deviceId);
                 state.detectedDevices[deviceId] = {
-                    device_id: deviceId,
-                    block_name: regInfo ? regInfo.block_name : "Unknown Block",
-                    status: 'OFFLINE',
-                    supply: 'OFF',
-                    fault: 'NO',
-                    voltage: 0.0,
-                    current: 0.0,
-                    power: 0.0,
-                    rssi: 0,
-                    lastSeen: 0
+                    device_id: deviceId, block_name: regInfo ? regInfo.block_name : "Unknown Block",
+                    status: 'OFFLINE', supply: 'OFF', fault: 'NO', voltage: 0.0, current: 0.0, power: 0.0,
+                    limit: 5.0, tol_time: 3000, lastSeen: 0,
+                    historyCurrent: [], historyTime: [] // Arrays for the Graph
                 };
             }
 
-            const device = state.detectedDevices[deviceId];
+            const dev = state.detectedDevices[deviceId];
 
             if (type === 'data') {
                 try {
                     const data = JSON.parse(message);
                     if (data.token !== EXPECTED_TOKEN) return; 
 
-                    device.lastSeen = Date.now();
-                    device.status = 'ONLINE'; 
-
-                    if (data.block_name) device.block_name = data.block_name;
-                    if (data.supply) device.supply = data.supply;
-                    if (data.voltage !== undefined) device.voltage = data.voltage;
-                    if (data.current !== undefined) device.current = data.current;
-                    if (data.power !== undefined) device.power = data.power;
-                    if (data.rssi !== undefined) device.rssi = data.rssi;
+                    dev.lastSeen = Date.now();
+                    dev.status = 'ONLINE'; 
                     
+                    if (data.block_name) dev.block_name = data.block_name;
+                    if (data.supply) dev.supply = data.supply;
+                    if (data.voltage !== undefined) dev.voltage = data.voltage;
+                    if (data.current !== undefined) dev.current = data.current;
+                    if (data.power !== undefined) dev.power = data.power;
+                    if (data.limit !== undefined) dev.limit = data.limit;
+                    if (data.tol_time !== undefined) dev.tol_time = data.tol_time;
+                    if (data.fault) dev.fault = data.fault;
+
+                    // Graph Data Downsampling (Store 1 point per second instead of 2 per second)
+                    if (!dev.lastGraphUpdate || (Date.now() - dev.lastGraphUpdate) > 1000) {
+                        dev.lastGraphUpdate = Date.now();
+                        const timeStr = new Date().toLocaleTimeString([], {minute: '2-digit', second:'2-digit'});
+                        dev.historyCurrent.push(dev.current);
+                        dev.historyTime.push(timeStr);
+                        
+                        if (dev.historyCurrent.length > MAX_GRAPH_POINTS) {
+                            dev.historyCurrent.shift();
+                            dev.historyTime.shift();
+                        }
+                    }
                 } catch (e) { return; }
             } else if (type === 'status') {
                 const newStatus = message.trim().toUpperCase();
-                device.status = newStatus;
-                if (newStatus === 'ONLINE') {
-                    device.lastSeen = Date.now();
-                } else {
-                    device.lastSeen = 0;
-                    device.voltage = 0.0;
-                    device.current = 0.0;
-                    device.power = 0.0;
-                }
+                dev.status = newStatus;
+                if (newStatus === 'ONLINE') dev.lastSeen = Date.now();
+                else dev.lastSeen = 0;
             }
 
             updateUI(deviceId);
         }
 
         function publishCommand(deviceId, command) {
-            if(!state.mqttConnected) { showToast("Error: Cloud Disconnected"); return; }
-
+            if(!state.mqttConnected) return showToast("Error: Cloud Disconnected");
             const dev = state.detectedDevices[deviceId];
-            if (dev && dev.status === 'ONLINE') {
-                if (command === "ON") {
-                    dev.supply = "ON";
-                    dev.voltage = 230.0;
-                    dev.current = 1.5;
-                    dev.power = 345.0;
-                } else if (command === "OFF") {
-                    dev.supply = "OFF";
-                    dev.voltage = 0.0;
-                    dev.current = 0.0;
-                    dev.power = 0.0;
-                }
+            
+            if (dev && dev.status === 'ONLINE' && command === "ON" && dev.fault === "NO") {
+                dev.supply = "ON"; dev.voltage = 230.0; dev.power = dev.voltage * dev.current;
+                updateUI(deviceId);
+            } else if (dev && command === "OFF") {
+                dev.supply = "OFF"; dev.voltage = 0.0; dev.current = 0.0; dev.power = 0.0;
                 updateUI(deviceId);
             }
-
-            const topic = `mrpsp/secure_bms/${deviceId}/command`;
-            state.mqttClient.publish(topic, command);
-            showToast(`Command ${command} sent`);
+            state.mqttClient.publish(`mrpsp/secure_bms/${deviceId}/command`, command);
+            showToast(`Command sent to hardware`);
         }
 
-        // ============================================================
-        // SMART UI UPDATE (NEVER REMOVES REGISTERED CARDS)
-        // ============================================================
+        function updateAdminSettings(deviceId) {
+            const limit = document.getElementById('set-limit').value;
+            const time = document.getElementById('set-time').value;
+            state.mqttClient.publish(`mrpsp/secure_bms/${deviceId}/command`, `SET_LIMIT:${limit}`);
+            state.mqttClient.publish(`mrpsp/secure_bms/${deviceId}/command`, `SET_TIME:${time}`);
+            showToast('Protection settings updated securely');
+        }
+
         function updateUI(deviceId) {
-            updateSidebarStats();
+            document.getElementById("sidebar-online-count").innerText = state.registeredDevices.filter(r => state.detectedDevices[r.device_id]?.status === 'ONLINE').length;
             const dev = state.detectedDevices[deviceId];
             if (!dev) return;
+            const isOnline = dev.status === 'ONLINE';
 
-            if (state.currentScreen === 'dashboard' && isRegistered(deviceId)) {
+            if (state.currentScreen === 'dashboard' && state.registeredDevices.some(d => d.device_id === deviceId)) {
                 let card = document.getElementById(`card-${deviceId}`);
-                
-                // If card is not in DOM yet, build it
                 if (!card) {
                     const grid = document.getElementById('grid');
-                    if (grid) {
-                        grid.insertAdjacentHTML('beforeend', createCard(dev));
-                        checkDashboardEmpty();
-                    }
+                    if (grid) { grid.insertAdjacentHTML('beforeend', createCard(dev)); checkDashboardEmpty(); }
                     return;
                 }
 
-                // Card exists: Update values without removing it
-                const isOnline = dev.status === 'ONLINE';
-
-                // 1. Update Card border style
-                if (isOnline) {
-                    card.classList.remove('card-offline');
-                } else {
-                    card.classList.add('card-offline');
-                }
-
-                // 2. Update Status Badge
+                card.className = `card ${isOnline ? '' : 'card-offline'}`;
                 const badge = document.getElementById(`badge-${deviceId}`);
-                const dot = document.getElementById(`dot-${deviceId}`);
-                const txt = document.getElementById(`txt-status-${deviceId}`);
-                if (badge && dot && txt) {
+                if (badge) {
                     badge.style.background = isOnline ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)';
                     badge.style.color = isOnline ? 'var(--success)' : 'var(--danger)';
-                    dot.className = `pulse-dot ${isOnline ? 'dot-online' : 'dot-offline'}`;
-                    txt.innerText = isOnline ? 'ONLINE' : 'OFFLINE';
+                    document.getElementById(`dot-${deviceId}`).className = `pulse-dot ${isOnline ? 'dot-online' : 'dot-offline'}`;
+                    document.getElementById(`txt-status-${deviceId}`).innerText = isOnline ? 'ONLINE' : 'OFFLINE';
                 }
 
-                // 3. Update Metrics
-                const vEl = document.getElementById(`v-${deviceId}`);
-                const cEl = document.getElementById(`c-${deviceId}`);
-                const pEl = document.getElementById(`p-${deviceId}`);
-                const sEl = document.getElementById(`s-${deviceId}`);
-
-                if (vEl) vEl.innerHTML = `${dev.voltage.toFixed(1)} <span>V</span>`;
-                if (cEl) cEl.innerHTML = `${dev.current.toFixed(2)} <span>A</span>`;
-                if (pEl) pEl.innerHTML = `${dev.power.toFixed(1)} <span>W</span>`;
-                if (sEl) {
-                    sEl.innerText = isOnline ? dev.supply : 'OFFLINE';
-                    sEl.className = `metric-val ${isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted'}`;
+                if(document.getElementById(`v-${deviceId}`)) {
+                    document.getElementById(`v-${deviceId}`).innerHTML = `${dev.voltage.toFixed(1)} <span>V</span>`;
+                    document.getElementById(`c-${deviceId}`).innerHTML = `${dev.current.toFixed(2)} <span>A</span>`;
+                    document.getElementById(`p-${deviceId}`).innerHTML = `${dev.power.toFixed(1)} <span>W</span>`;
+                    document.getElementById(`s-${deviceId}`).innerText = isOnline ? dev.supply : 'OFFLINE';
+                    document.getElementById(`s-${deviceId}`).className = `metric-val ${isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted'}`;
+                    
+                    const faultEl = document.getElementById(`f-${deviceId}`);
+                    faultEl.innerText = dev.fault;
+                    faultEl.style.color = dev.fault !== 'NO' ? 'var(--danger)' : 'var(--text-main)';
                 }
             }
             else if (state.currentScreen === 'room_detail' && state.selectedDeviceId === deviceId) {
-                const isOnline = dev.status === 'ONLINE';
-                
                 document.getElementById('rd-v').innerHTML = `${dev.voltage.toFixed(1)} <span>V</span>`;
                 document.getElementById('rd-c').innerHTML = `${dev.current.toFixed(2)} <span>A</span>`;
                 document.getElementById('rd-p').innerHTML = `${dev.power.toFixed(1)} <span>W</span>`;
                 
                 const s = document.getElementById('rd-supply');
-                if (s) {
-                    s.innerText = isOnline ? dev.supply : 'OFFLINE';
-                    s.className = `metric-val ${isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted'}`;
-                }
+                s.innerText = isOnline ? dev.supply : 'OFFLINE';
+                s.className = `metric-val ${isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted'}`;
                 
-                const offlineAlert = document.getElementById('rd-offline');
-                if (offlineAlert) offlineAlert.className = isOnline ? 'hidden' : '';
-            }
-            else if (state.currentScreen === 'register') {
-                const list = document.getElementById('reg-list');
-                if (list) list.innerHTML = buildRegisterList();
+                const faultEl = document.getElementById('rd-fault');
+                faultEl.innerText = dev.fault;
+                faultEl.style.color = dev.fault !== 'NO' ? 'var(--danger)' : 'var(--text-main)';
+
+                document.getElementById('rd-offline').className = isOnline ? 'hidden' : '';
+
+                // Safely update graph
+                if (currentChartInstance && dev.historyCurrent.length > 0) {
+                    currentChartInstance.data.labels = dev.historyTime;
+                    currentChartInstance.data.datasets[0].data = dev.historyCurrent;
+                    currentChartInstance.update('none'); // Update without animation for performance
+                }
             }
         }
-
-        // ============================================================
-        // WATCHDOG TIMER (2.5 SECONDS TIMEOUT)
-        // ============================================================
-        const OFFLINE_TIMEOUT_MS = 2500;
 
         setInterval(() => {
             const now = Date.now();
             let stateChanged = false;
-
             Object.keys(state.detectedDevices).forEach(id => {
                 const dev = state.detectedDevices[id];
-                if (dev.status === 'ONLINE' && (now - dev.lastSeen > OFFLINE_TIMEOUT_MS)) {
-                    dev.status = 'OFFLINE';
-                    dev.voltage = 0.0;
-                    dev.current = 0.0;
-                    dev.power = 0.0;
-                    stateChanged = true;
-                    updateUI(id); // Updates card to OFFLINE in-place without removing it!
+                if (dev.status === 'ONLINE' && (now - dev.lastSeen > 2500)) {
+                    dev.status = 'OFFLINE'; dev.voltage = 0.0; dev.current = 0.0; dev.power = 0.0;
+                    stateChanged = true; updateUI(id); 
                 }
             });
-
-            if (stateChanged) {
-                updateSidebarStats();
-            }
         }, 1000);
 
-        // --- NAVIGATION & RENDERING ---
         function navigate(screen, params = null) {
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             if (event && event.currentTarget) event.currentTarget.classList.add('active');
-            state.currentScreen = screen;
-            state.selectedDeviceId = params;
+            state.currentScreen = screen; state.selectedDeviceId = params;
+            
+            if (currentChartInstance) { currentChartInstance.destroy(); currentChartInstance = null; }
             renderScreen();
         }
 
@@ -460,46 +384,32 @@
             const container = document.getElementById("screen-container");
             container.innerHTML = "";
             if (state.currentScreen === 'dashboard') renderDashboard(container);
-            if (state.currentScreen === 'register') renderRegister(container);
-            if (state.currentScreen === 'registered') renderRegistered(container);
             if (state.currentScreen === 'room_detail') renderRoomDetail(container);
-            if (state.currentScreen === 'system') renderSystem(container);
+            
+            if (state.userRole === 'admin') {
+                if (state.currentScreen === 'register') renderRegister(container);
+                if (state.currentScreen === 'registered') renderRegistered(container);
+                if (state.currentScreen === 'system') renderSystem(container);
+            } else {
+                if (['register', 'registered', 'system'].includes(state.currentScreen)) {
+                    container.innerHTML = `<div class="empty-state"><i class="ph ph-lock-key empty-icon"></i><h3>Admin Access Required</h3><p>You do not have permission to view this page.</p></div>`;
+                }
+            }
         }
 
-        // ============================================================
-        // DASHBOARD: ALWAYS RENDERS ALL REGISTERED BLOCKS
-        // ============================================================
         function renderDashboard(container) {
             container.innerHTML = `<div id="grid" class="grid"></div>`;
             const grid = document.getElementById('grid');
             
             if (state.registeredDevices.length === 0) {
-                container.innerHTML = `
-                    <div id="empty-dash" class="empty-state">
-                        <i class="ph ph-plugs empty-icon"></i>
-                        <h3>No Authorized Blocks</h3>
-                        <p>Go to "Detect Controllers" in the sidebar to add your hardware blocks.</p>
-                    </div>
-                `;
+                container.innerHTML = `<div id="empty-dash" class="empty-state"><i class="ph ph-plugs empty-icon"></i><h3>No Authorized Blocks</h3><p>Contact an administrator to add hardware.</p></div>`;
                 return;
             }
 
             state.registeredDevices.forEach(reg => {
-                // Fetch live data or initialize fallback offline card
                 let dev = state.detectedDevices[reg.device_id];
                 if (!dev) {
-                    dev = {
-                        device_id: reg.device_id,
-                        block_name: reg.block_name || reg.device_id,
-                        status: 'OFFLINE',
-                        supply: 'OFF',
-                        fault: 'NO',
-                        voltage: 0.0,
-                        current: 0.0,
-                        power: 0.0,
-                        rssi: 0,
-                        lastSeen: 0
-                    };
+                    dev = { device_id: reg.device_id, block_name: reg.block_name || reg.device_id, status: 'OFFLINE', supply: 'OFF', fault: 'NO', voltage: 0, current: 0, power: 0, rssi: 0, lastSeen: 0 };
                     state.detectedDevices[reg.device_id] = dev;
                 }
                 grid.innerHTML += createCard(dev);
@@ -508,7 +418,7 @@
 
         function createCard(dev) {
             const isOnline = dev.status === 'ONLINE';
-
+            const faultFlag = dev.fault !== 'NO';
             return `
             <div class="card ${isOnline ? '' : 'card-offline'}" id="card-${dev.device_id}">
                 <div class="card-header">
@@ -524,13 +434,11 @@
                 <div class="metrics-grid">
                     <div class="metric-box">
                         <div class="metric-label"><i class="ph-fill ph-lightning"></i> Supply</div>
-                        <div class="metric-val ${isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted'}" id="s-${dev.device_id}">
-                            ${isOnline ? dev.supply : 'OFFLINE'}
-                        </div>
+                        <div class="metric-val ${isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted'}" id="s-${dev.device_id}">${isOnline ? dev.supply : 'OFFLINE'}</div>
                     </div>
                     <div class="metric-box">
-                        <div class="metric-label"><i class="ph-fill ph-gauge"></i> Power</div>
-                        <div class="metric-val" id="p-${dev.device_id}">${dev.power.toFixed(1)} <span>W</span></div>
+                        <div class="metric-label"><i class="ph-fill ph-warning-circle"></i> Fault State</div>
+                        <div class="metric-val" id="f-${dev.device_id}" style="font-size:18px; color: ${faultFlag ? 'var(--danger)' : 'var(--text-main)'};">${dev.fault}</div>
                     </div>
                     <div class="metric-box">
                         <div class="metric-label"><i class="ph-fill ph-wave-sine"></i> Voltage</div>
@@ -542,195 +450,122 @@
                     </div>
                 </div>
                 <button class="btn btn-primary" style="width:100%" onclick="navigate('room_detail', '${dev.device_id}')">
-                    <i class="ph-bold ph-sliders"></i> Manage Block Controller
+                    <i class="ph-bold ph-chart-line-up"></i> Manage & View Graph
                 </button>
             </div>`;
-        }
-
-        function renderRegister(container) {
-            container.innerHTML = `
-                <div style="margin-bottom: 24px;">
-                    <h2 class="header-title" style="font-size:22px;">Detect New Hardware</h2>
-                    <p class="subtitle">Scanning for secure tokens on the local network...</p>
-                </div>
-                <div id="reg-list">${buildRegisterList()}</div>
-            `;
-        }
-
-        function buildRegisterList() {
-            let html = "";
-            let count = 0;
-            Object.keys(state.detectedDevices).forEach(id => {
-                if (!isRegistered(id)) {
-                    count++;
-                    const dev = state.detectedDevices[id];
-                    html += `
-                    <div class="list-item">
-                        <div class="list-info">
-                            <h3>${dev.block_name}</h3>
-                            <p>${dev.device_id} &bull; Signal: ${dev.rssi}dBm</p>
-                        </div>
-                        <button class="btn btn-success" onclick="regESP('${dev.device_id}', '${dev.block_name}')">
-                            <i class="ph-bold ph-plus"></i> Authorize
-                        </button>
-                    </div>`;
-                }
-            });
-            return count > 0 ? html : `
-                <div class="empty-state">
-                    <i class="ph ph-radar empty-icon" style="animation: pulse-green 2s infinite; border-radius:50%;"></i>
-                    <h3>Listening for devices...</h3>
-                    <p>No new unauthorized hardware detected.</p>
-                </div>`;
-        }
-
-        function regESP(id, name) {
-            state.registeredDevices.push({ device_id: id, block_name: name });
-            saveRegistrations();
-            showToast(`${name} added to dashboard`);
-            renderScreen();
-        }
-
-        function renderRegistered(container) {
-            container.innerHTML = `
-                <div style="margin-bottom: 24px;">
-                    <h2 class="header-title" style="font-size:22px;">Authorized Hardware</h2>
-                    <p class="subtitle">These blocks permanently remain on your dashboard.</p>
-                </div>
-                <div id="auth-list"></div>
-            `;
-            const list = document.getElementById('auth-list');
-            
-            if (state.registeredDevices.length === 0) {
-                list.innerHTML = `<div class="empty-state"><i class="ph ph-shield-warning empty-icon"></i><h3>No hardware authorized</h3></div>`;
-                return;
-            }
-            
-            state.registeredDevices.forEach(reg => {
-                const live = state.detectedDevices[reg.device_id];
-                const isOnline = live && live.status === 'ONLINE';
-
-                list.innerHTML += `
-                <div class="list-item">
-                    <div class="list-info">
-                        <h3>${reg.block_name}</h3>
-                        <p>${reg.device_id} &bull; <span class="${isOnline ? 'text-success' : 'text-danger'}">${isOnline ? 'ONLINE' : 'OFFLINE'}</span></p>
-                    </div>
-                    <button class="btn btn-danger" onclick="delESP('${reg.device_id}')">
-                        <i class="ph-bold ph-trash"></i> Revoke
-                    </button>
-                </div>`;
-            });
-        }
-
-        function delESP(id) {
-            state.registeredDevices = state.registeredDevices.filter(d => d.device_id !== id);
-            saveRegistrations();
-            showToast("Access revoked");
-            renderScreen();
         }
 
         function renderRoomDetail(container) {
             const dev = state.detectedDevices[state.selectedDeviceId];
             if (!dev) return;
-            
             const isOnline = dev.status === 'ONLINE';
+            const isAdmin = state.userRole === 'admin';
 
             container.innerHTML = `
                 <button class="btn btn-outline" style="margin-bottom: 24px;" onclick="navigate('dashboard')">
                     <i class="ph-bold ph-arrow-left"></i> Back to Dashboard
                 </button>
                 
-                <div class="card" style="max-width: 800px;">
-                    <div class="card-header" style="align-items: center; border-bottom: 1px solid var(--border-light); padding-bottom:20px;">
-                        <div>
-                            <h2 class="room-name" style="font-size:32px;">${dev.block_name}</h2>
-                            <div class="hw-id">${dev.device_id}</div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+                    <!-- LEFT COLUMN: Metrics & Graph -->
+                    <div>
+                        <div class="card">
+                            <div class="card-header" style="align-items: center; border-bottom: 1px solid var(--border-light); padding-bottom:20px;">
+                                <div>
+                                    <h2 class="room-name" style="font-size:32px;">${dev.block_name}</h2>
+                                    <div class="hw-id">${dev.device_id}</div>
+                                </div>
+                                <div class="sys-status" style="background: ${isOnline ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)'}; border:none;">
+                                    <div class="pulse-dot ${isOnline ? 'dot-online' : 'dot-offline'}"></div> 
+                                    <span class="${isOnline ? 'text-success' : 'text-danger'}">${dev.status}</span>
+                                </div>
+                            </div>
+                            
+                            <div id="rd-offline" class="${isOnline ? 'hidden' : ''}" style="background: rgba(239,68,68,0.1); color: var(--danger); padding: 16px; border-radius: 8px; margin: 20px 0; font-weight: 600; display:flex; align-items:center; gap:10px;">
+                                <i class="ph-bold ph-warning-circle" style="font-size:24px;"></i> HARDWARE DISCONNECTED
+                            </div>
+
+                            <div class="metrics-grid" style="grid-template-columns: repeat(4, 1fr); margin-top:24px;">
+                                <div class="metric-box"><div class="label">Supply</div><div class="metric-val ${isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted'}" id="rd-supply">${isOnline ? dev.supply : 'OFFLINE'}</div></div>
+                                <div class="metric-box"><div class="label">Fault</div><div class="metric-val" id="rd-fault" style="font-size:18px;">${dev.fault}</div></div>
+                                <div class="metric-box"><div class="label">Voltage</div><div class="metric-val" id="rd-v">${dev.voltage.toFixed(1)} <span>V</span></div></div>
+                                <div class="metric-box"><div class="label">Current</div><div class="metric-val" id="rd-c">${dev.current.toFixed(2)} <span>A</span></div></div>
+                            </div>
+
+                            <div style="display:flex; gap:16px; margin-top: 20px; padding-top: 24px; border-top: 1px solid var(--border-light);">
+                                <button class="btn btn-success" style="flex:1; padding: 16px;" onclick="publishCommand('${dev.device_id}', 'ON')">TURN SUPPLY ON</button>
+                                <button class="btn btn-danger" style="flex:1; padding: 16px;" onclick="publishCommand('${dev.device_id}', 'OFF')">TURN SUPPLY OFF</button>
+                                <button class="btn btn-outline" style="flex:0.5; padding: 16px;" onclick="publishCommand('${dev.device_id}', 'RESET_FAULT')">RESET FAULT</button>
+                            </div>
                         </div>
-                        <div class="sys-status" style="background: ${isOnline ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)'}; border:none;">
-                            <div class="pulse-dot ${isOnline ? 'dot-online' : 'dot-offline'}"></div> 
-                            <span class="${isOnline ? 'text-success' : 'text-danger'}">${dev.status}</span>
+
+                        <!-- LIVE CURRENT GRAPH -->
+                        <div class="graph-container">
+                            <h3 style="margin-bottom: 15px; font-size: 16px;">Real-Time Current (Last 4 Minutes)</h3>
+                            <canvas id="currentChart"></canvas>
                         </div>
-                    </div>
-                    
-                    <div id="rd-offline" class="${isOnline ? 'hidden' : ''}" style="background: rgba(239,68,68,0.1); color: var(--danger); padding: 16px; border-radius: 8px; margin: 20px 0; font-weight: 600; display:flex; align-items:center; gap:10px;">
-                        <i class="ph-bold ph-warning-circle" style="font-size:24px;"></i> CONTROLLER HARDWARE CURRENTLY DISCONNECTED
                     </div>
 
-                    <div class="metrics-grid" style="grid-template-columns: repeat(4, 1fr); margin-top:24px;">
-                        <div class="metric-box">
-                            <div class="metric-label"><i class="ph-fill ph-lightning"></i> Supply</div>
-                            <div class="metric-val ${isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted'}" id="rd-supply">${isOnline ? dev.supply : 'OFFLINE'}</div>
+                    <!-- RIGHT COLUMN: Admin Protection Settings -->
+                    <div class="card ${isAdmin ? '' : 'hidden'}" style="height: fit-content;">
+                        <h3 style="margin-bottom: 16px; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-shield-check" style="color:var(--primary)"></i> Protection Settings</h3>
+                        <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Configure hardware breaker limits for this block.</p>
+                        
+                        <div class="input-group">
+                            <label class="metric-label">Max Fault Limit (Amps)</label>
+                            <input type="number" id="set-limit" step="0.1" value="${dev.limit}">
                         </div>
-                        <div class="metric-box">
-                            <div class="metric-label"><i class="ph-fill ph-gauge"></i> Power</div>
-                            <div class="metric-val" id="rd-p">${dev.power.toFixed(1)} <span>W</span></div>
+                        <div class="input-group">
+                            <label class="metric-label">Tolerance Time (Milliseconds)</label>
+                            <input type="number" id="set-time" step="100" value="${dev.tol_time}">
                         </div>
-                        <div class="metric-box">
-                            <div class="metric-label"><i class="ph-fill ph-wave-sine"></i> Voltage</div>
-                            <div class="metric-val" id="rd-v">${dev.voltage.toFixed(1)} <span>V</span></div>
-                        </div>
-                        <div class="metric-box">
-                            <div class="metric-label"><i class="ph-fill ph-arrow-fat-line-right"></i> Current</div>
-                            <div class="metric-val" id="rd-c">${dev.current.toFixed(2)} <span>A</span></div>
-                        </div>
-                    </div>
-
-                    <div style="display:flex; gap:16px; margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--border-light);">
-                        <button class="btn btn-success" style="flex:1; padding: 16px;" onclick="publishCommand('${dev.device_id}', 'ON')">
-                            <i class="ph-bold ph-power"></i> TURN SUPPLY ON
-                        </button>
-                        <button class="btn btn-danger" style="flex:1; padding: 16px;" onclick="publishCommand('${dev.device_id}', 'OFF')">
-                            <i class="ph-bold ph-power"></i> TURN SUPPLY OFF
+                        
+                        <button class="btn btn-primary" style="width:100%; margin-top: 10px;" onclick="updateAdminSettings('${dev.device_id}')">
+                            <i class="ph-bold ph-floppy-disk"></i> Apply Settings
                         </button>
                     </div>
                 </div>
             `;
+
+            // Initialize Chart.js
+            const ctx = document.getElementById('currentChart').getContext('2d');
+            currentChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dev.historyTime,
+                    datasets: [{
+                        label: 'Current (A)',
+                        data: dev.historyCurrent,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        pointRadius: 0,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    scales: {
+                        y: { beginAtZero: true, suggestedMax: dev.limit + 1 },
+                        x: { ticks: { maxTicksLimit: 10 } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
         }
 
-        function renderSystem(container) {
-            container.innerHTML = `
-                <h2 class="header-title" style="font-size:22px; margin-bottom: 24px;">System Configuration</h2>
-                <div class="grid">
-                    <div class="card">
-                        <h3 style="margin-bottom: 16px; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-cloud-check" style="color:var(--primary)"></i> Cloud Sync Status</h3>
-                        <p style="color: var(--text-muted); margin-bottom: 20px;">Your registered blocks are synchronized across all connected browsers and devices.</p>
-                        <div class="metric-box">
-                            <div class="metric-label">Registered Blocks</div>
-                            <div class="metric-val">${state.registeredDevices.length}</div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <h3 style="margin-bottom: 16px; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-lock-key" style="color:var(--success)"></i> Watchdog & Security</h3>
-                        <p style="color: var(--text-muted); margin-bottom: 20px;">2.5s Watchdog active. Disconnected controllers are immediately flagged as OFFLINE without leaving the dashboard.</p>
-                        <div class="sys-status" style="justify-content:center; background: rgba(16,185,129,0.1); color: var(--success); border:none;">
-                            WATCHDOG ACTIVE
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // --- UTILS ---
-        function setSystemStatus(isOnline, text) {
-            document.getElementById("system-status-text").innerText = text;
-            document.getElementById("system-status-dot").className = `pulse-dot ${isOnline ? "dot-online" : "dot-offline"}`;
-        }
-        function updateSidebarStats() {
-            const count = state.registeredDevices.filter(r => state.detectedDevices[r.device_id]?.status === 'ONLINE').length;
-            const el = document.getElementById("sidebar-online-count");
-            if (el) el.innerText = count;
-        }
+        // Check empty dashboard utility
         function checkDashboardEmpty() {
             const e = document.getElementById('empty-dash');
             const g = document.getElementById('grid');
             if (e && g) e.className = g.children.length === 0 ? "empty-state" : "hidden";
         }
         function showToast(msg) {
-            const t = document.getElementById("toast");
-            document.getElementById("toast-msg").innerText = msg;
-            t.classList.add("show");
-            setTimeout(() => t.classList.remove("show"), 3500);
+            const t = document.getElementById("toast"); document.getElementById("toast-msg").innerText = msg;
+            t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 3500);
         }
 
         window.onload = initApp;
