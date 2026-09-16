@@ -1315,7 +1315,9 @@
                         device_id: reg.device_id, 
                         block_name: reg.block_name || reg.device_id, 
                         status: 'OFFLINE', supply: 'UNKNOWN', fault: 'NO', 
-                        voltage: 0, current: 0, power: 0 
+                        voltage: 0, current: 0, power: 0,
+                        historyCurrent: [], 
+                        historyTime: []
                     };
                     state.detectedDevices[reg.device_id] = dev;
                 }
@@ -1808,7 +1810,8 @@
                 }
 
                 // Fast update Chart.js
-                if (currentChartInstance && dev.historyCurrent.length > 0) {
+                // Fast update Chart.js (Added safety check for dev.historyCurrent)
+                if (currentChartInstance && dev.historyCurrent && dev.historyCurrent.length > 0) {
                     currentChartInstance.data.labels = dev.historyTime;
                     currentChartInstance.data.datasets[0].data = dev.historyCurrent;
                     currentChartInstance.update('none'); // Update without animation blocking
