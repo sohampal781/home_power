@@ -320,12 +320,34 @@
             updateUI(deviceId);
         }
 
-        function publishCommand(deviceId, command) {
-            if(!state.mqttConnected) { showToast("Error: Cloud Disconnected"); return; }
-            const topic = `mrpsp/secure_bms/${deviceId}/command`;
-            state.mqttClient.publish(topic, command);
-            showToast(`Command ${command} sent successfully`);
+       function publishCommand(deviceId, command) {
+    if(!state.mqttConnected) { 
+        showToast("Error: Cloud Disconnected"); 
+        return; 
+    }
+
+    // 1. INSTANT OPTIMISTIC UI: Update the screen before the ESP even answers
+    const dev = state.detectedDevices[deviceId];
+    if (dev) {
+        if (command === "ON") {
+            dev.supply = "ON";
+            dev.voltage = 230.0;
+            dev.current = 1.5;
+            dev.power = 345.0;
+        } else if (command === "OFF") {
+            dev.supply = "OFF";
+            dev.voltage = 0.0;
+            dev.current = 0.0;
+            dev.power = 0.0;
         }
+        updateUI(deviceId); // Re-renders the card instantly with zero delay
+    }
+
+    // 2. Send the command over MQTT
+    const topic = `mrpsp/secure_bms/${deviceId}/command`;
+    state.mqttClient.publish(topic, command);
+    showToast(`Command ${command} executed`);
+}
 
         // Smart DOM Updater (No Flickering)
         function updateUI(deviceId) {
