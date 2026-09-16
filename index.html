@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>MRPSP Electrical SCADA</title>
+
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+
+    margin: 0;
+
+    background: #071018;
+
+    color: #ffffff;
+
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ==================================================
+   HEADER
+================================================== */
+
+.header {
+
+    background: #0d1822;
+
+    border-bottom: 2px solid #263b4d;
+
+    padding: 18px 25px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+}
+
+.title {
+
+    font-size: 28px;
+
+    font-weight: bold;
+
+}
+
+.subtitle {
+
+    color: #8fa6b8;
+
+    font-size: 13px;
+
+    margin-top: 4px;
+
+}
+
+.connection {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    font-weight: bold;
+
+}
+
+.dot {
+
+    width: 13px;
+
+    height: 13px;
+
+    border-radius: 50%;
+
+    background: #777;
+
+}
+
+/* ==================================================
+   SYSTEM BAR
+================================================== */
+
+.systembar {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(180px, 1fr));
+
+    gap: 10px;
+
+    padding: 15px 20px;
+
+    background: #0a141d;
+
+}
+
+.info {
+
+    background: #111f2b;
+
+    padding: 12px;
+
+    border: 1px solid #263b4d;
+
+}
+
+.info-title {
+
+    color: #7f96a8;
+
+    font-size: 11px;
+
+}
+
+.info-value {
+
+    margin-top: 5px;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+}
+
+/* ==================================================
+   DASHBOARD
+================================================== */
+
+.dashboard {
+
+    padding: 20px;
+
+}
+
+.dashboard-title {
+
+    font-size: 20px;
+
+    margin-bottom: 15px;
+
+}
+
+/* ==================================================
+   ROOM GRID
+================================================== */
+
+.room-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(280px, 1fr));
+
+    gap: 16px;
+
+}
+
+/* ==================================================
+   ROOM CARD
+================================================== */
+
+.room {
+
+    background: #101d28;
+
+    border: 1px solid #294052;
+
+    border-radius: 5px;
+
+    overflow: hidden;
+
+}
+
+.room-header {
+
+    background: #172735;
+
+    padding: 13px 15px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+}
+
+.room-name {
+
+    font-size: 20px;
+
+    font-weight: bold;
+
+}
+
+.online {
+
+    color: #43e66e;
+
+}
+
+.offline {
+
+    color: #ff4d4d;
+
+}
+
+/* ==================================================
+   SUPPLY
+================================================== */
+
+.supply {
+
+    padding: 20px;
+
+    text-align: center;
+
+}
+
+.supply-status {
+
+    font-size: 25px;
+
+    font-weight: bold;
+
+}
+
+.supply-on {
+
+    color: #36e66b;
+
+}
+
+.supply-off {
+
+    color: #ff4545;
+
+}
+
+/* ==================================================
+   ELECTRICAL LINE
+================================================== */
+
+.electrical {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    margin: 12px 0 20px;
+
+}
+
+.line {
+
+    width: 80px;
+
+    height: 4px;
+
+    background: #555;
+
+}
+
+.line.active {
+
+    background: #36e66b;
+
+}
+
+.breaker {
+
+    width: 38px;
+
+    height: 38px;
+
+    border: 3px solid #aaa;
+
+    transform: rotate(45deg);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+.breaker span {
+
+    transform: rotate(-45deg);
+
+    font-size: 12px;
+
+}
+
+/* ==================================================
+   VALUES
+================================================== */
+
+.values {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 8px;
+
+    padding: 0 15px 15px;
+
+}
+
+.value {
+
+    background: #0a141c;
+
+    border: 1px solid #263b4d;
+
+    padding: 10px;
+
+    text-align: center;
+
+}
+
+.value-label {
+
+    color: #7890a3;
+
+    font-size: 11px;
+
+}
+
+.value-number {
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    margin-top: 5px;
+
+}
+
+/* ==================================================
+   CONTROLS
+================================================== */
+
+.controls {
+
+    display: flex;
+
+    gap: 8px;
+
+    padding: 0 15px 15px;
+
+}
+
+button {
+
+    flex: 1;
+
+    padding: 11px;
+
+    border: none;
+
+    cursor: pointer;
+
+    font-weight: bold;
+
+    color: white;
+
+    background: #253b4d;
+
+}
+
+button:hover {
+
+    background: #36566d;
+
+}
+
+/* ==================================================
+   FOOTER
+================================================== */
+
+.footer {
+
+    margin: 20px;
+
+    padding: 15px;
+
+    background: #101d28;
+
+    border: 1px solid #263b4d;
+
+}
+
+.footer-title {
+
+    font-size: 18px;
+
+    margin-bottom: 10px;
+
+}
+
+#events {
+
+    font-size: 13px;
+
+    color: #9fb0bd;
+
+    max-height: 180px;
+
+    overflow-y: auto;
+
+}
+
+.event {
+
+    padding: 6px;
+
+    border-bottom: 1px solid #1e303e;
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =================================================
+     HEADER
+================================================= -->
+
+<div class="header">
+
+    <div>
+
+        <div class="title">
+            MRPSP ELECTRICAL SCADA
+        </div>
+
+        <div class="subtitle">
+            REMOTE BUILDING POWER MONITORING SYSTEM
+        </div>
+
+    </div>
+
+
+    <div class="connection">
+
+        <div id="mqttDot"
+             class="dot"></div>
+
+        <span id="mqttStatus">
+            CONNECTING
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- =================================================
+     SYSTEM INFORMATION
+================================================= -->
+
+<div class="systembar">
+
+    <div class="info">
+
+        <div class="info-title">
+            SYSTEM
+        </div>
+
+        <div class="info-value">
+            BUILDING 01
+        </div>
+
+    </div>
+
+
+    <div class="info">
+
+        <div class="info-title">
+            DEVICES ONLINE
+        </div>
+
+        <div class="info-value"
+             id="deviceCount">
+            0
+        </div>
+
+    </div>
+
+
+    <div class="info">
+
+        <div class="info-title">
+            TOTAL POWER
+        </div>
+
+        <div class="info-value"
+             id="totalPower">
+            0 W
+        </div>
+
+    </div>
+
+
+    <div class="info">
+
+        <div class="info-title">
+            LAST UPDATE
+        </div>
+
+        <div class="info-value"
+             id="lastUpdate">
+            --
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =================================================
+     DASHBOARD
+================================================= -->
+
+<div class="dashboard">
+
+    <div class="dashboard-title">
+        ROOM MONITORING
+    </div>
+
+    <div id="roomGrid"
+         class="room-grid">
+    </div>
+
+</div>
+
+
+<!-- =================================================
+     EVENTS
+================================================= -->
+
+<div class="footer">
+
+    <div class="footer-title">
+        EVENT / ALARM LOG
+    </div>
+
+    <div id="events">
+    </div>
+
+</div>
+
+
+<script>
+
+/* ==================================================
+   MQTT CONFIGURATION
+================================================== */
+
+const MQTT_URL =
+    "wss://test.mosquitto.org:8081/mqtt";
+
+
+const BASE_TOPIC =
+    "mrpsp/building01/devices/";
+
+
+/* ==================================================
+   DEVICE DATABASE
+================================================== */
+
+const devices = {};
+
+
+/* ==================================================
+   MQTT CONNECTION
+================================================== */
+
+const client = mqtt.connect(MQTT_URL, {
+
+    clientId:
+        "MRPSP_SCADA_" +
+        Math.random()
+            .toString(16)
+            .substring(2),
+
+    clean: true,
+
+    connectTimeout: 10000,
+
+    reconnectPeriod: 3000
+
+});
+
+
+/* ==================================================
+   MQTT CONNECTED
+================================================== */
+
+client.on("connect", function() {
+
+    document.getElementById(
+        "mqttStatus"
+    ).innerText = "MQTT ONLINE";
+
+
+    document.getElementById(
+        "mqttDot"
+    ).style.background = "#36e66b";
+
+
+    /*
+       Subscribe to EVERY device
+    */
+
+    client.subscribe(
+        BASE_TOPIC + "+/data"
+    );
+
+
+    client.subscribe(
+        BASE_TOPIC + "+/status"
+    );
+
+
+    addEvent(
+        "SCADA connected to MQTT broker"
+    );
+
+});
+
+
+/* ==================================================
+   MQTT ERROR
+================================================== */
+
+client.on("error", function(error) {
+
+    console.log(error);
+
+    document.getElementById(
+        "mqttStatus"
+    ).innerText = "MQTT ERROR";
+
+});
+
+
+/* ==================================================
+   MQTT DISCONNECTED
+================================================== */
+
+client.on("offline", function() {
+
+    document.getElementById(
+        "mqttStatus"
+    ).innerText = "MQTT OFFLINE";
+
+
+    document.getElementById(
+        "mqttDot"
+    ).style.background = "#ff4545";
+
+});
+
+
+/* ==================================================
+   MQTT MESSAGE
+================================================== */
+
+client.on("message", function(topic, message) {
+
+    const payload =
+        message.toString();
+
+
+    /*
+       Extract ROOM_XX
+    */
+
+    const parts =
+        topic.split("/");
+
+
+    const deviceName =
+        parts[3];
+
+
+    const type =
+        parts[4];
+
+
+    /* ==============================================
+       STATUS
+    ============================================== */
+
+    if (type === "status") {
+
+        updateStatus(
+            deviceName,
+            payload
+        );
+
+        return;
+    }
+
+
+    /* ==============================================
+       DATA
+    ============================================== */
+
+    if (type === "data") {
+
+        try {
+
+            const data =
+                JSON.parse(payload);
+
+
+            updateDevice(
+                data
+            );
+
+        }
+
+        catch(error) {
+
+            console.log(
+                "Invalid JSON:",
+                payload
+            );
+
+        }
+
+    }
+
+});
+
+
+/* ==================================================
+   UPDATE DEVICE
+================================================== */
+
+function updateDevice(data) {
+
+    const id =
+        data.device_id;
+
+
+    if (!devices[id]) {
+
+        devices[id] = {
+
+            id: id,
+
+            status: "ONLINE",
+
+            voltage: 0,
+
+            current: 0,
+
+            power: 0,
+
+            rssi: 0,
+
+            lastSeen: Date.now()
+
+        };
+
+    }
+
+
+    devices[id].status =
+        "ONLINE";
+
+
+    devices[id].voltage =
+        Number(data.voltage);
+
+
+    devices[id].current =
+        Number(data.current);
+
+
+    devices[id].power =
+        Number(data.power);
+
+
+    devices[id].rssi =
+        Number(data.rssi);
+
+
+    devices[id].supply =
+        data.status;
+
+
+    devices[id].lastSeen =
+        Date.now();
+
+
+    renderDashboard();
+
+
+    document.getElementById(
+        "lastUpdate"
+    ).innerText =
+        new Date()
+            .toLocaleTimeString();
+
+}
+
+
+/* ==================================================
+   UPDATE STATUS
+================================================== */
+
+function updateStatus(
+    deviceName,
+    status
+) {
+
+    if (!devices[deviceName]) {
+
+        devices[deviceName] = {
+
+            id: deviceName,
+
+            status: status,
+
+            voltage: 0,
+
+            current: 0,
+
+            power: 0,
+
+            rssi: 0,
+
+            lastSeen: Date.now()
+
+        };
+
+    }
+
+
+    devices[deviceName].status =
+        status;
+
+
+    if (status === "ONLINE") {
+
+        devices[deviceName].lastSeen =
+            Date.now();
+
+        addEvent(
+            deviceName +
+            " connected"
+        );
+
+    }
+
+    else {
+
+        addEvent(
+            deviceName +
+            " OFFLINE"
+        );
+
+    }
+
+
+    renderDashboard();
+
+}
+
+
+/* ==================================================
+   OFFLINE TIMEOUT
+================================================== */
+
+setInterval(function() {
+
+    const now =
+        Date.now();
+
+
+    for (
+        const id in devices
+    ) {
+
+        if (
+            now -
+            devices[id].lastSeen
+            > 10000
+        ) {
+
+            if (
+                devices[id].status
+                !== "OFFLINE"
+            ) {
+
+                devices[id].status =
+                    "OFFLINE";
+
+
+                addEvent(
+                    id +
+                    " communication lost"
+                );
+
+            }
+
+        }
+
+    }
+
+
+    renderDashboard();
+
+}, 3000);
+
+
+/* ==================================================
+   RENDER DASHBOARD
+================================================== */
+
+function renderDashboard() {
+
+    const grid =
+        document.getElementById(
+            "roomGrid"
+        );
+
+
+    grid.innerHTML = "";
+
+
+    let onlineCount = 0;
+
+    let totalPower = 0;
+
+
+    const ids =
+        Object.keys(devices)
+        .sort();
+
+
+    ids.forEach(function(id) {
+
+        const d =
+            devices[id];
+
+
+        if (
+            d.status === "ONLINE"
+        ) {
+
+            onlineCount++;
+
+            totalPower +=
+                Number(d.power || 0);
+
+        }
+
+
+        const card =
+            document.createElement(
+                "div"
+            );
+
+
+        card.className =
+            "room";
+
+
+        const online =
+            d.status === "ONLINE";
+
+
+        const supplyOn =
+            d.supply === "ON";
+
+
+        card.innerHTML = `
+
+            <div class="room-header">
+
+                <div class="room-name">
+                    ${d.id}
+                </div>
+
+                <div class="${
+                    online
+                    ? "online"
+                    : "offline"
+                }">
+
+                    ● ${
+                        online
+                        ? "ONLINE"
+                        : "OFFLINE"
+                    }
+
+                </div>
+
+            </div>
+
+
+            <div class="supply">
+
+                <div class="
+                    supply-status
+                    ${
+                        supplyOn
+                        ? "supply-on"
+                        : "supply-off"
+                    }
+                ">
+
+                    ${
+                        supplyOn
+                        ? "SUPPLY ON"
+                        : "SUPPLY OFF"
+                    }
+
+                </div>
+
+
+                <div class="electrical">
+
+                    <div class="
+                        line
+                        ${
+                            supplyOn
+                            ? "active"
+                            : ""
+                        }
+                    "></div>
+
+
+                    <div class="breaker">
+
+                        <span>
+                            CB
+                        </span>
+
+                    </div>
+
+
+                    <div class="
+                        line
+                        ${
+                            supplyOn
+                            ? "active"
+                            : ""
+                        }
+                    "></div>
+
+                </div>
+
+            </div>
+
+
+            <div class="values">
+
+                <div class="value">
+
+                    <div class="value-label">
+                        VOLTAGE
+                    </div>
+
+                    <div class="value-number">
+                        ${d.voltage.toFixed(1)} V
+                    </div>
+
+                </div>
+
+
+                <div class="value">
+
+                    <div class="value-label">
+                        CURRENT
+                    </div>
+
+                    <div class="value-number">
+                        ${d.current.toFixed(2)} A
+                    </div>
+
+                </div>
+
+
+                <div class="value">
+
+                    <div class="value-label">
+                        POWER
+                    </div>
+
+                    <div class="value-number">
+                        ${d.power.toFixed(1)} W
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="values">
+
+                <div class="value">
+
+                    <div class="value-label">
+                        RSSI
+                    </div>
+
+                    <div class="value-number">
+                        ${d.rssi} dBm
+                    </div>
+
+                </div>
+
+
+                <div class="value">
+
+                    <div class="value-label">
+                        DEVICE
+                    </div>
+
+                    <div class="value-number">
+                        ESP8266
+                    </div>
+
+                </div>
+
+
+                <div class="value">
+
+                    <div class="value-label">
+                        STATUS
+                    </div>
+
+                    <div class="value-number">
+                        ${d.status}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="controls">
+
+                <button
+                    onclick="sendCommand(
+                        '${d.id}',
+                        'ON'
+                    )">
+
+                    SUPPLY ON
+
+                </button>
+
+
+                <button
+                    onclick="sendCommand(
+                        '${d.id}',
+                        'OFF'
+                    )">
+
+                    SUPPLY OFF
+
+                </button>
+
+            </div>
+
+        `;
+
+
+        grid.appendChild(card);
+
+    });
+
+
+    document.getElementById(
+        "deviceCount"
+    ).innerText =
+        onlineCount;
+
+
+    document.getElementById(
+        "totalPower"
+    ).innerText =
+        totalPower.toFixed(1)
+        + " W";
+
+}
+
+
+/* ==================================================
+   SEND COMMAND
+================================================== */
+
+function sendCommand(
+    device,
+    command
+) {
+
+    const topic =
+        BASE_TOPIC +
+        device +
+        "/command";
+
+
+    client.publish(
+        topic,
+        command
+    );
+
+
+    addEvent(
+        "Command sent: " +
+        device +
+        " → " +
+        command
+    );
+
+}
+
+
+/* ==================================================
+   EVENT LOG
+================================================== */
+
+function addEvent(text) {
+
+    const events =
+        document.getElementById(
+            "events"
+        );
+
+
+    const event =
+        document.createElement(
+            "div"
+        );
+
+
+    event.className =
+        "event";
+
+
+    event.innerText =
+        new Date()
+        .toLocaleTimeString()
+        + "  "
+        + text;
+
+
+    events.prepend(event);
+
+
+    /*
+       Keep last 50 events
+    */
+
+    while (
+        events.children.length
+        > 50
+    ) {
+
+        events.removeChild(
+            events.lastChild
+        );
+
+    }
+
+}
+
+</script>
+
+</body>
+
+</html>
