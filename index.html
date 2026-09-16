@@ -626,6 +626,96 @@
                 </div>
             `;
         }
+        // Inside handleMqttMessage: Record timestamp on every incoming packet
+function handleMqttMessage(topic, message) {
+    if (topic === CONFIG_TOPIC) {
+        try {
+            const cloudConfig = JSON.parse(message);
+            state.registeredDevices = cloudConfig;
+            localStorage.setItem(STORAGE_KEY, message);
+            updateSidebarStats();
+            if (state.currentScreen === 'dashboard' || state.currentScreen === 'registered') {
+                renderScreen();
+            }
+        } catch(e) {}
+        return;
+    }
+
+    const parts = topic.split("/");
+    if (parts.length !== 4) return;
+    
+    const deviceId = parts[2]; 
+    const type = parts[3];     
+
+    if (!state.detectedDevices[deviceId]) {
+        state.detectedDevices[deviceId] = {
+            device_id: deviceId, block_name: "Unknown Block",
+            status: 'OFFLINE', supply: 'OFF', fault: 'NO',
+            voltage: 0, current: 0, power: 0, rssi: 0,
+            lastSeen: 0
+        };
+    }
+
+    const device = state.detectedDevices[deviceId];
+
+    if (type === 'data') {
+        try {
+            const data = JSON.parse(message);
+            if (data.token !== EXPECTED_TOKEN) return; 
+
+            // Update last seen timestamp & mark ONLINE
+            device.lastSeen = Date.now();
+            device.status = 'ONLINE'; 
+
+            if (data.block_name) device.block_name = data.block_name;
+            if (data.supply) device.supply = data.supply;
+            if (data.voltage !== undefined) device.voltage = data.voltage;
+            if (data.current !== undefined) device.current = data.current;
+            if (data.power !== undefined) device.power = data.power;
+            if (data.rssi !== undefined) device.rssi = data.rssi;
+            
+        } catch (e) { return; }
+    } else if (type === 'status') {
+        const newStatus = message.trim().toUpperCase();
+        device.status = newStatus;
+        if (newStatus === 'ONLINE') {
+            device.lastSeen = Date.now();
+        } else {
+            device.lastSeen = 0; // Force immediate offline
+        }
+    }
+
+    updateUI(deviceId);
+}
+
+// ============================================================
+// WATCHDOG TIMER: CHECKS EVERY 1 SECOND FOR DISCONNECTED DEVICES
+// ============================================================
+const OFFLINE_TIMEOUT_MS = 2500; // 2.5 seconds timeout (telemetry arrives every 500ms)
+
+setInterval(() => {
+    const now = Date.now();
+    let stateChanged = false;
+
+    Object.keys(state.detectedDevices).forEach(id => {
+        const dev = state.detectedDevices[id];
+        
+        // If device was online but hasn't sent data in 2.5 seconds
+        if (dev.status === 'ONLINE' && (now - dev.lastSeen > OFFLINE_TIMEOUT_MS)) {
+            dev.status = 'OFFLINE';
+            dev.voltage = 0.0;
+            dev.current = 0.0;
+            dev.power = 0.0;
+            stateChanged = true;
+            updateUI(id);
+        }
+    });
+
+    if (stateChanged) {
+        updateSidebarStats();
+        checkDashboardEmpty();
+    }
+}, 1000);
 
         // --- UTILS ---
         function setSystemStatus(isOnline, text) {
