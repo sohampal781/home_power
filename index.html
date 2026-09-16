@@ -791,9 +791,46 @@
             background: none;
             border: none;
         }
+        /* ==========================================================================
+           LOGIN SCREEN OVERLAY
+           ========================================================================== */
+        .login-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--bg-sidebar); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.4s ease;
+        }
+        .login-card {
+            background: var(--bg-surface); padding: 40px; border-radius: var(--radius-lg);
+            width: 90%; max-width: 400px; box-shadow: var(--shadow-xl); text-align: center;
+        }
+        .login-card h2 { margin-bottom: 24px; color: var(--text-main); font-weight: 800; display:flex; align-items:center; justify-content:center; gap:8px;}
+        .login-card .input-group { text-align: left; margin-bottom: 16px; }
+        .login-card input { width: 100%; }
+        .login-card .btn { width: 100%; margin-top: 12px; padding: 14px; font-size: 16px;}
     </style>
 </head>
 <body>
+    <!-- LOGIN OVERLAY -->
+    <div id="login-screen" class="login-overlay">
+        <div class="login-card">
+            <h2><i class="ph-fill ph-cpu" style="color: var(--primary);"></i> SECURE BMS</h2>
+            <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 14px;">Enter your credentials to access the fleet.</p>
+            
+            <div class="input-group">
+                <label class="metric-label" style="margin-bottom: 4px;">User ID</label>
+                <input type="text" id="login-id" placeholder="e.g. admin" onkeypress="if(event.key === 'Enter') handleLogin()">
+            </div>
+            <div class="input-group">
+                <label class="metric-label" style="margin-bottom: 4px;">Password</label>
+                <input type="password" id="login-pass" placeholder="••••••••" onkeypress="if(event.key === 'Enter') handleLogin()">
+            </div>
+            
+            <p id="login-error" class="hidden" style="color: var(--danger); font-size: 13px; margin: 8px 0; font-weight: 600;">Invalid ID or Password</p>
+            
+            <button class="btn btn-primary" onclick="handleLogin()">SECURE LOGIN</button>
+        </div>
+    </div>
 
     <!-- SIDEBAR NAVIGATION -->
     <aside id="sidebar">
@@ -835,9 +872,11 @@
                 </div>
             </div>
             <div class="top-bar-controls">
-                <!-- Role Toggle Button -->
-                <div class="role-badge" id="role-toggle" onclick="toggleRole()">
-                    <i class="ph-fill ph-user"></i> <span id="role-text">Standard User</span>
+                <!-- User Profile & Logout -->
+                <div class="role-badge" id="user-profile" onclick="logout()" title="Click to logout">
+                    <i class="ph-fill ph-user" id="profile-icon"></i> 
+                    <span id="role-text">Logging in...</span>
+                    <i class="ph-bold ph-sign-out" style="margin-left: 6px;"></i>
                 </div>
                 <!-- System Connection Status -->
                 <div class="sys-status" id="sys-status-container">
@@ -887,65 +926,96 @@
             OFFLINE_TIMEOUT_MS: 15000 // Increased to 8 seconds to prevent false offlines
         };
 
+       // --- HARDCODED USERS DATABASE ---
+        const USERS = {
+            "admin": { password: "admin", role: "admin" },
+            "operator": { password: "user", role: "user" }
+        };
+
         const state = {
-            registeredDevices: [], // Array of { device_id, block_name }
-            detectedDevices: {},   // Object map of live device data
-            currentScreen: 'dashboard',
-            selectedDeviceId: null,
-            mqttClient: null,
-            mqttConnected: false,
-            userRole: localStorage.getItem('bms_role') || 'user',
-            reconnectAttempts: 0
+            registeredDevices: [], detectedDevices: {}, currentScreen: 'dashboard',
+            selectedDeviceId: null, mqttClient: null, mqttConnected: false,
+            // Fetch saved session
+            username: localStorage.getItem('bms_user') || null,
+            userRole: localStorage.getItem('bms_role') || null
         };
 
         let currentChartInstance = null;
-        let watchdogTimer = null;
 
-        /**
-         * ==========================================================================
-         * 2. INITIALIZATION & LIFECYCLE
-         * ==========================================================================
-         */
         function initApp() {
-            console.log("[SYSTEM] Initializing BMS Enterprise Dashboard...");
-            
-            // Load persistent configurations
-            const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
-            if (stored) {
-                try { 
-                    state.registeredDevices = JSON.parse(stored);
-                    console.log(`[SYSTEM] Loaded ${state.registeredDevices.length} authorized devices from local storage.`);
-                } catch(e) {
-                    console.error("[SYSTEM] Failed to parse local storage configuration.");
-                }
+            // Check Login Status first
+            if (!state.username || !state.userRole) {
+                document.getElementById('login-screen').classList.remove('hidden');
+            } else {
+                document.getElementById('login-screen').classList.add('hidden');
+                updateRoleUI();
+                connectMQTT();
+                setInterval(watchdogTimer, 1000);
             }
             
-            updateRoleUI();
-            connectMQTT();
-            startWatchdog();
+            const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
+            if (stored) { try { state.registeredDevices = JSON.parse(stored); } catch(e){} }
             renderScreen();
         }
-
+        let watchdogTimer = null;
         /**
          * ==========================================================================
          * 3. ROLE BASED ACCESS CONTROL (RBAC)
          * ==========================================================================
          */
-        function toggleRole() {
-            state.userRole = state.userRole === 'admin' ? 'user' : 'admin';
-            localStorage.setItem('bms_role', state.userRole);
-            updateRoleUI();
-            
-            // Eject user from protected screens if they demote themselves
-            if (state.userRole === 'user' && ['register', 'registered', 'system'].includes(state.currentScreen)) {
-                navigate('dashboard');
+        function handleLogin() {
+            const idInput = document.getElementById('login-id').value.trim();
+            const passInput = document.getElementById('login-pass').value.trim();
+            const errorText = document.getElementById('login-error');
+
+            if (USERS[idInput] && USERS[idInput].password === passInput) {
+                // Successful Login
+                state.username = idInput;
+                state.userRole = USERS[idInput].role;
+                
+                // Save session
+                localStorage.setItem('bms_user', state.username);
+                localStorage.setItem('bms_role', state.userRole);
+                
+                errorText.classList.add('hidden');
+                document.getElementById('login-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('login-screen').classList.add('hidden');
+                    initApp(); // Restart app safely
+                    showToast(`Welcome back, ${state.username.toUpperCase()}`, "success");
+                }, 400);
             } else {
-                renderScreen();
+                // Failed Login
+                errorText.classList.remove('hidden');
             }
-            
-            showToast(`Switched to ${state.userRole.toUpperCase()} mode`, 'info');
         }
 
+        function logout() {
+            if(confirm("Are you sure you want to log out?")) {
+                localStorage.removeItem('bms_user');
+                localStorage.removeItem('bms_role');
+                location.reload(); // Instantly clears memory and kicks to login screen
+            }
+        }
+
+        function updateRoleUI() {
+            const profile = document.getElementById('user-profile');
+            const icon = document.getElementById('profile-icon');
+            const txt = document.getElementById('role-text');
+            const adminOnly = document.querySelectorAll('.admin-only');
+            
+            if (state.userRole === 'admin') {
+                profile.classList.add('admin-active');
+                icon.className = 'ph-fill ph-shield-star';
+                txt.innerText = `${state.username} (Admin)`;
+                adminOnly.forEach(el => el.classList.remove('hidden'));
+            } else {
+                profile.classList.remove('admin-active');
+                icon.className = 'ph-fill ph-user';
+                txt.innerText = `${state.username} (User)`;
+                adminOnly.forEach(el => el.classList.add('hidden'));
+            }
+        }
         function updateRoleUI() {
             const toggleBtn = document.getElementById('role-toggle');
             const adminOnlyElements = document.querySelectorAll('.admin-only');
@@ -1086,27 +1156,25 @@
                 try {
                     const data = JSON.parse(message);
                     
-                    // SECURITY FIREWALL: Drop payloads without the correct token
-                    if (data.token !== CONFIG.EXPECTED_TOKEN) {
-                        console.warn(`[SECURITY] Blocked unauthorized payload from ${deviceId}`);
-                        return; 
-                    }
+                    // Match the new ultra-short "t" key for token
+                    if (data.t !== CONFIG.EXPECTED_TOKEN) return; 
 
-                    // Update timestamps and state
                     dev.lastSeen = Date.now();
                     dev.status = 'ONLINE'; 
                     
-                    // Safely assign telemetry
-                    if (data.block_name) dev.block_name = data.block_name;
-                    if (data.supply) dev.supply = data.supply;
-                    if (data.voltage !== undefined) dev.voltage = parseFloat(data.voltage);
-                    if (data.current !== undefined) dev.current = parseFloat(data.current);
-                    if (data.power !== undefined) dev.power = parseFloat(data.power);
-                    if (data.limit !== undefined) dev.limit = parseFloat(data.limit);
-                    if (data.tol_time !== undefined) dev.tol_time = parseInt(data.tol_time);
-                    if (data.fault) dev.fault = data.fault;
+                    // Map the ultra-short keys back to our dashboard
+                    if (data.n) dev.block_name = data.n;
+                    if (data.s !== undefined) dev.supply = data.s === 1 ? 'ON' : 'OFF';
+                    if (data.v !== undefined) dev.voltage = parseFloat(data.v);
+                    if (data.c !== undefined) dev.current = parseFloat(data.c);
+                    if (data.l !== undefined) dev.limit = parseFloat(data.l);
+                    if (data.tt !== undefined) dev.tol_time = parseInt(data.tt);
+                    if (data.f) dev.fault = data.f;
 
-                    // Update Graph Arrays (Downsample to 1 point per second maximum)
+                    // Calculate power locally on the PC/Phone to save Wi-Fi bandwidth!
+                    dev.power = dev.voltage * dev.current;
+
+                    // Update Graph Arrays
                     if (!dev.lastGraphUpdate || (Date.now() - dev.lastGraphUpdate) >= 1000) {
                         dev.lastGraphUpdate = Date.now();
                         const timeStr = new Date().toLocaleTimeString([], {minute: '2-digit', second:'2-digit'});
@@ -1114,7 +1182,6 @@
                         dev.historyCurrent.push(dev.current);
                         dev.historyTime.push(timeStr);
                         
-                        // Maintain rolling window
                         if (dev.historyCurrent.length > CONFIG.MAX_GRAPH_POINTS) {
                             dev.historyCurrent.shift();
                             dev.historyTime.shift();
