@@ -1,2940 +1,1225 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
 
-<title>MRPSP Building Management System</title>
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>
+MRPSP Electrical SCADA
+</title>
 
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
+
 <style>
+
 * {
     box-sizing: border-box;
 }
 
+
 body {
+
     margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: #f3f6fa;
-    color: #172033;
-}
 
-/* ================= HEADER ================= */
+    background: #071016;
 
-.header {
-    height: 78px;
-    background: white;
-    border-bottom: 1px solid #dfe5ec;
+    color: #d9e2e8;
 
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 
-    padding: 0 28px;
-
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.logoArea {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.logo {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-
-    background: #1769ff;
-    color: white;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 25px;
-    font-weight: bold;
-}
-
-.systemTitle {
-    font-size: 24px;
-    font-weight: 700;
-}
-
-.systemSubtitle {
-    font-size: 14px;
-    color: #687386;
-    margin-top: 3px;
-}
-
-.connection {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.connectionDot {
-    width: 13px;
-    height: 13px;
-    border-radius: 50%;
-    background: #f04444;
-}
-
-.connectionDot.online {
-    background: #16a34a;
-}
-
-/* ================= LAYOUT ================= */
-
-.layout {
-    display: flex;
-    min-height: calc(100vh - 78px);
-}
-
-/* ================= SIDEBAR ================= */
-
-.sidebar {
-    width: 250px;
-    background: white;
-    border-right: 1px solid #dfe5ec;
-
-    padding: 25px 16px;
-}
-
-.navTitle {
-    color: #8993a4;
-    font-size: 13px;
-    font-weight: bold;
-    margin: 5px 12px 12px;
-}
-
-.navButton {
-    width: 100%;
-    padding: 16px 15px;
-    margin-bottom: 8px;
-
-    border: none;
-    background: transparent;
-
-    text-align: left;
-
-    border-radius: 10px;
-
-    font-size: 16px;
-    font-weight: 600;
-
-    cursor: pointer;
-}
-
-.navButton:hover {
-    background: #eef4ff;
-}
-
-.navButton.active {
-    background: #e9f1ff;
-    color: #1769ff;
-}
-
-.onlineCount {
-    margin-top: 35px;
-
-    background: #f5f8fc;
-    border-radius: 12px;
-
-    padding: 18px;
-}
-
-.onlineCountTitle {
-    font-size: 14px;
-    color: #687386;
-}
-
-.onlineCountNumber {
-    font-size: 34px;
-    font-weight: 700;
-    margin-top: 5px;
-}
-
-/* ================= MAIN ================= */
-
-.main {
-    flex: 1;
-    padding: 30px;
     overflow-x: hidden;
 }
 
-.page {
-    max-width: 1600px;
-    margin: auto;
-}
 
-.pageTitle {
-    font-size: 30px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
+/* =====================================================
+   HEADER
+   ===================================================== */
 
-.pageDescription {
-    font-size: 16px;
-    color: #697586;
-    margin-bottom: 30px;
-}
+.header {
 
-/* ================= SUMMARY ================= */
+    height: 75px;
 
-.summaryGrid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    background: #0d171e;
 
-    margin-bottom: 35px;
-}
-
-.summaryCard {
-    background: white;
-    border: 1px solid #e0e6ee;
-    border-radius: 16px;
-
-    padding: 24px;
-
-    min-height: 125px;
-}
-
-.summaryLabel {
-    font-size: 15px;
-    color: #6b7585;
-}
-
-.summaryValue {
-    font-size: 34px;
-    font-weight: 700;
-    margin-top: 12px;
-}
-
-/* ================= ROOMS ================= */
-
-.sectionHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    margin-bottom: 18px;
-}
-
-.sectionTitle {
-    font-size: 24px;
-    font-weight: 700;
-}
-
-.roomGrid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(auto-fill, minmax(340px, 1fr));
-
-    gap: 24px;
-}
-
-.roomCard {
-    background: white;
-
-    border: 2px solid #dfe5ec;
-
-    border-radius: 18px;
-
-    padding: 25px;
-
-    cursor: pointer;
-
-    transition: 0.2s;
-}
-
-.roomCard:hover {
-    transform: translateY(-3px);
-    border-color: #1769ff;
-    box-shadow: 0 8px 25px rgba(30,60,100,0.10);
-}
-
-.roomTop {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    margin-bottom: 20px;
-}
-
-.roomName {
-    font-size: 27px;
-    font-weight: 700;
-}
-
-.onlineBadge {
-    padding: 8px 13px;
-
-    border-radius: 20px;
-
-    background: #dcfce7;
-    color: #15803d;
-
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.offlineBadge {
-    padding: 8px 13px;
-
-    border-radius: 20px;
-
-    background: #fee2e2;
-    color: #b91c1c;
-
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.supplyStatus {
-    font-size: 21px;
-    font-weight: 700;
-
-    margin-bottom: 20px;
-}
-
-.supplyOn {
-    color: #15803d;
-}
-
-.supplyOff {
-    color: #b91c1c;
-}
-
-.measureGrid {
-    display: grid;
-
-    grid-template-columns: repeat(3, 1fr);
-
-    gap: 12px;
-}
-
-.measure {
-    background: #f6f8fb;
-
-    border-radius: 12px;
-
-    padding: 15px;
-}
-
-.measureLabel {
-    font-size: 13px;
-    color: #697586;
-}
-
-.measureValue {
-    font-size: 21px;
-    font-weight: 700;
-
-    margin-top: 7px;
-}
-
-.roomFooter {
-    border-top: 1px solid #e5e9ef;
-
-    margin-top: 20px;
-    padding-top: 15px;
-
-    font-size: 14px;
-    color: #687386;
-}
-
-/* ================= WAITING ================= */
-
-.waiting {
-    background: white;
-
-    border: 2px dashed #cdd5df;
-
-    border-radius: 18px;
-
-    padding: 70px 30px;
-
-    text-align: center;
-
-    font-size: 21px;
-    color: #687386;
-}
-
-.waitingIcon {
-    font-size: 50px;
-    margin-bottom: 15px;
-}
-
-/* ================= REGISTER PAGE ================= */
-
-.registerPanel {
-    background: white;
-
-    border: 1px solid #dfe5ec;
-
-    border-radius: 18px;
-
-    padding: 28px;
-}
-
-.registerTop {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    margin-bottom: 25px;
-}
-
-.bigButton {
-    border: none;
-
-    padding: 15px 24px;
-
-    border-radius: 10px;
-
-    font-size: 16px;
-    font-weight: 700;
-
-    cursor: pointer;
-}
-
-.scanButton {
-    background: #1769ff;
-    color: white;
-}
-
-.scanButton:hover {
-    background: #0e56d8;
-}
-
-.deviceList {
-    display: grid;
-
-    grid-template-columns:
-        repeat(auto-fill, minmax(350px, 1fr));
-
-    gap: 18px;
-}
-
-.detectedDevice {
-    border: 2px solid #e0e6ee;
-
-    border-radius: 15px;
-
-    padding: 22px;
-
-    background: #fbfcfe;
-}
-
-.deviceName {
-    font-size: 23px;
-    font-weight: 700;
-}
-
-.deviceTopic {
-    font-size: 13px;
-
-    color: #718096;
-
-    margin-top: 8px;
-
-    word-break: break-all;
-}
-
-.deviceStatus {
-    margin-top: 15px;
-
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.registered {
-    margin-top: 15px;
-
-    color: #15803d;
-    font-weight: 700;
-}
-
-.registerDeviceButton {
-    margin-top: 15px;
-
-    width: 100%;
-
-    padding: 13px;
-
-    border: none;
-
-    border-radius: 9px;
-
-    background: #1769ff;
-    color: white;
-
-    font-size: 15px;
-    font-weight: 700;
-
-    cursor: pointer;
-}
-
-/* ================= REGISTERED LIST ================= */
-
-.registeredSection {
-    margin-top: 35px;
-}
-
-.registeredRow {
-    display: flex;
-
-    align-items: center;
-    justify-content: space-between;
-
-    background: #f7f9fc;
-
-    border: 1px solid #dfe5ec;
-
-    border-radius: 12px;
-
-    padding: 17px 20px;
-
-    margin-bottom: 10px;
-}
-
-.registeredName {
-    font-size: 19px;
-    font-weight: 700;
-}
-
-.deleteButton {
-    background: #fee2e2;
-    color: #b91c1c;
-
-    border: none;
-
-    padding: 10px 16px;
-
-    border-radius: 8px;
-
-    font-weight: 700;
-
-    cursor: pointer;
-}
-
-/* ================= DETAIL PAGE ================= */
-
-.backButton {
-    border: none;
-
-    background: white;
-
-    border: 1px solid #dfe5ec;
-
-    padding: 12px 18px;
-
-    border-radius: 9px;
-
-    font-size: 15px;
-    font-weight: 700;
-
-    cursor: pointer;
-
-    margin-bottom: 20px;
-}
-
-.detailHeader {
-    background: white;
-
-    border-radius: 18px;
-
-    border: 1px solid #dfe5ec;
-
-    padding: 28px;
+    border-bottom:
+        2px solid #1d303c;
 
     display: flex;
 
     align-items: center;
+
     justify-content: space-between;
 
-    margin-bottom: 25px;
+    padding: 0 25px;
 }
 
-.detailRoomName {
-    font-size: 36px;
-    font-weight: 700;
+
+.logo {
+
+    font-size: 25px;
+
+    font-weight: bold;
+
+    letter-spacing: 1px;
 }
 
-.detailStatus {
-    margin-top: 8px;
 
-    font-size: 17px;
-    color: #687386;
+.subtitle {
+
+    color: #78909c;
+
+    font-size: 12px;
+
+    margin-top: 4px;
 }
 
-.detailGrid {
+
+.connection {
+
+    padding:
+        10px 18px;
+
+    border-radius: 5px;
+
+    background: #351515;
+
+    color: #ff5252;
+
+    font-weight: bold;
+
+    border:
+        1px solid #713030;
+}
+
+
+.connection.online {
+
+    background: #10351f;
+
+    color: #00e676;
+
+    border-color:
+        #18753d;
+}
+
+
+/* =====================================================
+   MAIN
+   ===================================================== */
+
+.main {
+
+    padding: 20px;
+}
+
+
+/* =====================================================
+   TOP INFO
+   ===================================================== */
+
+.info-grid {
+
     display: grid;
 
     grid-template-columns:
         repeat(4, 1fr);
 
-    gap: 20px;
+    gap: 12px;
 
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
-.detailValueCard {
-    background: white;
 
-    border: 1px solid #dfe5ec;
+.info {
 
-    border-radius: 16px;
+    background: #0d181f;
 
-    padding: 25px;
+    border:
+        1px solid #1d303c;
+
+    padding: 15px;
+
+    border-radius: 5px;
 }
 
-.detailValueLabel {
-    font-size: 15px;
-    color: #687386;
+
+.info-label {
+
+    color: #718792;
+
+    font-size: 11px;
+
+    text-transform: uppercase;
 }
 
-.detailValue {
-    font-size: 35px;
-    font-weight: 700;
 
-    margin-top: 12px;
+.info-value {
+
+    font-size: 18px;
+
+    margin-top: 7px;
+
+    font-weight: bold;
 }
 
-.detailColumns {
+
+/* =====================================================
+   ROOM GRID
+   ===================================================== */
+
+.room-grid {
+
     display: grid;
 
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns:
+        repeat(4, 1fr);
 
-    gap: 25px;
+    gap: 15px;
 }
 
-.detailPanel {
-    background: white;
 
-    border: 1px solid #dfe5ec;
+/* =====================================================
+   ROOM CARD
+   ===================================================== */
 
-    border-radius: 18px;
+.room {
 
-    padding: 25px;
+    background: #0d181f;
+
+    border:
+        1px solid #1d303c;
+
+    border-radius: 6px;
+
+    overflow: hidden;
 }
 
-.panelTitle {
-    font-size: 23px;
-    font-weight: 700;
 
-    margin-bottom: 22px;
-}
+.room-header {
 
-.infoRow {
+    padding: 12px 15px;
+
+    background: #111f27;
+
+    border-bottom:
+        1px solid #1d303c;
+
     display: flex;
 
     justify-content: space-between;
 
-    padding: 15px 0;
+    align-items: center;
+}
 
-    border-bottom: 1px solid #edf0f4;
+
+.room-name {
 
     font-size: 17px;
+
+    font-weight: bold;
 }
 
-.infoValue {
-    font-weight: 700;
+
+.supply {
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    padding:
+        5px 10px;
+
+    border-radius: 4px;
+
+    background: #351515;
+
+    color: #ff5252;
 }
 
-.controlButton {
-    width: 100%;
 
-    padding: 17px;
+.supply.on {
 
-    margin-bottom: 12px;
+    background: #10351f;
 
-    border: none;
+    color: #00e676;
+}
 
-    border-radius: 10px;
 
-    font-size: 18px;
-    font-weight: 700;
+/* =====================================================
+   ELECTRICAL SYMBOL
+   ===================================================== */
+
+.diagram {
+
+    height: 100px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    position: relative;
+}
+
+
+.line {
+
+    position: absolute;
+
+    height: 3px;
+
+    width: 80%;
+
+    background: #596b75;
+}
+
+
+.line.on {
+
+    background: #00e676;
+
+    box-shadow:
+        0 0 8px #00e676;
+}
+
+
+.breaker {
+
+    z-index: 2;
+
+    width: 55px;
+
+    height: 55px;
+
+    border:
+        3px solid #687982;
+
+    background: #0a1217;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 24px;
+}
+
+
+.breaker.on {
+
+    border-color: #00e676;
+
+    color: #00e676;
+}
+
+
+/* =====================================================
+   VALUES
+   ===================================================== */
+
+.values {
+
+    padding: 15px;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 8px;
+}
+
+
+.value {
+
+    background: #111f27;
+
+    padding: 10px;
+
+    text-align: center;
+
+    border-radius: 4px;
+}
+
+
+.value-label {
+
+    font-size: 10px;
+
+    color: #718792;
+}
+
+
+.value-number {
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    margin-top: 5px;
+}
+
+
+/* =====================================================
+   CONTROL
+   ===================================================== */
+
+.controls {
+
+    display: flex;
+
+    gap: 8px;
+
+    padding: 0 15px 15px;
+}
+
+
+button {
+
+    flex: 1;
+
+    padding: 10px;
+
+    border: 0;
+
+    border-radius: 4px;
+
+    color: white;
+
+    font-weight: bold;
 
     cursor: pointer;
 }
 
-.onButton {
-    background: #dcfce7;
-    color: #15803d;
+
+.on-button {
+
+    background: #087f3b;
 }
 
-.offButton {
-    background: #fee2e2;
-    color: #b91c1c;
+
+.off-button {
+
+    background: #a52222;
 }
 
-.statusButton {
-    background: #e9f1ff;
-    color: #1769ff;
+
+button:hover {
+
+    opacity: .8;
 }
 
-.resetButton {
-    background: #f1f5f9;
-    color: #334155;
+
+/* =====================================================
+   ALARM
+   ===================================================== */
+
+.alarm {
+
+    margin-top: 20px;
+
+    background: #0d181f;
+
+    border:
+        1px solid #1d303c;
+
+    padding: 15px;
 }
 
-/* ================= RESPONSIVE ================= */
 
-@media(max-width: 1100px) {
+.alarm-title {
 
-    .summaryGrid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    font-size: 16px;
 
-    .detailGrid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    font-weight: bold;
 
-    .sidebar {
-        width: 210px;
-    }
+    margin-bottom: 10px;
 }
 
-@media(max-width: 750px) {
 
-    .sidebar {
-        display: none;
+.alarm-row {
+
+    padding: 8px;
+
+    border-bottom:
+        1px solid #1d303c;
+
+    font-size: 13px;
+
+    color: #ff7373;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media(max-width:900px) {
+
+    .room-grid {
+
+        grid-template-columns:
+            repeat(2, 1fr);
     }
 
-    .main {
-        padding: 18px;
+}
+
+
+@media(max-width:600px) {
+
+    .info-grid {
+
+        grid-template-columns:
+            repeat(2, 1fr);
     }
 
-    .summaryGrid {
-        grid-template-columns: 1fr;
+
+    .room-grid {
+
+        grid-template-columns:
+            1fr;
     }
 
-    .detailGrid {
-        grid-template-columns: 1fr;
-    }
-
-    .detailColumns {
-        grid-template-columns: 1fr;
-    }
-
-    .systemTitle {
-        font-size: 18px;
-    }
-
-    .roomGrid {
-        grid-template-columns: 1fr;
-    }
 
     .header {
-        padding: 0 15px;
+
+        height: auto;
+
+        padding: 15px;
+
+        display: block;
     }
 
+
     .connection {
-        font-size: 12px;
+
+        display: inline-block;
+
+        margin-top: 10px;
     }
+
 }
+
 </style>
+
 </head>
+
 
 <body>
 
-<!-- ========================================================= -->
-<!-- HEADER -->
-<!-- ========================================================= -->
 
-<header class="header">
+<!-- =====================================================
+     HEADER
+     ===================================================== -->
 
-    <div class="logoArea">
+<div class="header">
 
-        <div class="logo">
-            ⚡
-        </div>
+<div>
 
-        <div>
-            <div class="systemTitle">
-                MRPSP BUILDING MANAGEMENT SYSTEM
-            </div>
+<div class="logo">
+MRPSP ELECTRICAL SCADA
+</div>
 
-            <div class="systemSubtitle">
-                Remote Electrical Monitoring & Control
-            </div>
-        </div>
-
-    </div>
-
-    <div class="connection">
-
-        <span
-            id="connectionDot"
-            class="connectionDot">
-        </span>
-
-        <span id="connectionText">
-            Connecting...
-        </span>
-
-    </div>
-
-</header>
-
-
-<!-- ========================================================= -->
-<!-- LAYOUT -->
-<!-- ========================================================= -->
-
-<div class="layout">
-
-
-<!-- ========================================================= -->
-<!-- SIDEBAR -->
-<!-- ========================================================= -->
-
-<aside class="sidebar">
-
-    <div class="navTitle">
-        BUILDING
-    </div>
-
-    <button
-        class="navButton active"
-        onclick="showDashboard()">
-
-        🏢 Overview
-
-    </button>
-
-
-    <button
-        class="navButton"
-        onclick="showRegister()">
-
-        ⚙ Register ESP
-
-    </button>
-
-
-    <button
-        class="navButton"
-        onclick="showRegistered()">
-
-        📋 Registered ESPs
-
-    </button>
-
-
-    <button
-        class="navButton"
-        onclick="showEvents()">
-
-        ⚠ Events
-
-    </button>
-
-
-    <div class="onlineCount">
-
-        <div class="onlineCountTitle">
-            ONLINE REGISTERED ESP
-        </div>
-
-        <div
-            class="onlineCountNumber"
-            id="sideOnlineCount">
-
-            0
-
-        </div>
-
-    </div>
-
-</aside>
-
-
-<!-- ========================================================= -->
-<!-- MAIN -->
-<!-- ========================================================= -->
-
-<main class="main">
-
-<div class="page" id="app">
-
-    <!-- Dashboard will be inserted here -->
+<div class="subtitle">
+REMOTE BUILDING POWER MONITORING SYSTEM
+</div>
 
 </div>
 
-</main>
+
+<div
+id="connection"
+class="connection">
+
+● MQTT OFFLINE
+
+</div>
+
+</div>
+
+
+<div class="main">
+
+
+<!-- =====================================================
+     SYSTEM INFORMATION
+     ===================================================== -->
+
+<div class="info-grid">
+
+
+<div class="info">
+
+<div class="info-label">
+SYSTEM
+</div>
+
+<div
+class="info-value">
+
+BUILDING 01
+
+</div>
+
+</div>
+
+
+<div class="info">
+
+<div class="info-label">
+DEVICE
+</div>
+
+<div
+class="info-value">
+
+BUILDING_SCADA_01
+
+</div>
+
+</div>
+
+
+<div class="info">
+
+<div class="info-label">
+ESP STATUS
+</div>
+
+<div
+id="espStatus"
+class="info-value">
+
+OFFLINE
+
+</div>
+
+</div>
+
+
+<div class="info">
+
+<div class="info-label">
+WIFI RSSI
+</div>
+
+<div
+id="rssi"
+class="info-value">
+
+--
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<!-- =====================================================
+     ROOM GRID
+     ===================================================== -->
+
+<div
+id="roomGrid"
+class="room-grid">
+
+</div>
+
+
+<!-- =====================================================
+     ALARM PANEL
+     ===================================================== -->
+
+<div class="alarm">
+
+<div class="alarm-title">
+ALARM / EVENT LOG
+</div>
+
+<div
+id="alarms">
+
+<div class="alarm-row">
+System waiting for data...
+</div>
+
+</div>
+
+</div>
+
 
 </div>
 
 
 <script>
 
-/* =========================================================
-   MQTT CONFIGURATION
-========================================================= */
+
+// =====================================================
+// MQTT
+// =====================================================
 
 const MQTT_URL =
     "wss://test.mosquitto.org:8081/mqtt";
 
 
 const DATA_TOPIC =
-    "mrpsp/building01/devices/+/data";
+    "mrpsp/building01/data";
 
 
-const STATUS_TOPIC =
-    "mrpsp/building01/devices/+/status";
+const COMMAND_TOPIC =
+    "mrpsp/building01/command";
 
 
-const COMMAND_BASE =
-    "mrpsp/building01/devices/";
+const clientId =
+    "SCADA_" +
+    Math.random()
+    .toString(16)
+    .substring(2);
 
 
-/* =========================================================
-   STORAGE
-========================================================= */
-
-const STORAGE_KEY =
-    "MRPSP_REGISTERED_ESPS";
-
-
-let registeredESPs =
-    JSON.parse(
-        localStorage.getItem(STORAGE_KEY) || "[]"
-    );
-
-
-/* =========================================================
-   LIVE DEVICES
-========================================================= */
-
-let liveDevices = {};
-
-
-let selectedRoom = null;
-
-
-/* =========================================================
-   MQTT
-========================================================= */
-
-let mqttClient;
-
-
-function connectMQTT() {
-
-    updateConnection(
-        false,
-        "Connecting..."
-    );
-
-
-    mqttClient = mqtt.connect(
+const client =
+    mqtt.connect(
         MQTT_URL,
         {
             clientId:
-                "MRPSP_BMS_" +
-                Math.random()
-                    .toString(16)
-                    .substring(2),
+                clientId,
 
-            clean: true,
-
-            reconnectPeriod: 3000,
-
-            connectTimeout: 10000
-        }
-    );
-
-
-    mqttClient.on(
-        "connect",
-        function() {
-
-            updateConnection(
+            clean:
                 true,
-                "MQTT ONLINE"
-            );
 
-
-            mqttClient.subscribe(
-                DATA_TOPIC
-            );
-
-
-            mqttClient.subscribe(
-                STATUS_TOPIC
-            );
-
-
-            console.log(
-                "MQTT connected"
-            );
-
+            reconnectPeriod:
+                3000
         }
     );
 
 
-    mqttClient.on(
-        "message",
-        function(topic, message) {
+// =====================================================
+// CREATE ROOMS
+// =====================================================
 
-            processMQTTMessage(
-                topic,
-                message.toString()
-            );
+function createRooms()
+{
 
-        }
-    );
-
-
-    mqttClient.on(
-        "error",
-        function(error) {
-
-            console.log(
-                "MQTT Error:",
-                error
-            );
-
-        }
-    );
-
-
-    mqttClient.on(
-        "offline",
-        function() {
-
-            updateConnection(
-                false,
-                "MQTT OFFLINE"
-            );
-
-        }
-    );
-
-}
-
-
-function updateConnection(
-    online,
-    text
-) {
-
-    const dot =
+    const grid =
         document.getElementById(
-            "connectionDot"
-        );
-
-    const label =
-        document.getElementById(
-            "connectionText"
+            "roomGrid"
         );
 
 
-    if (online) {
-
-        dot.classList.add(
-            "online"
-        );
-
-    } else {
-
-        dot.classList.remove(
-            "online"
-        );
-
-    }
-
-
-    label.textContent = text;
-
-}
-
-
-/* =========================================================
-   MQTT MESSAGE PROCESSING
-========================================================= */
-
-function processMQTTMessage(
-    topic,
-    payload
-) {
-
-    const parts =
-        topic.split("/");
-
-
-    /*
-       Topic format:
-
-       mrpsp
-       building01
-       devices
-       ROOM_01
-       data/status
-    */
-
-
-    if (
-        parts.length < 5
-    ) {
-
-        return;
-
-    }
-
-
-    const deviceName =
-        parts[3];
-
-
-    const messageType =
-        parts[4];
-
-
-    if (!deviceName) {
-
-        return;
-
-    }
-
-
-    /* -----------------------------------------------------
-       STATUS MESSAGE
-    ----------------------------------------------------- */
-
-    if (
-        messageType === "status"
-    ) {
-
-        const status =
-            payload
-                .trim()
-                .toUpperCase();
-
-
-        if (
-            status === "OFFLINE"
-        ) {
-
-            /*
-               Remove immediately from
-               live dashboard.
-            */
-
-            delete liveDevices[
-                deviceName
-            ];
-
-
-            updateUI();
-
-            return;
-
-        }
-
-
-        if (
-            status === "ONLINE"
-        ) {
-
-            /*
-               Do NOT create the room
-               from retained ONLINE alone.
-
-               The DATA heartbeat must arrive.
-            */
-
-            if (
-                liveDevices[
-                    deviceName
-                ]
-            ) {
-
-                liveDevices[
-                    deviceName
-                ].status =
-                    "ONLINE";
-
-            }
-
-            updateUI();
-
-        }
-
-        return;
-
-    }
-
-
-    /* -----------------------------------------------------
-       DATA MESSAGE
-    ----------------------------------------------------- */
-
-    if (
-        messageType === "data"
-    ) {
-
-        try {
-
-            const data =
-                JSON.parse(payload);
-
-
-            /*
-               DATA message acts as
-               registration heartbeat.
-            */
-
-            if (
-                !isRegistered(
-                    deviceName
-                )
-            ) {
-
-                /*
-                   ESP is detected but not
-                   registered.
-
-                   It will appear only in
-                   Register ESP page.
-                */
-
-                return;
-
-            }
-
-
-            liveDevices[
-                deviceName
-            ] = {
-
-                ...data,
-
-                device_id:
-                    deviceName,
-
-                name:
-                    data.name ||
-                    deviceName,
-
-                lastSeen:
-                    Date.now(),
-
-                status:
-                    "ONLINE"
-
-            };
-
-
-            updateUI();
-
-        }
-
-        catch(error) {
-
-            console.log(
-                "Invalid JSON:",
-                payload
-            );
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   REGISTERED CHECK
-========================================================= */
-
-function isRegistered(
-    deviceName
-) {
-
-    return registeredESPs.includes(
-        deviceName
-    );
-
-}
-
-
-/* =========================================================
-   SAVE REGISTRATION
-========================================================= */
-
-function saveRegistered() {
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(
-            registeredESPs
-        )
-    );
-
-}
-
-
-/* =========================================================
-   REGISTER ESP
-========================================================= */
-
-function registerESP(
-    deviceName
-) {
-
-    if (
-        !isRegistered(
-            deviceName
-        )
-    ) {
-
-        registeredESPs.push(
-            deviceName
-        );
-
-        saveRegistered();
-
-        alert(
-            deviceName +
-            " registered successfully."
-        );
-
-        updateUI();
-
-    }
-
-}
-
-
-/* =========================================================
-   DELETE ESP
-========================================================= */
-
-function deleteESP(
-    deviceName
-) {
-
-    const confirmDelete =
-        confirm(
-            "Delete " +
-            deviceName +
-            " from registered ESPs?"
-        );
-
-
-    if (!confirmDelete) {
-
-        return;
-
-    }
-
-
-    registeredESPs =
-        registeredESPs.filter(
-            function(name) {
-
-                return name !==
-                    deviceName;
-
-            }
-        );
-
-
-    /*
-       Remove it immediately
-       from live dashboard.
-    */
-
-    delete liveDevices[
-        deviceName
-    ];
-
-
-    saveRegistered();
-
-
-    updateUI();
-
-}
-
-
-/* =========================================================
-   CHECK ONLINE TIMEOUT
-========================================================= */
-
-function removeOfflineDevices() {
-
-    const now =
-        Date.now();
-
-
-    const TIMEOUT =
-        7000;
-
-
-    Object.keys(
-        liveDevices
-    ).forEach(
-        function(deviceName) {
-
-            if (
-                now -
-                liveDevices[
-                    deviceName
-                ].lastSeen
-                >
-                TIMEOUT
-            ) {
-
-                delete liveDevices[
-                    deviceName
-                ];
-
-            }
-
-        }
-    );
-
-
-    updateUI();
-
-}
-
-
-setInterval(
-    removeOfflineDevices,
-    2000
-);
-
-
-/* =========================================================
-   DASHBOARD
-========================================================= */
-
-function showDashboard() {
-
-    selectedRoom = null;
-
-
-    setActiveNav(0);
-
-
-    renderDashboard();
-
-}
-
-
-function renderDashboard() {
-
-    const app =
-        document.getElementById(
-            "app"
-        );
-
-
-    const devices =
-        Object.values(
-            liveDevices
-        );
-
-
-    const onlineCount =
-        devices.length;
-
-
-    let totalPower = 0;
-
-    let totalCurrent = 0;
-
-    let supplyOn = 0;
-
-
-    devices.forEach(
-        function(device) {
-
-            totalPower +=
-                Number(
-                    device.power || 0
-                );
-
-            totalCurrent +=
-                Number(
-                    device.current || 0
-                );
-
-
-            if (
-                String(
-                    device.status
-                ).toUpperCase()
-                === "ON"
-            ) {
-
-                supplyOn++;
-
-            }
-
-        }
-    );
-
-
-    app.innerHTML = `
-
-        <div class="pageTitle">
-            Building Overview
-        </div>
-
-        <div class="pageDescription">
-            Only registered and currently online ESP controllers are displayed.
-        </div>
-
-
-        <div class="summaryGrid">
-
-            <div class="summaryCard">
-
-                <div class="summaryLabel">
-                    Online Rooms
-                </div>
-
-                <div class="summaryValue">
-                    ${onlineCount}
-                </div>
-
-            </div>
-
-
-            <div class="summaryCard">
-
-                <div class="summaryLabel">
-                    Supply ON
-                </div>
-
-                <div class="summaryValue">
-                    ${supplyOn}
-                </div>
-
-            </div>
-
-
-            <div class="summaryCard">
-
-                <div class="summaryLabel">
-                    Total Current
-                </div>
-
-                <div class="summaryValue">
-                    ${totalCurrent.toFixed(2)} A
-                </div>
-
-            </div>
-
-
-            <div class="summaryCard">
-
-                <div class="summaryLabel">
-                    Total Power
-                </div>
-
-                <div class="summaryValue">
-                    ${totalPower.toFixed(1)} W
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="sectionHeader">
-
-            <div class="sectionTitle">
-                Online Registered Rooms
-            </div>
-
-        </div>
-
+    for (
+        let i = 1;
+        i <= 8;
+        i++
+    )
+    {
+
+        grid.innerHTML += `
 
         <div
-            id="roomContainer"
-            class="roomGrid">
+        class="room"
+        id="room${i}">
 
-            ${
-                devices.length === 0
-                ?
-                `
-                <div class="waiting">
+        <div class="room-header">
 
-                    <div class="waitingIcon">
-                        📡
-                    </div>
-
-                    Waiting for online registered ESP controllers...
-
-                    <br>
-
-                    <span style="
-                        font-size:15px;
-                        display:block;
-                        margin-top:10px;
-                    ">
-                        Go to "Register ESP" to register a detected controller.
-                    </span>
-
-                </div>
-                `
-                :
-                devices
-                    .map(
-                        createRoomCard
-                    )
-                    .join("")
-            }
-
-        </div>
-    `;
-
-
-    updateSideCount();
-
-}
-
-
-/* =========================================================
-   ROOM CARD
-========================================================= */
-
-function createRoomCard(
-    device
-) {
-
-    const name =
-        device.name ||
-        device.device_id;
-
-
-    const supply =
-        String(
-            device.status ||
-            "UNKNOWN"
-        ).toUpperCase();
-
-
-    const supplyClass =
-        supply === "ON"
-        ?
-        "supplyOn"
-        :
-        "supplyOff";
-
-
-    return `
-
-        <div
-            class="roomCard"
-            onclick="openRoom('${escapeJS(name)}')"
-        >
-
-            <div class="roomTop">
-
-                <div class="roomName">
-                    ${escapeHTML(name)}
-                </div>
-
-                <div class="onlineBadge">
-                    ● ONLINE
-                </div>
-
+            <div class="room-name">
+                ROOM ${i}
             </div>
 
-
-            <div class="
-                supplyStatus
-                ${supplyClass}
-            ">
-
-                ${
-                    supply === "ON"
-                    ?
-                    "● SUPPLY ON"
-                    :
-                    "● SUPPLY OFF"
-                }
-
-            </div>
-
-
-            <div class="measureGrid">
-
-                <div class="measure">
-
-                    <div class="measureLabel">
-                        Voltage
-                    </div>
-
-                    <div class="measureValue">
-                        ${Number(
-                            device.voltage || 0
-                        ).toFixed(1)}
-                        V
-                    </div>
-
-                </div>
-
-
-                <div class="measure">
-
-                    <div class="measureLabel">
-                        Current
-                    </div>
-
-                    <div class="measureValue">
-                        ${Number(
-                            device.current || 0
-                        ).toFixed(2)}
-                        A
-                    </div>
-
-                </div>
-
-
-                <div class="measure">
-
-                    <div class="measureLabel">
-                        Power
-                    </div>
-
-                    <div class="measureValue">
-                        ${Number(
-                            device.power || 0
-                        ).toFixed(1)}
-                        W
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="roomFooter">
-
-                RSSI:
-                ${device.rssi ?? "--"} dBm
-
-                &nbsp;&nbsp; • &nbsp;&nbsp;
-
-                Fault:
-                ${
-                    device.fault ||
-                    "NO"
-                }
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-/* =========================================================
-   OPEN ROOM
-========================================================= */
-
-function openRoom(
-    deviceName
-) {
-
-    selectedRoom =
-        deviceName;
-
-
-    renderRoomDetail();
-
-}
-
-
-/* =========================================================
-   ROOM DETAIL
-========================================================= */
-
-function renderRoomDetail() {
-
-    const device =
-        liveDevices[
-            selectedRoom
-        ];
-
-
-    if (!device) {
-
-        showDashboard();
-
-        return;
-
-    }
-
-
-    const app =
-        document.getElementById(
-            "app"
-        );
-
-
-    const name =
-        device.name ||
-        selectedRoom;
-
-
-    const supply =
-        String(
-            device.status ||
-            "UNKNOWN"
-        ).toUpperCase();
-
-
-    app.innerHTML = `
-
-        <button
-            class="backButton"
-            onclick="showDashboard()">
-
-            ← Back to Building Overview
-
-        </button>
-
-
-        <div class="detailHeader">
-
-            <div>
-
-                <div class="detailRoomName">
-
-                    ${escapeHTML(name)}
-
-                </div>
-
-                <div class="detailStatus">
-
-                    ESP ID:
-                    ${escapeHTML(
-                        selectedRoom
-                    )}
-
-                    &nbsp; • &nbsp;
-
-                    Controller ONLINE
-
-                </div>
-
-            </div>
-
-
-            <div>
-
-                <span class="onlineBadge">
-                    ● ONLINE
-                </span>
+            <div
+            id="supply${i}"
+            class="supply">
+
+                OFF
 
             </div>
 
         </div>
 
 
-        <div class="detailGrid">
+        <div class="diagram">
 
-            <div class="detailValueCard">
-
-                <div class="detailValueLabel">
-                    Voltage
-                </div>
-
-                <div class="detailValue">
-                    ${Number(
-                        device.voltage || 0
-                    ).toFixed(1)}
-                    V
-                </div>
-
+            <div
+            id="line${i}"
+            class="line">
             </div>
 
+            <div
+            id="breaker${i}"
+            class="breaker">
 
-            <div class="detailValueCard">
-
-                <div class="detailValueLabel">
-                    Current
-                </div>
-
-                <div class="detailValue">
-                    ${Number(
-                        device.current || 0
-                    ).toFixed(2)}
-                    A
-                </div>
-
-            </div>
-
-
-            <div class="detailValueCard">
-
-                <div class="detailValueLabel">
-                    Power
-                </div>
-
-                <div class="detailValue">
-                    ${Number(
-                        device.power || 0
-                    ).toFixed(1)}
-                    W
-                </div>
-
-            </div>
-
-
-            <div class="detailValueCard">
-
-                <div class="detailValueLabel">
-                    Wi-Fi Signal
-                </div>
-
-                <div class="detailValue">
-                    ${device.rssi ?? "--"}
-                    <span style="font-size:20px">
-                        dBm
-                    </span>
-                </div>
+                ⚡
 
             </div>
 
         </div>
 
 
-        <div class="detailColumns">
+        <div class="values">
 
 
-            <div class="detailPanel">
+            <div class="value">
 
-                <div class="panelTitle">
-                    Electrical Information
+                <div class="value-label">
+                    VOLTAGE
                 </div>
 
+                <div
+                id="voltage${i}"
+                class="value-number">
 
-                <div class="infoRow">
-
-                    <span>
-                        Supply Status
-                    </span>
-
-                    <span class="infoValue">
-                        ${
-                            supply === "ON"
-                            ?
-                            "ON"
-                            :
-                            "OFF"
-                        }
-                    </span>
-
-                </div>
-
-
-                <div class="infoRow">
-
-                    <span>
-                        Fault
-                    </span>
-
-                    <span class="infoValue">
-                        ${
-                            device.fault ||
-                            "NO"
-                        }
-                    </span>
-
-                </div>
-
-
-                <div class="infoRow">
-
-                    <span>
-                        IP Address
-                    </span>
-
-                    <span class="infoValue">
-                        ${
-                            device.ip ||
-                            "--"
-                        }
-                    </span>
-
-                </div>
-
-
-                <div class="infoRow">
-
-                    <span>
-                        Device RSSI
-                    </span>
-
-                    <span class="infoValue">
-                        ${
-                            device.rssi ??
-                            "--"
-                        }
-                        dBm
-                    </span>
+                    0 V
 
                 </div>
 
             </div>
 
 
-            <div class="detailPanel">
+            <div class="value">
 
-                <div class="panelTitle">
-                    Remote Control
+                <div class="value-label">
+                    CURRENT
                 </div>
 
+                <div
+                id="current${i}"
+                class="value-number">
 
-                <button
-                    class="controlButton onButton"
-                    onclick="sendCommand('ON')">
+                    0 A
 
-                    ⚡ TURN SUPPLY ON
+                </div>
 
-                </button>
-
-
-                <button
-                    class="controlButton offButton"
-                    onclick="sendCommand('OFF')">
-
-                    ⛔ TURN SUPPLY OFF
-
-                </button>
+            </div>
 
 
-                <button
-                    class="controlButton statusButton"
-                    onclick="sendCommand('STATUS')">
+            <div class="value">
 
-                    🔄 REQUEST STATUS
+                <div class="value-label">
+                    POWER
+                </div>
 
-                </button>
+                <div
+                id="power${i}"
+                class="value-number">
 
+                    0 W
 
-                <button
-                    class="controlButton resetButton"
-                    onclick="sendCommand('RESET_FAULT')">
-
-                    🔧 RESET FAULT
-
-                </button>
+                </div>
 
             </div>
 
 
         </div>
-    `;
 
-}
 
+        <div class="controls">
 
-/* =========================================================
-   SEND COMMAND
-========================================================= */
+            <button
+            class="on-button"
+            onclick="roomOn(${i})">
 
-function sendCommand(
-    command
-) {
+                ON
 
-    if (
-        !mqttClient ||
-        !mqttClient.connected
-    ) {
-
-        alert(
-            "MQTT is not connected."
-        );
-
-        return;
-
-    }
-
-
-    if (!selectedRoom) {
-
-        return;
-
-    }
-
-
-    const topic =
-        COMMAND_BASE +
-        selectedRoom +
-        "/command";
-
-
-    mqttClient.publish(
-        topic,
-        command
-    );
-
-
-    console.log(
-        "Command sent:",
-        topic,
-        command
-    );
-
-}
-
-
-/* =========================================================
-   REGISTER PAGE
-========================================================= */
-
-function showRegister() {
-
-    selectedRoom = null;
-
-    setActiveNav(1);
-
-    renderRegisterPage();
-
-}
-
-
-function renderRegisterPage() {
-
-    const app =
-        document.getElementById(
-            "app"
-        );
-
-
-    /*
-       Find all currently detected
-       ESPs from MQTT.
-
-       Registered OR unregistered.
-    */
-
-    const detected =
-        getDetectedDevices();
-
-
-    app.innerHTML = `
-
-        <div class="pageTitle">
-            Register ESP Controller
-        </div>
-
-        <div class="pageDescription">
-
-            Scan the MQTT network and register
-            only the ESP controllers you want
-            to keep in this building.
-
-        </div>
-
-
-        <div class="registerPanel">
-
-            <div class="registerTop">
-
-                <div>
-
-                    <div class="sectionTitle">
-                        Detected ESP Controllers
-                    </div>
-
-                    <div style="
-                        color:#687386;
-                        margin-top:6px;
-                    ">
-
-                        Select an ESP whose signal/data
-                        is currently being received.
-
-                    </div>
-
-                </div>
-
-
-                <button
-                    class="bigButton scanButton"
-                    onclick="renderRegisterPage()">
-
-                    🔍 Refresh Detection
-
-                </button>
-
-            </div>
-
-
-            <div class="deviceList">
-
-                ${
-                    detected.length === 0
-                    ?
-                    `
-                    <div class="waiting">
-
-                        <div class="waitingIcon">
-                            📡
-                        </div>
-
-                        Waiting for ESP signal...
-
-                        <div style="
-                            font-size:15px;
-                            margin-top:10px;
-                        ">
-
-                            Make sure the ESP is connected
-                            to MQTT and publishing data.
-
-                        </div>
-
-                    </div>
-                    `
-                    :
-                    detected
-                        .map(
-                            createDetectedDevice
-                        )
-                        .join("")
-                }
-
-            </div>
-
-
-            <div class="registeredSection">
-
-                <div class="sectionTitle">
-                    Registered ESPs
-                </div>
-
-                <div style="
-                    color:#687386;
-                    margin:7px 0 18px;
-                ">
-
-                    These controllers are saved in this browser.
-
-                </div>
-
-
-                ${
-                    registeredESPs.length === 0
-                    ?
-                    `
-                    <div style="
-                        color:#687386;
-                        padding:20px;
-                    ">
-                        No ESP has been registered yet.
-                    </div>
-                    `
-                    :
-                    registeredESPs
-                        .map(
-                            createRegisteredRow
-                        )
-                        .join("")
-                }
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-function getDetectedDevices() {
-
-    const result = [];
-
-
-    /*
-       liveDevices only contains
-       devices that are actively
-       sending data.
-
-       For registration we need
-       unregistered devices too.
-
-       Therefore we keep a separate
-       discovery list.
-    */
-
-    Object.keys(
-        discoveredDevices
-    ).forEach(
-        function(name) {
-
-            result.push(
-                discoveredDevices[name]
-            );
-
-        }
-    );
-
-
-    return result;
-
-}
-
-
-/* =========================================================
-   DISCOVERY LIST
-========================================================= */
-
-let discoveredDevices = {};
-
-
-/*
-   Modify MQTT processing so every
-   DATA message is also discovered.
-*/
-
-
-const originalProcessMQTTMessage =
-    processMQTTMessage;
-
-
-/*
-   Replace function behavior by
-   wrapping MQTT message handler.
-*/
-
-
-mqttClient = null;
-
-
-/* Reconnect with custom handler below */
-
-function startMQTT() {
-
-    updateConnection(
-        false,
-        "Connecting..."
-    );
-
-
-    mqttClient = mqtt.connect(
-        MQTT_URL,
-        {
-            clientId:
-                "MRPSP_BMS_" +
-                Math.random()
-                    .toString(16)
-                    .substring(2),
-
-            clean: true,
-
-            reconnectPeriod: 3000,
-
-            connectTimeout: 10000
-        }
-    );
-
-
-    mqttClient.on(
-        "connect",
-        function() {
-
-            updateConnection(
-                true,
-                "MQTT ONLINE"
-            );
-
-
-            mqttClient.subscribe(
-                DATA_TOPIC
-            );
-
-
-            mqttClient.subscribe(
-                STATUS_TOPIC
-            );
-
-        }
-    );
-
-
-    mqttClient.on(
-        "message",
-        function(topic, message) {
-
-            const payload =
-                message.toString();
-
-            const parts =
-                topic.split("/");
-
-
-            if (
-                parts.length >= 5
-            ) {
-
-                const deviceName =
-                    parts[3];
-
-                const type =
-                    parts[4];
-
-
-                if (
-                    type === "data"
-                ) {
-
-                    try {
-
-                        const data =
-                            JSON.parse(
-                                payload
-                            );
-
-
-                        /*
-                           Store every ESP
-                           discovered from
-                           live MQTT data.
-                        */
-
-                        discoveredDevices[
-                            deviceName
-                        ] = {
-
-                            ...data,
-
-                            device_id:
-                                deviceName,
-
-                            name:
-                                data.name ||
-                                deviceName,
-
-                            lastSeen:
-                                Date.now()
-
-                        };
-
-
-                    }
-                    catch(e) {}
-
-                }
-
-            }
-
-
-            /*
-               Now process normal
-               dashboard logic.
-            */
-
-            processMQTTMessage(
-                topic,
-                payload
-            );
-
-
-            /*
-               If registration page
-               is open, refresh it.
-            */
-
-            if (
-                document.querySelector(
-                    ".registerPanel"
-                )
-            ) {
-
-                renderRegisterPage();
-
-            }
-
-        }
-    );
-
-
-    mqttClient.on(
-        "offline",
-        function() {
-
-            updateConnection(
-                false,
-                "MQTT OFFLINE"
-            );
-
-        }
-    );
-
-}
-
-
-function createDetectedDevice(
-    device
-) {
-
-    const name =
-        device.name ||
-        device.device_id;
-
-
-    const alreadyRegistered =
-        isRegistered(name);
-
-
-    return `
-
-        <div class="detectedDevice">
-
-            <div class="deviceName">
-
-                ${escapeHTML(name)}
-
-            </div>
-
-
-            <div class="deviceTopic">
-
-                mrpsp/building01/devices/${escapeHTML(name)}
-
-            </div>
-
-
-            <div class="deviceStatus">
-
-                🟢 ESP signal detected
-
-            </div>
-
-
-            ${
-                alreadyRegistered
-                ?
-                `
-                <div class="registered">
-                    ✓ REGISTERED
-                </div>
-                `
-                :
-                `
-                <button
-                    class="registerDeviceButton"
-                    onclick="
-                        registerESP(
-                            '${escapeJS(name)}'
-                        )
-                    ">
-
-                    REGISTER THIS ESP
-
-                </button>
-                `
-            }
-
-        </div>
-
-    `;
-
-}
-
-
-/* =========================================================
-   REGISTERED PAGE
-========================================================= */
-
-function showRegistered() {
-
-    selectedRoom = null;
-
-    setActiveNav(2);
-
-    renderRegisteredPage();
-
-}
-
-
-function renderRegisteredPage() {
-
-    const app =
-        document.getElementById(
-            "app"
-        );
-
-
-    app.innerHTML = `
-
-        <div class="pageTitle">
-            Registered ESP Controllers
-        </div>
-
-        <div class="pageDescription">
-            Only controllers saved here are allowed to appear on the BMS dashboard.
-        </div>
-
-
-        <div class="registerPanel">
-
-            ${
-                registeredESPs.length === 0
-                ?
-                `
-                <div class="waiting">
-
-                    No ESP controllers registered.
-
-                </div>
-                `
-                :
-                registeredESPs
-                    .map(
-                        createRegisteredRow
-                    )
-                    .join("")
-            }
-
-        </div>
-
-    `;
-
-}
-
-
-function createRegisteredRow(
-    name
-) {
-
-    const online =
-        !!liveDevices[name];
-
-
-    return `
-
-        <div class="registeredRow">
-
-            <div>
-
-                <div class="registeredName">
-
-                    ${escapeHTML(name)}
-
-                </div>
-
-                <div style="
-                    margin-top:6px;
-                    color:#687386;
-                ">
-
-                    ${
-                        online
-                        ?
-                        "🟢 Currently Online"
-                        :
-                        "⚪ Currently Offline"
-                    }
-
-                </div>
-
-            </div>
+            </button>
 
 
             <button
-                class="deleteButton"
-                onclick="
-                    deleteESP(
-                        '${escapeJS(name)}'
-                    )
-                ">
+            class="off-button"
+            onclick="roomOff(${i})">
 
-                🗑 DELETE
+                OFF
 
             </button>
 
         </div>
 
-    `;
 
+        </div>
+
+        `;
+    }
 }
 
 
-/* =========================================================
-   EVENTS
-========================================================= */
-
-function showEvents() {
-
-    selectedRoom = null;
-
-    setActiveNav(3);
+createRooms();
 
 
-    const app =
+// =====================================================
+// MQTT CONNECT
+// =====================================================
+
+client.on(
+    "connect",
+    function()
+    {
+
+        console.log(
+            "MQTT CONNECTED"
+        );
+
+
         document.getElementById(
-            "app"
+            "connection"
+        ).innerText =
+            "● MQTT ONLINE";
+
+
+        document.getElementById(
+            "connection"
+        ).className =
+            "connection online";
+
+
+        client.subscribe(
+            DATA_TOPIC
         );
 
-
-    app.innerHTML = `
-
-        <div class="pageTitle">
-            System Events
-        </div>
-
-        <div class="pageDescription">
-            Current registered ESP controller status.
-        </div>
+    }
+);
 
 
-        <div class="registerPanel">
+// =====================================================
+// MQTT OFFLINE
+// =====================================================
 
-            ${
-                registeredESPs.length === 0
-                ?
-                `
-                <div class="waiting">
-                    No registered ESPs.
-                </div>
-                `
-                :
-                registeredESPs
-                    .map(
-                        function(name) {
+client.on(
+    "close",
+    function()
+    {
 
-                            const online =
-                                !!liveDevices[name];
+        document.getElementById(
+            "connection"
+        ).innerText =
+            "● MQTT OFFLINE";
 
 
-                            return `
+        document.getElementById(
+            "connection"
+        ).className =
+            "connection";
 
-                                <div class="infoRow">
-
-                                    <span>
-                                        ${escapeHTML(name)}
-                                    </span>
-
-                                    <span class="infoValue">
-
-                                        ${
-                                            online
-                                            ?
-                                            "🟢 ONLINE"
-                                            :
-                                            "⚪ OFFLINE"
-                                        }
-
-                                    </span>
-
-                                </div>
-
-                            `;
-
-                        }
-                    )
-                    .join("")
-            }
-
-        </div>
-
-    `;
-
-}
+    }
+);
 
 
-/* =========================================================
-   NAV
-========================================================= */
+// =====================================================
+// MQTT MESSAGE
+// =====================================================
 
-function setActiveNav(
-    index
-) {
-
-    document
-        .querySelectorAll(
-            ".navButton"
-        )
-        .forEach(
-            function(button, i) {
-
-                button.classList.toggle(
-                    "active",
-                    i === index
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   UI UPDATE
-========================================================= */
-
-function updateUI() {
-
-    updateSideCount();
-
-
-    if (
-        selectedRoom
-    ) {
+client.on(
+    "message",
+    function(topic, message)
+    {
 
         if (
-            liveDevices[
-                selectedRoom
-            ]
-        ) {
+            topic !== DATA_TOPIC
+        )
+        {
+            return;
+        }
 
-            renderRoomDetail();
 
-        } else {
+        try
+        {
 
-            showDashboard();
+            const data =
+                JSON.parse(
+                    message.toString()
+                );
+
+
+            updateDashboard(
+                data
+            );
 
         }
 
-        return;
+        catch(error)
+        {
+
+            console.log(
+                error
+            );
+
+        }
 
     }
+);
 
 
-    const registerPanel =
-        document.querySelector(
-            ".registerPanel"
-        );
+// =====================================================
+// UPDATE DASHBOARD
+// =====================================================
+
+function updateDashboard(
+    data
+)
+{
+
+    document.getElementById(
+        "espStatus"
+    ).innerText =
+        "ONLINE";
 
 
-    if (registerPanel) {
-
-        /*
-           Do not force a page
-           change while user is
-           registering.
-        */
-
-        renderRegisterPage();
-
-        return;
-
-    }
+    document.getElementById(
+        "rssi"
+    ).innerText =
+        data.rssi +
+        " dBm";
 
 
-    renderDashboard();
+    for (
+        let room of data.rooms
+    )
+    {
 
-}
-
-
-function updateSideCount() {
-
-    const count =
-        Object.keys(
-            liveDevices
-        ).length;
+        const n =
+            room.room;
 
 
-    const element =
+        const supply =
+            document.getElementById(
+                "supply" + n
+            );
+
+
+        const line =
+            document.getElementById(
+                "line" + n
+            );
+
+
+        const breaker =
+            document.getElementById(
+                "breaker" + n
+            );
+
+
+        const isOn =
+            room.supply === "ON";
+
+
+        supply.innerText =
+            room.supply;
+
+
+        if (
+            isOn
+        )
+        {
+
+            supply.className =
+                "supply on";
+
+
+            line.className =
+                "line on";
+
+
+            breaker.className =
+                "breaker on";
+
+        }
+
+        else
+        {
+
+            supply.className =
+                "supply";
+
+
+            line.className =
+                "line";
+
+
+            breaker.className =
+                "breaker";
+
+        }
+
+
         document.getElementById(
-            "sideOnlineCount"
-        );
+            "voltage" + n
+        ).innerText =
+            Number(
+                room.voltage
+            ).toFixed(1)
+            + " V";
 
 
-    if (element) {
+        document.getElementById(
+            "current" + n
+        ).innerText =
+            Number(
+                room.current
+            ).toFixed(2)
+            + " A";
 
-        element.textContent =
-            count;
+
+        document.getElementById(
+            "power" + n
+        ).innerText =
+            Number(
+                room.power
+            ).toFixed(1)
+            + " W";
+
+
+        // ------------------------------------------------
+        // ALARM
+        // ------------------------------------------------
+
+        if (
+            !isOn
+        )
+        {
+
+            addAlarm(
+                "ROOM " +
+                n +
+                " MAIN SUPPLY OFF"
+            );
+
+        }
 
     }
 
 }
 
 
-/* =========================================================
-   SECURITY / HTML ESCAPE
-========================================================= */
+// =====================================================
+// SEND ROOM ON
+// =====================================================
 
-function escapeHTML(
-    text
-) {
+function roomOn(
+    room
+)
+{
 
-    return String(text)
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
+    if (
+        !client.connected
+    )
+    {
+
+        alert(
+            "MQTT is offline"
         );
+
+        return;
+    }
+
+
+    const command =
+        "ROOM" +
+        room +
+        "_ON";
+
+
+    client.publish(
+        COMMAND_TOPIC,
+        command
+    );
 
 }
 
 
-function escapeJS(
-    text
-) {
+// =====================================================
+// SEND ROOM OFF
+// =====================================================
 
-    return String(text)
-        .replace(
-            /\\/g,
-            "\\\\"
-        )
-        .replace(
-            /'/g,
-            "\\'"
+function roomOff(
+    room
+)
+{
+
+    if (
+        !client.connected
+    )
+    {
+
+        alert(
+            "MQTT is offline"
         );
+
+        return;
+    }
+
+
+    const command =
+        "ROOM" +
+        room +
+        "_OFF";
+
+
+    client.publish(
+        COMMAND_TOPIC,
+        command
+    );
 
 }
 
 
-/* =========================================================
-   START
-========================================================= */
+// =====================================================
+// ALARM LOG
+// =====================================================
 
-startMQTT();
+function addAlarm(
+    message
+)
+{
+
+    const alarms =
+        document.getElementById(
+            "alarms"
+        );
 
 
-/*
-   Start with empty dashboard.
+    const time =
+        new Date()
+        .toLocaleTimeString();
 
-   It will populate only after
-   registered ESP data arrives.
-*/
 
-showDashboard();
+    alarms.innerHTML =
+
+        `<div class="alarm-row">
+            ${time}
+            &nbsp;&nbsp;
+            ${message}
+        </div>`
+        +
+        alarms.innerHTML;
+
+
+    // Keep only last 8 alarms
+
+    while (
+        alarms.children.length > 8
+    )
+    {
+
+        alarms.removeChild(
+            alarms.lastChild
+        );
+
+    }
+
+}
 
 </script>
 
+
 </body>
+
 </html>
