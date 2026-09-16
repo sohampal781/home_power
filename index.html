@@ -244,8 +244,12 @@
             flex-shrink: 0; flex-wrap: wrap; gap: 16px; /* Added wrapping */
         }
         .top-bar-controls { 
-            display: flex; align-items: center; gap: 12px; 
-            flex-wrap: wrap; /* Added wrapping */
+            display: flex; 
+            align-items: center; 
+            justify-content: flex-end; /* Aligns the buttons themselves to the right */
+            gap: 12px; 
+            flex-wrap: wrap; 
+            margin-left: auto; /* Pushes the entire block to the far right corner */
         }
         
         .header-title {
