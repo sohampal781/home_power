@@ -1218,7 +1218,7 @@
                     // Update Graph Arrays
                     if (!dev.lastGraphUpdate || (Date.now() - dev.lastGraphUpdate) >= 1000) {
                         dev.lastGraphUpdate = Date.now();
-                        const timeStr = new Date().toLocaleTimeString([], {minute: '2-digit', second:'2-digit'});
+                        const timeStr = new Date().dev.historyTime.push(new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }));
                         
                         dev.historyCurrent.push(dev.current);
                         dev.historyTime.push(timeStr);
