@@ -9,105 +9,113 @@
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Inter for UI, JetBrains Mono for Telemetry -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         /* ==========================================================================
-           1. CSS CUSTOM PROPERTIES (SCADA / CYBER DESIGN SYSTEM)
+           1. CSS CUSTOM PROPERTIES (DESIGN SYSTEM)
            ========================================================================== */
         :root {
             /* Core Backgrounds */
-            --bg-body: #050507;
-            --bg-surface: #0f1115;
-            --bg-surface-hover: #16191f;
-            --bg-sidebar: #090a0c;
-            --bg-sidebar-hover: #14171c;
-            --bg-modal-overlay: rgba(0, 0, 0, 0.85);
+            --bg-body: #f1f5f9;
+            --bg-surface: #ffffff;
+            --bg-surface-hover: #f8fafc;
+            --bg-sidebar: #0f172a;
+            --bg-sidebar-hover: #1e293b;
+            --bg-modal-overlay: rgba(15, 23, 42, 0.7);
 
             /* Typography Colors */
-            --text-main: #e2e8f0;
+            --text-main: #0f172a;
             --text-muted: #64748b;
-            --text-light: #ffffff;
+            --text-light: #f8fafc;
             --text-sidebar-dim: #94a3b8;
-            --text-accent: #00f0ff;
+            --text-accent: #38bdf8;
 
             /* Borders & Dividers */
-            --border-light: rgba(255, 255, 255, 0.08);
-            --border-medium: rgba(255, 255, 255, 0.15);
-            --border-dark: rgba(255, 255, 255, 0.03);
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --border-dark: #334155;
 
-            /* Status & Brand Colors (Neon SCADA Palette) */
-            --primary: #00d2ff;
-            --primary-hover: #00a8cc;
-            --primary-light: rgba(0, 210, 255, 0.15);
+            /* Status & Brand Colors */
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: rgba(37, 99, 235, 0.1);
             
-            --success: #00ff66;
-            --success-hover: #00cc52;
-            --success-light: rgba(0, 255, 102, 0.1);
+            --success: #10b981;
+            --success-hover: #059669;
+            --success-light: rgba(16, 185, 129, 0.1);
             
-            --danger: #ff003c;
-            --danger-hover: #cc0030;
-            --danger-light: rgba(255, 0, 60, 0.1);
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --danger-light: rgba(239, 68, 68, 0.1);
             
-            --warning: #ffb700;
-            --warning-hover: #cc9200;
-            --warning-light: rgba(255, 183, 0, 0.1);
+            --warning: #f59e0b;
+            --warning-hover: #d97706;
+            --warning-light: rgba(245, 158, 11, 0.1);
             
             --info: #0ea5e9;
 
-            /* Shadows & Glows */
-            --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.5);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.5);
-            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.7);
-            --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.8);
-            --glow-primary: 0 0 12px rgba(0, 210, 255, 0.4);
-            --glow-success: 0 0 12px rgba(0, 255, 102, 0.4);
-            --glow-danger: 0 0 12px rgba(255, 0, 60, 0.4);
-
-            /* Fonts */
-            --font-ui: 'Inter', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
             /* Layout Dimensions */
             --sidebar-width: 280px;
-            --radius-sm: 4px;
-            --radius-md: 8px;
-            --radius-lg: 12px;
+            --topbar-height: 90px;
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
             
             /* Transitions */
             --transition-fast: 0.15s ease-in-out;
             --transition-normal: 0.3s ease-in-out;
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* ==========================================================================
            2. RESET & BASE STYLES
            ========================================================================== */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        html { font-size: 16px; scroll-behavior: smooth; }
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
 
         body {
             background-color: var(--bg-body);
-            /* Engineering Grid Overlay */
-            background-image: 
-                linear-gradient(var(--border-dark) 1px, transparent 1px),
-                linear-gradient(90deg, var(--border-dark) 1px, transparent 1px);
-            background-size: 40px 40px;
             color: var(--text-main);
-            font-family: var(--font-ui);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
             display: flex;
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* Custom SCADA Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-body); }
-        ::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--primary); box-shadow: var(--glow-primary); }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-body);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-medium);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
 
         /* ==========================================================================
            3. LAYOUT & SIDEBAR
@@ -118,318 +126,651 @@
             display: flex;
             flex-direction: column;
             position: fixed;
-            top: 0; left: 0;
+            top: 0;
+            left: 0;
             height: 100vh;
             z-index: 100;
             color: var(--text-sidebar-dim);
             transition: var(--transition-normal);
-            border-right: 1px solid var(--border-light);
-            box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+            box-shadow: var(--shadow-lg);
         }
 
         .brand {
             padding: 32px 24px;
-            border-bottom: 1px solid var(--border-light);
-            display: flex; align-items: center; gap: 16px;
-            background: linear-gradient(180deg, rgba(0,210,255,0.05) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border-dark);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
         }
 
-        .brand i { font-size: 36px; color: var(--primary); filter: drop-shadow(0 0 8px var(--primary)); }
+        .brand i {
+            font-size: 36px;
+            color: var(--primary);
+            filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.4));
+        }
+
         .brand h2 {
-            font-size: 22px; color: var(--text-light); font-weight: 800;
-            line-height: 1.1; letter-spacing: 1px; text-transform: uppercase;
+            font-size: 22px;
+            color: var(--text-light);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
-        .nav-menu { padding: 24px 0; flex-grow: 1; list-style: none; overflow-y: auto; }
+        .nav-menu {
+            padding: 24px 0;
+            flex-grow: 1;
+            list-style: none;
+            overflow-y: auto;
+        }
 
         .nav-item {
-            padding: 16px 24px; margin: 4px 16px; border-radius: var(--radius-sm);
-            font-size: 14px; font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; gap: 16px;
+            padding: 16px 24px;
+            margin: 4px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 16px;
             transition: var(--transition-fast);
             color: var(--text-sidebar-dim);
-            text-transform: uppercase; letter-spacing: 1px;
-            border: 1px solid transparent;
         }
 
-        .nav-item i { font-size: 20px; transition: var(--transition-fast); }
+        .nav-item i {
+            font-size: 24px;
+            transition: var(--transition-fast);
+        }
 
         .nav-item:hover {
-            background-color: var(--bg-surface);
+            background-color: var(--bg-sidebar-hover);
             color: var(--text-light);
-            border-color: var(--border-light);
+            transform: translateX(4px);
         }
 
         .nav-item.active {
-            background-color: var(--primary-light);
-            color: var(--primary);
-            border-color: var(--primary);
-            box-shadow: var(--glow-primary);
+            background-color: var(--primary);
+            color: var(--text-light);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
-        .nav-item.active i { color: var(--primary); filter: drop-shadow(0 0 5px var(--primary)); }
+        .nav-item.active i {
+            color: #ffffff;
+        }
 
         .sidebar-footer {
-            padding: 24px; border-top: 1px solid var(--border-light);
-            background: rgba(0,0,0,0.3);
+            padding: 24px;
+            border-top: 1px solid var(--border-dark);
+            background-color: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
         }
 
         .stat-label {
-            font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
-            margin-bottom: 8px; color: var(--text-muted); font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-weight: 600;
         }
 
         .stat-value {
-            font-size: 32px; font-weight: 800; color: var(--primary);
-            font-family: var(--font-mono); text-shadow: var(--glow-primary);
-            display: flex; align-items: center; gap: 12px;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         /* ==========================================================================
            4. MAIN CONTENT AREA & TOPBAR
            ========================================================================== */
         #main-content {
-            margin-left: var(--sidebar-width); flex-grow: 1;
-            padding: 40px 48px; width: calc(100% - var(--sidebar-width));
-            min-height: 100vh; display: flex; flex-direction: column;
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 40px 48px;
+            width: calc(100% - var(--sidebar-width));
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         .top-bar { 
             display: flex; justify-content: space-between; align-items: center; 
-            margin-bottom: 30px; padding-bottom: 20px; 
-            border-bottom: 1px solid var(--border-light); 
-            flex-shrink: 0; flex-wrap: wrap; gap: 16px; 
+            margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light); 
+            flex-shrink: 0; flex-wrap: wrap; gap: 16px; /* Added wrapping */
         }
         .top-bar-controls { 
-            display: flex; align-items: center; justify-content: flex-end; 
-            gap: 12px; flex-wrap: wrap; margin-left: auto; 
+            display: flex; 
+            align-items: center; 
+            justify-content: flex-end; /* Aligns the buttons themselves to the right */
+            gap: 12px; 
+            flex-wrap: wrap; 
+            margin-left: auto; /* Pushes the entire block to the far right corner */
         }
         
         .header-title {
-            font-size: 28px; font-weight: 800; color: var(--text-light);
-            margin-bottom: 4px; letter-spacing: 1px; text-transform: uppercase;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
 
-        .subtitle { font-size: 14px; color: var(--text-accent); font-family: var(--font-mono); }
-
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
         /* ==========================================================================
-           5. BADGES, STATUS & PULSE ANIMATIONS (LED LOOK)
+           5. BADGES, STATUS & PULSE ANIMATIONS
            ========================================================================== */
         .sys-status {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 20px; background-color: rgba(0,0,0,0.5);
-            border-radius: var(--radius-sm); font-weight: 700;
-            font-size: 12px; font-family: var(--font-mono); letter-spacing: 1px;
-            border: 1px solid var(--border-medium);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            background-color: var(--bg-surface);
+            border-radius: 30px;
+            box-shadow: var(--shadow-sm);
+            font-weight: 700;
+            font-size: 14px;
+            border: 1px solid var(--border-light);
+            transition: var(--transition-normal);
         }
 
         .role-badge {
-            display: flex; align-items: center; gap: 8px;
-            background-color: var(--bg-surface); color: var(--text-main);
-            padding: 10px 20px; border-radius: var(--radius-sm);
-            font-weight: 700; font-size: 13px; cursor: pointer;
-            border: 1px solid var(--border-medium); transition: var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--warning-light);
+            color: var(--warning-hover);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            transition: var(--transition-fast);
+            user-select: none;
         }
 
-        .role-badge:hover { border-color: var(--primary); box-shadow: var(--glow-primary); color: var(--primary); }
-        .role-badge.admin-active { border-color: var(--danger); color: var(--danger); box-shadow: var(--glow-danger); }
+        .role-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
 
-        .pulse-dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 5px currentColor; }
-        .dot-online { background-color: var(--success); box-shadow: var(--glow-success); animation: pulse-green 2s infinite; }
-        .dot-offline { background-color: var(--danger); box-shadow: var(--glow-danger); animation: pulse-red 2s infinite; }
+        .role-badge.admin-active {
+            background-color: var(--danger-light);
+            color: var(--danger-hover);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .pulse-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-online {
+            background-color: var(--success);
+            animation: pulse-green 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dot-offline {
+            background-color: var(--danger);
+            animation: pulse-red 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
         
         @keyframes pulse-green {
-            0% { box-shadow: 0 0 0 0 rgba(0,255,102,0.7), var(--glow-success); }
-            70% { box-shadow: 0 0 0 8px rgba(0,255,102,0), var(--glow-success); }
-            100% { box-shadow: 0 0 0 0 rgba(0,255,102,0), var(--glow-success); }
+            0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(16,185,129,0); }
+            100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
         }
         @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(255,0,60,0.7), var(--glow-danger); }
-            70% { box-shadow: 0 0 0 8px rgba(255,0,60,0), var(--glow-danger); }
-            100% { box-shadow: 0 0 0 0 rgba(255,0,60,0), var(--glow-danger); }
+            0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(239,68,68,0); }
+            100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
         }
 
         /* ==========================================================================
-           6. GRID & CARD ARCHITECTURE (HARDWARE PANELS)
+           6. GRID & CARD ARCHITECTURE
            ========================================================================== */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 24px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 32px;
+        }
 
         .card {
-            background-color: var(--bg-surface); border-radius: var(--radius-sm);
-            padding: 24px; border: 1px solid var(--border-medium);
-            position: relative; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
+            background-color: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-light);
+            transition: var(--transition-normal);
+            position: relative;
+            overflow: hidden;
         }
 
-        /* Top colored strip for cards */
         .card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
-            background: var(--primary); box-shadow: var(--glow-primary); transition: var(--transition-normal);
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary);
+            opacity: 0;
+            transition: var(--transition-normal);
         }
-        .card-offline::before { background: var(--danger); box-shadow: var(--glow-danger); }
-        .card-offline { border-color: rgba(255, 0, 60, 0.3); background-color: rgba(20, 5, 5, 0.9); }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-offline {
+            border-color: rgba(239, 68, 68, 0.3);
+            background-color: #fffafa;
+        }
+
+        .card-offline::before {
+            background: var(--danger);
+            opacity: 1;
+        }
 
         .card-header {
-            display: flex; justify-content: space-between; align-items: flex-start;
-            margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-light);
         }
 
         .room-name {
-            font-size: 20px; font-weight: 800; color: var(--text-light);
-            margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px;
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
         }
 
         .hw-id {
-            font-size: 12px; color: var(--primary); font-family: var(--font-mono);
-            background-color: rgba(0,210,255,0.1); padding: 4px 8px; border-radius: 3px;
-            display: inline-block; border: 1px solid rgba(0,210,255,0.2);
+            font-size: 14px;
+            color: var(--text-muted);
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-body);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            display: inline-block;
+            border: 1px solid var(--border-light);
         }
 
         /* ==========================================================================
-           7. METRICS & DATA DISPLAYS (LCD INSETS)
+           7. METRICS & DATA DISPLAYS
            ========================================================================== */
-        .metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
 
         .metric-box {
-            background-color: #050608; padding: 16px; border-radius: var(--radius-sm);
-            display: flex; flex-direction: column;
-            border: 1px inset var(--border-light);
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.8);
+            background-color: var(--bg-body);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid transparent;
+            transition: var(--transition-fast);
+        }
+
+        .metric-box:hover {
+            border-color: var(--border-light);
+            background-color: var(--bg-surface);
+            box-shadow: var(--shadow-sm);
         }
 
         .metric-label {
-            font-size: 11px; text-transform: uppercase; color: var(--text-muted);
-            font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
-            letter-spacing: 1px;
+            font-size: 13px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.5px;
         }
-        .metric-label i { font-size: 14px; }
+
+        .metric-label i {
+            font-size: 18px;
+        }
 
         .metric-val {
-            font-size: 28px; font-weight: 700; color: var(--text-light);
-            font-family: var(--font-mono); text-shadow: 0 0 10px rgba(255,255,255,0.3);
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-main);
+            transition: color var(--transition-fast);
         }
-        .metric-val span { font-size: 14px; color: var(--text-muted); margin-left: 4px; text-shadow: none; }
-        
-        .text-success { color: var(--success) !important; text-shadow: var(--glow-success) !important; }
-        .text-danger { color: var(--danger) !important; text-shadow: var(--glow-danger) !important; }
+
+        .metric-val span {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-left: 2px;
+        }
 
         /* ==========================================================================
-           8. BUTTONS & FORMS (TACTILE SWITCHES)
+           8. BUTTONS & FORMS
            ========================================================================== */
         .btn {
-            padding: 12px 24px; font-size: 13px; font-weight: 700; font-family: var(--font-mono);
-            border: 1px solid transparent; border-radius: var(--radius-sm); cursor: pointer;
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            transition: all 0.1s ease; text-transform: uppercase; letter-spacing: 1px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
-        }
-        .btn:active { transform: translateY(2px); box-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-
-        .btn-primary { background: linear-gradient(180deg, #00d2ff, #00a8cc); color: #000; border-color: #00d2ff; }
-        .btn-primary:hover { box-shadow: var(--glow-primary), inset 0 1px 0 rgba(255,255,255,0.4); }
-
-        .btn-success { background: linear-gradient(180deg, #00ff66, #00cc52); color: #000; border-color: #00ff66; }
-        .btn-success:hover { box-shadow: var(--glow-success), inset 0 1px 0 rgba(255,255,255,0.4); }
-
-        .btn-danger { background: linear-gradient(180deg, #ff003c, #cc0030); color: #fff; border-color: #ff003c; }
-        .btn-danger:hover { box-shadow: var(--glow-danger), inset 0 1px 0 rgba(255,255,255,0.4); }
-
-        .btn-outline { background: #111; border: 1px solid var(--border-medium); color: var(--text-light); }
-        .btn-outline:hover { background: #222; border-color: var(--text-light); }
-
-        .input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-        .input-group input {
-            padding: 12px 16px; border: 1px inset var(--border-medium); border-radius: var(--radius-sm);
-            font-size: 14px; font-family: var(--font-mono); color: var(--primary);
-            background-color: #050507; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             transition: var(--transition-fast);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .input-group input:focus { outline: none; border-color: var(--primary); box-shadow: inset 0 0 8px rgba(0,210,255,0.3); }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-success:hover {
+            background-color: var(--success-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-light);
+            color: var(--danger-hover);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--border-medium);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--bg-body);
+            border-color: var(--text-main);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            padding: 14px 16px;
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            transition: var(--transition-fast);
+            background-color: var(--bg-surface);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
 
         /* ==========================================================================
            9. LISTS & TABLES
            ========================================================================== */
         .list-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 24px; background-color: var(--bg-surface);
-            border-radius: var(--radius-sm); margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 32px;
+            background-color: var(--bg-surface);
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
             border: 1px solid var(--border-light);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: var(--transition-normal);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition-normal);
         }
-        .list-item:hover { border-color: var(--primary); box-shadow: var(--glow-primary); transform: translateX(4px); }
-        
-        .list-info h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; color: var(--text-light); text-transform: uppercase; }
-        .list-info p { font-size: 13px; color: var(--primary); font-family: var(--font-mono); }
+
+        .list-item:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--border-medium);
+            transform: translateX(4px);
+        }
+
+        .list-info h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .list-info p {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-body);
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
 
         /* ==========================================================================
-           10. GRAPHS & CHARTS (RADAR/OSCILLOSCOPE VIBE)
+           10. GRAPHS & CHARTS
            ========================================================================== */
         .graph-container {
-            background-color: var(--bg-surface); padding: 24px;
-            border-radius: var(--radius-sm); border: 1px solid var(--border-light);
-            margin-top: 24px; height: 450px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.5);
+            background-color: var(--bg-surface);
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            margin-top: 32px;
+            height: 450px;
+            box-shadow: var(--shadow-sm);
             position: relative;
         }
-        .graph-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+
+        .graph-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
 
         /* ==========================================================================
            11. MODALS & OVERLAYS
            ========================================================================== */
         .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: var(--bg-modal-overlay); backdrop-filter: blur(8px);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 1000; opacity: 0; pointer-events: none; transition: var(--transition-normal);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-modal-overlay);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition-normal);
         }
-        .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
 
         .modal-content {
-            background-color: var(--bg-surface); width: 90%; max-width: 500px;
-            border-radius: var(--radius-sm); padding: 32px;
-            box-shadow: 0 0 40px rgba(0,0,0,0.9);
-            border: 1px solid var(--border-medium); border-top: 3px solid var(--warning);
-            transform: translateY(20px) scale(0.95); transition: var(--transition-normal);
+            background-color: var(--bg-surface);
+            width: 90%;
+            max-width: 500px;
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            box-shadow: var(--shadow-xl);
+            transform: translateY(20px) scale(0.95);
+            transition: var(--transition-slow);
+            opacity: 0;
         }
-        .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
 
-        .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; color: var(--text-light); text-transform: uppercase;}
-        .modal-body { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; line-height: 1.6; font-family: var(--font-mono);}
-        .modal-actions { display: flex; justify-content: flex-end; gap: 16px; }
+        .modal-overlay.active .modal-content {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-body {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 16px;
+        }
 
         /* ==========================================================================
            12. TOAST NOTIFICATIONS
            ========================================================================== */
-        .toast-container { position: fixed; bottom: 32px; right: 32px; display: flex; flex-direction: column; gap: 12px; z-index: 2000; }
-        .toast {
-            background-color: var(--bg-surface); border-left: 4px solid var(--primary);
-            color: var(--text-light); padding: 16px 24px; border-radius: var(--radius-sm);
-            font-weight: 600; font-family: var(--font-mono); font-size: 13px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            display: flex; align-items: center; gap: 16px;
-            transform: translateX(120%); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border-top: 1px solid var(--border-light); border-right: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light);
+        .toast-container {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 2000;
         }
-        .toast.show { transform: translateX(0); opacity: 1; }
-        .toast-icon { font-size: 24px; }
+
+        .toast {
+            background-color: var(--bg-sidebar);
+            color: white;
+            padding: 16px 24px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transform: translateX(120%);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            min-width: 300px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast-icon {
+            font-size: 24px;
+        }
 
         /* ==========================================================================
            13. UTILITIES & EMPTY STATES
            ========================================================================== */
+        .text-success { color: var(--success) !important; }
+        .text-danger { color: var(--danger) !important; }
+        .text-muted { color: var(--text-muted) !important; }
+        .text-warning { color: var(--warning) !important; }
+        
         .hidden { display: none !important; }
         
         .empty-state {
-            text-align: center; padding: 100px 20px; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border: 1px dashed var(--border-medium); border-radius: var(--radius-sm);
+            text-align: center;
+            padding: 100px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        .empty-icon { font-size: 64px; color: var(--border-medium); margin-bottom: 24px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.1)); }
-        .empty-state h3 { font-size: 20px; color: var(--text-light); margin-bottom: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;}
-        .empty-state p { color: var(--text-muted); font-size: 14px; max-width: 400px; line-height: 1.6; font-family: var(--font-mono); }
+        
+        .empty-icon {
+            font-size: 80px;
+            color: var(--border-medium);
+            margin-bottom: 24px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));
+        }
+        
+        .empty-state h3 {
+            font-size: 24px;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            font-weight: 800;
+        }
+        
+        .empty-state p {
+            color: var(--text-muted);
+            font-size: 16px;
+            max-width: 400px;
+            line-height: 1.6;
+        }
 
         /* ==========================================================================
-           14. RESPONSIVE & SPECIFICS
+           14. RESPONSIVE MEDIA QUERIES
            ========================================================================== */
-        @media (max-width: 1200px) { .metrics-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 1200px) {
+            .grid { grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
+            .metrics-grid { grid-template-columns: 1fr 1fr; }
+        }
+
         @media (max-width: 992px) {
             #sidebar { transform: translateX(-100%); }
             #sidebar.mobile-open { transform: translateX(0); }
@@ -437,69 +778,100 @@
             .top-bar { flex-direction: column; gap: 24px; align-items: flex-start; }
             .mobile-menu-btn { display: block !important; }
             .graph-container { height: 350px; }
-            .room-layout { flex-direction: column !important; }
         }
 
-        .mobile-menu-btn { display: none; font-size: 32px; color: var(--text-light); cursor: pointer; background: none; border: none; }
-        
-        /* TERMINAL LOGIN SCREEN */
+        .mobile-menu-btn {
+            display: none;
+            font-size: 32px;
+            color: var(--text-main);
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        /* ==========================================================================
+           LOGIN SCREEN OVERLAY
+           ========================================================================== */
         .login-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center;
+            background: var(--bg-sidebar); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
             transition: opacity 0.4s ease;
-            background-image: 
-                linear-gradient(rgba(0, 210, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 210, 255, 0.05) 1px, transparent 1px);
-            background-size: 40px 40px;
         }
         .login-card {
-            background: rgba(10,12,15,0.95); padding: 40px; border-radius: var(--radius-sm);
-            width: 90%; max-width: 400px; box-shadow: 0 0 50px rgba(0,210,255,0.2); text-align: center;
-            border: 1px solid var(--primary);
+            background: var(--bg-surface); padding: 40px; border-radius: var(--radius-lg);
+            width: 90%; max-width: 400px; box-shadow: var(--shadow-xl); text-align: center;
         }
-        .login-card h2 { margin-bottom: 8px; color: var(--primary); font-weight: 800; display:flex; align-items:center; justify-content:center; gap:8px; text-shadow: var(--glow-primary); text-transform: uppercase; letter-spacing: 2px;}
+        .login-card h2 { margin-bottom: 24px; color: var(--text-main); font-weight: 800; display:flex; align-items:center; justify-content:center; gap:8px;}
         .login-card .input-group { text-align: left; margin-bottom: 16px; }
-        .login-card input { width: 100%; color: var(--primary); border-color: var(--primary-light); }
-        .login-card .btn { width: 100%; margin-top: 12px; padding: 14px; }
-
-        /* IST DIGITAL CLOCK */
+        .login-card input { width: 100%; }
+        .login-card .btn { width: 100%; margin-top: 12px; padding: 14px; font-size: 16px;}
+        /* ==========================================================================
+           INNOVATIVE IST CLOCK & GRAPH GLOW
+           ========================================================================== */
         .ist-clock-pill {
-            display: flex; align-items: center; gap: 10px;
-            background: #000; padding: 10px 20px; border-radius: var(--radius-sm);
-            border: 1px solid var(--primary); box-shadow: inset 0 0 10px rgba(0,210,255,0.2), var(--glow-primary);
-            font-family: var(--font-mono); cursor: default; white-space: nowrap; flex-shrink: 0;
+            display: flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            padding: 8px 16px; border-radius: 30px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+            font-family: 'Inter', monospace;
+            cursor: default; transition: all 0.3s ease;
+            white-space: nowrap; /* CRITICAL FIX: Keeps it on one line */
+            flex-shrink: 0;
         }
-        .ist-clock-pulse { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; box-shadow: var(--glow-primary); animation: pulse-cyan 2s infinite; }
+        .ist-clock-pill:hover {
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+            border-color: rgba(56, 189, 248, 0.6);
+        }
+        .ist-clock-pulse {
+            width: 8px; height: 8px; background: #38bdf8; border-radius: 50%;
+            box-shadow: 0 0 8px #38bdf8; animation: pulse-cyan 2s infinite;
+        }
         @keyframes pulse-cyan {
-            0% { box-shadow: 0 0 0 0 rgba(0,210,255,0.7); }
-            70% { box-shadow: 0 0 0 8px rgba(0,210,255,0); }
-            100% { box-shadow: 0 0 0 0 rgba(0,210,255,0); }
+            0% { box-shadow: 0 0 0 0 rgba(56,189,248,0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(56,189,248,0); }
+            100% { box-shadow: 0 0 0 0 rgba(56,189,248,0); }
         }
-
-        .room-layout { display: flex; flex-direction: row; gap: 24px; flex-grow: 1; min-height: 0; min-width: 0; }
-        .room-col-left { display: flex; flex-direction: column; gap: 24px; min-height: 0; flex: 2; min-width: 0; }
-        .room-col-right { display: flex; flex-direction: column; gap: 24px; overflow-y: auto; padding-right: 4px; flex: 1; min-width: 0; }
+        /* ==========================================================================
+           SINGLE SCREEN LAYOUT FIXES (PREVENTS CUT-OFF)
+           ========================================================================== */
+        .room-layout { 
+            display: flex; flex-direction: row; gap: 24px; 
+            flex-grow: 1; min-height: 0; min-width: 0; 
+        }
+        .room-col-left { 
+            display: flex; flex-direction: column; gap: 16px; min-height: 0; 
+            flex: 2; min-width: 0; 
+        }
+        .room-col-right { 
+            display: flex; flex-direction: column; gap: 16px; overflow-y: auto; padding-right: 4px; 
+            flex: 1; min-width: 0; 
+        }
+        .card, .graph-container {
+            min-width: 0;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
-    <!-- TERMINAL LOGIN -->
+    <!-- LOGIN OVERLAY -->
     <div id="login-screen" class="login-overlay">
         <div class="login-card">
-            <h2><i class="ph-fill ph-cpu"></i> HMI TERMINAL</h2>
-            <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 12px; font-family: var(--font-mono); text-transform: uppercase;">Authenticate to Access SCADA Fleet</p>
+            <h2><i class="ph-fill ph-cpu" style="color: var(--primary);"></i> SECURE BMS</h2>
+            <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 14px;">Enter your credentials to access the fleet.</p>
             
             <div class="input-group">
-                <label class="metric-label" style="color: var(--primary);">OPERATOR ID</label>
-                <input type="text" id="login-id" placeholder="SYSADMIN" onkeypress="if(event.key === 'Enter') handleLogin()">
+                <label class="metric-label" style="margin-bottom: 4px;">User ID</label>
+                <input type="text" id="login-id" placeholder="e.g. admin" onkeypress="if(event.key === 'Enter') handleLogin()">
             </div>
             <div class="input-group">
-                <label class="metric-label" style="color: var(--primary);">AUTHORIZATION KEY</label>
+                <label class="metric-label" style="margin-bottom: 4px;">Password</label>
                 <input type="password" id="login-pass" placeholder="••••••••" onkeypress="if(event.key === 'Enter') handleLogin()">
             </div>
             
-            <p id="login-error" class="hidden" style="color: var(--danger); font-size: 12px; margin: 8px 0; font-family: var(--font-mono); font-weight: 700; text-shadow: var(--glow-danger);">ACCESS DENIED</p>
+            <p id="login-error" class="hidden" style="color: var(--danger); font-size: 13px; margin: 8px 0; font-weight: 600;">Invalid ID or Password</p>
             
-            <button class="btn btn-primary" onclick="handleLogin()">INITIALIZE SECURE LINK</button>
+            <button class="btn btn-primary" onclick="handleLogin()">SECURE LOGIN</button>
         </div>
     </div>
 
@@ -507,26 +879,26 @@
     <aside id="sidebar">
         <div class="brand">
             <i class="ph-fill ph-cpu"></i>
-            <h2>NEXUS<br><span style="font-size: 12px; color: var(--primary); font-family: var(--font-mono);">SCADA.SYS</span></h2>
+            <h2>SECURE<br>BMS</h2>
         </div>
         <ul class="nav-menu">
             <li class="nav-item active" onclick="navigate('dashboard')">
-                <i class="ph ph-squares-four"></i> Overview
+                <i class="ph ph-squares-four"></i> Dashboard
             </li>
             <li class="nav-item" onclick="navigate('register')">
-                <i class="ph ph-radar"></i> Hardware Scan
+                <i class="ph ph-radar"></i> Detect Hardware
             </li>
             <li class="nav-item admin-only hidden" onclick="navigate('registered')">
-                <i class="ph ph-shield-check"></i> Fleet Auth
+                <i class="ph ph-shield-check"></i> Authorized Blocks
             </li>
             <li class="nav-item admin-only hidden" onclick="navigate('system')">
-                <i class="ph ph-terminal-window"></i> Architecture
+                <i class="ph ph-sliders"></i> System Config
             </li>
         </ul>
         <div class="sidebar-footer">
-            <div class="stat-label">Active Nodes</div>
+            <div class="stat-label">Online Controllers</div>
             <div class="stat-value" id="sidebar-online-count">0</div>
-            <div style="margin-top: 16px; font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); text-transform: uppercase;">v2.4.0 Enterprise Build</div>
+            <div style="margin-top: 16px; font-size: 12px; color: var(--text-muted);">v2.4.0 Enterprise Edition</div>
         </div>
     </aside>
 
@@ -538,26 +910,28 @@
                     <i class="ph ph-list"></i>
                 </button>
                 <div>
-                    <h1 class="header-title">Global Telemetry</h1>
-                    <div class="subtitle">SECURE CLOUD-SYNCED ELECTRICAL HMI</div>
+                    <h1 class="header-title">Enterprise SCADA Dashboard</h1>
+                    <div class="subtitle">Secure Cloud-Synced Electrical Management System</div>
                 </div>
             </div>
             <div class="top-bar-controls">
+                <!-- User Profile & Logout -->
                 <div class="role-badge" id="user-profile" onclick="logout()" title="Click to logout">
                     <i class="ph-fill ph-user" id="profile-icon"></i> 
-                    <span id="role-text" style="font-family: var(--font-mono);">AUTH...</span>
+                    <span id="role-text">Logging in...</span>
                     <i class="ph-bold ph-sign-out" style="margin-left: 6px;"></i>
                 </div>
+                <!-- System Connection Status -->
                 <div class="sys-status" id="sys-status-container">
                     <div class="pulse-dot dot-offline" id="system-status-dot"></div>
-                    <span id="system-status-text">NO LINK</span>
+                    <span id="system-status-text">DISCONNECTED</span>
                 </div>
                 <div class="ist-clock-pill">
                     <div class="ist-clock-pulse"></div>
-                    <span id="ist-date" style="color: var(--text-muted); font-size: 11px; font-weight: 700; margin-right: 4px;">--</span>
-                    <span id="ist-time" style="font-weight: 800; color: var(--primary); font-size: 16px; letter-spacing: 1px; text-shadow: var(--glow-primary);">--:--:--</span>
-                    <span style="color: var(--text-light); font-size: 10px; font-weight: 800; margin-left: 2px;">IST</span>
-                </div>
+                    <span id="ist-date" style="color: #94a3b8; font-size: 13px; font-weight: 600; margin-right: 4px;">Loading...</span>
+                    <span id="ist-time" style="font-weight: 800; color: #ffffff; font-size: 15px; letter-spacing: 0.5px;">--:--:--</span>
+                    <span style="color: #38bdf8; font-size: 11px; font-weight: 800; margin-left: 2px;">IST</span>
+                </div
             </div>
         </div>
         
@@ -573,29 +947,35 @@
         <div class="modal-content">
             <div class="modal-title" id="modal-title">
                 <i class="ph-fill ph-warning-circle" style="color: var(--warning);"></i> 
-                AWAITING OVERRIDE
+                Confirm Action
             </div>
             <div class="modal-body" id="modal-body">
-                Please confirm structural modification. Action is irreversible and logs will be recorded.
+                Are you sure you want to proceed with this action? This cannot be undone.
             </div>
             <div class="modal-actions">
-                <button class="btn btn-outline" onclick="closeModal()">ABORT</button>
-                <button class="btn btn-danger" id="modal-confirm-btn">EXECUTE</button>
+                <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-danger" id="modal-confirm-btn">Confirm</button>
             </div>
         </div>
     </div>
 
     <!-- JAVASCRIPT APPLICATION LOGIC -->
     <script>
+        /**
+         * ==========================================================================
+         * 1. CORE SYSTEM CONFIGURATION & STATE
+         * ==========================================================================
+         */
         const CONFIG = {
             EXPECTED_TOKEN: "MRPSP_AUTH_999",
             MQTT_BROKER: "wss://test.mosquitto.org:8081/mqtt",
             STORAGE_KEY: "SECURE_BMS_DEVICES",
             CLOUD_CONFIG_TOPIC: "mrpsp/secure_bms/system/cloud_config",
             MAX_GRAPH_POINTS: 240, 
-            OFFLINE_TIMEOUT_MS: 15000 
+            OFFLINE_TIMEOUT_MS: 15000 // Increased to 8 seconds to prevent false offlines
         };
 
+       // --- HARDCODED USERS DATABASE ---
         const USERS = {
             "admin": { password: "admin", role: "admin" },
             "operator": { password: "user", role: "user" }
@@ -604,35 +984,45 @@
         const state = {
             registeredDevices: [], detectedDevices: {}, currentScreen: 'dashboard',
             selectedDeviceId: null, mqttClient: null, mqttConnected: false,
+            // Fetch saved session
             username: localStorage.getItem('bms_user') || null,
             userRole: localStorage.getItem('bms_role') || null
         };
 
         let currentChartInstance = null;
-        let watchdogTimer = null;
 
         function initApp() {
+            // Check Login Status first
             if (!state.username || !state.userRole) {
                 document.getElementById('login-screen').classList.remove('hidden');
             } else {
                 document.getElementById('login-screen').classList.add('hidden');
                 updateRoleUI();
                 connectMQTT();
-                setInterval(watchdogTimerLogic, 1000);
+                setInterval(watchdogTimer, 1000);
             }
+            
             const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
             if (stored) { try { state.registeredDevices = JSON.parse(stored); } catch(e){} }
             renderScreen();
         }
-
+        let watchdogTimer = null;
+        /**
+         * ==========================================================================
+         * 3. ROLE BASED ACCESS CONTROL (RBAC)
+         * ==========================================================================
+         */
         function handleLogin() {
             const idInput = document.getElementById('login-id').value.trim();
             const passInput = document.getElementById('login-pass').value.trim();
             const errorText = document.getElementById('login-error');
 
             if (USERS[idInput] && USERS[idInput].password === passInput) {
+                // Successful Login
                 state.username = idInput;
                 state.userRole = USERS[idInput].role;
+                
+                // Save session
                 localStorage.setItem('bms_user', state.username);
                 localStorage.setItem('bms_role', state.userRole);
                 
@@ -640,19 +1030,20 @@
                 document.getElementById('login-screen').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('login-screen').classList.add('hidden');
-                    initApp(); 
-                    showToast(`OPERATOR LINKED: ${state.username.toUpperCase()}`, "success");
+                    initApp(); // Restart app safely
+                    showToast(`Welcome back, ${state.username.toUpperCase()}`, "success");
                 }, 400);
             } else {
+                // Failed Login
                 errorText.classList.remove('hidden');
             }
         }
 
         function logout() {
-            if(confirm("TERMINATE SESSION?")) {
+            if(confirm("Are you sure you want to log out?")) {
                 localStorage.removeItem('bms_user');
                 localStorage.removeItem('bms_role');
-                location.reload(); 
+                location.reload(); // Instantly clears memory and kicks to login screen
             }
         }
 
@@ -665,198 +1056,354 @@
             if (state.userRole === 'admin') {
                 profile.classList.add('admin-active');
                 icon.className = 'ph-fill ph-shield-star';
-                txt.innerText = `${state.username} [L0]`;
+                txt.innerText = `${state.username} (Admin)`;
                 adminOnly.forEach(el => el.classList.remove('hidden'));
             } else {
                 profile.classList.remove('admin-active');
                 icon.className = 'ph-fill ph-user';
-                txt.innerText = `${state.username} [L1]`;
+                txt.innerText = `${state.username} (User)`;
                 adminOnly.forEach(el => el.classList.add('hidden'));
             }
         }
-
+        /**
+         * ==========================================================================
+         * 4. CLOUD SYNCHRONIZATION & STORAGE
+         * ==========================================================================
+         */
         function saveRegistrationsToCloud() {
             const configJson = JSON.stringify(state.registeredDevices);
             localStorage.setItem(CONFIG.STORAGE_KEY, configJson);
+            
+            // Retain flag ensures new clients instantly get the config upon connection
             if (state.mqttConnected) {
                 state.mqttClient.publish(CONFIG.CLOUD_CONFIG_TOPIC, configJson, { retain: true });
+                console.log("[CLOUD] Configuration synchronized to MQTT broker.");
             }
         }
 
+        /**
+         * ==========================================================================
+         * 5. MQTT COMMUNICATION ENGINE
+         * ==========================================================================
+         */
         function connectMQTT() {
-            setSystemStatus(false, "HANDSHAKING...");
-            const options = { keepalive: 30, clientId: 'bms_web_' + Math.random().toString(16).substr(2, 8), clean: true, reconnectPeriod: 5000 };
+            setSystemStatus(false, "CONNECTING...");
+            
+            const options = {
+                keepalive: 30,
+                clientId: 'bms_web_' + Math.random().toString(16).substr(2, 8),
+                clean: true,
+                reconnectPeriod: 5000, // Reconnect every 5 seconds if dropped
+            };
+
             state.mqttClient = mqtt.connect(CONFIG.MQTT_BROKER, options);
 
             state.mqttClient.on("connect", () => {
+                console.log("[MQTT] Successfully connected to broker.");
                 state.mqttConnected = true;
-                setSystemStatus(true, "DATALINK ACTIVE");
+                state.reconnectAttempts = 0;
+                setSystemStatus(true, "CLOUD CONNECTED");
+                
+                // Subscribe to necessary topics
                 state.mqttClient.subscribe("mrpsp/secure_bms/+/data", { qos: 0 });
                 state.mqttClient.subscribe("mrpsp/secure_bms/+/status", { qos: 1 });
                 state.mqttClient.subscribe(CONFIG.CLOUD_CONFIG_TOPIC, { qos: 1 });
             });
 
+            state.mqttClient.on("reconnect", () => {
+                state.reconnectAttempts++;
+                console.warn(`[MQTT] Reconnecting... Attempt ${state.reconnectAttempts}`);
+                setSystemStatus(false, `RECONNECTING (${state.reconnectAttempts})`);
+            });
+
             state.mqttClient.on("close", () => {
+                console.error("[MQTT] Connection closed unexpectedly.");
                 state.mqttConnected = false;
-                setSystemStatus(false, "DATALINK LOST");
+                setSystemStatus(false, "DISCONNECTED");
+            });
+
+            state.mqttClient.on("error", (err) => {
+                console.error("[MQTT] Client Error:", err);
             });
 
             state.mqttClient.on("message", (topic, message) => handleIncomingMessage(topic, message.toString()));
         }
 
         function handleIncomingMessage(topic, message) {
+            // 1. Handle Cloud Config Synchronization
             if (topic === CONFIG.CLOUD_CONFIG_TOPIC) {
                 try {
                     const parsedConfig = JSON.parse(message);
+                    // Only update if it's an array to prevent corruption
                     if (Array.isArray(parsedConfig)) {
                         state.registeredDevices = parsedConfig;
                         localStorage.setItem(CONFIG.STORAGE_KEY, message);
-                        if (state.currentScreen === 'dashboard' || state.currentScreen === 'registered') renderScreen();
+                        if (state.currentScreen === 'dashboard' || state.currentScreen === 'registered') {
+                            renderScreen();
+                        }
                     }
-                } catch(e) {}
+                } catch(e) {
+                    console.error("[CLOUD] Failed to parse incoming cloud configuration.");
+                }
                 return;
             }
 
+            // 2. Parse Telemetry Topics
             const parts = topic.split("/");
-            if (parts.length !== 4) return;
-            const deviceId = parts[2]; const type = parts[3];     
+            if (parts.length !== 4) return; // mrpsp / secure_bms / {ID} / data
+            
+            const deviceId = parts[2]; 
+            const type = parts[3];     
 
+            // 3. Initialize Device State if First Time Seen
             if (!state.detectedDevices[deviceId]) {
                 const regInfo = state.registeredDevices.find(r => r.device_id === deviceId);
                 state.detectedDevices[deviceId] = {
-                    device_id: deviceId, block_name: regInfo ? regInfo.block_name : "UNKNOWN NODE",
-                    status: 'OFFLINE', supply: 'OFF', fault: 'NO', 
-                    voltage: 0.0, current: 0.0, power: 0.0, limit: 5.0, tol_time: 3000, 
-                    lastSeen: 0, historyCurrent: [], historyTime: []
+                    device_id: deviceId, 
+                    block_name: regInfo ? regInfo.block_name : "Unknown Block",
+                    status: 'OFFLINE', 
+                    supply: 'OFF', 
+                    fault: 'NO', 
+                    voltage: 0.0, 
+                    current: 0.0, 
+                    power: 0.0,
+                    limit: 5.0, 
+                    tol_time: 3000, 
+                    lastSeen: 0,
+                    historyCurrent: [], 
+                    historyTime: []
                 };
+                
                 const now = new Date();
                 for(let i=0; i<30; i++) {
                     const d = new Date(now.getTime() - (30-i)*1000);
-                    state.detectedDevices[deviceId].historyTime.push(d.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }));
+                    state.detectedDevices[deviceId].historyTime.push(
+                        d.toLocaleTimeString('en-IN', {
+                            timeZone: 'Asia/Kolkata', 
+                            hour: '2-digit', 
+                            minute: '2-digit', 
+                            second: '2-digit',
+                            hour12: true
+                        })
+                    );
                     state.detectedDevices[deviceId].historyCurrent.push(0);
                 }
             }
 
             const dev = state.detectedDevices[deviceId];
 
+            // 4. Process Data Payload
             if (type === 'data') {
-                try {
-                    const data = JSON.parse(message);
-                    if (data.t !== CONFIG.EXPECTED_TOKEN) return;
-                    dev.lastSeen = Date.now();
-                    dev.status = 'ONLINE';
-                    if (data.n) dev.block_name = data.n;
-                    if (data.s !== undefined) dev.supply = (data.s === 1) ? 'ON' : 'OFF';
-                    if (data.f) dev.fault = data.f;
-                    if (data.v !== undefined) dev.voltage = parseFloat(data.v);
-                    if (data.c !== undefined) dev.current = parseFloat(data.c);
-                    if (data.l !== undefined) dev.limit = parseFloat(data.l);
-                    if (data.tt !== undefined) dev.tol_time = parseInt(data.tt);
-                    dev.power = dev.voltage * dev.current;
+    try {
+        const data = JSON.parse(message);
+        if (data.t !== CONFIG.EXPECTED_TOKEN) return;
 
-                    if (!dev.lastGraphUpdate || (Date.now() - dev.lastGraphUpdate) >= 1000) {
-                        dev.lastGraphUpdate = Date.now();
-                        dev.historyCurrent.push(dev.current);
-                        dev.historyTime.push(new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }));
-                        if (dev.historyCurrent.length > CONFIG.MAX_GRAPH_POINTS) {
-                            dev.historyCurrent.shift(); dev.historyTime.shift();
-                        }
-                    }
-                    updateDomForDevice(deviceId);
-                } catch (err) { return; }
-            } else if (type === 'status') {
+        dev.lastSeen = Date.now();
+        dev.status = 'ONLINE';
+
+        // Key decompression mapping
+        if (data.n) dev.block_name = data.n;
+        if (data.s !== undefined) dev.supply = (data.s === 1) ? 'ON' : 'OFF';
+        if (data.f) dev.fault = data.f;
+        if (data.v !== undefined) dev.voltage = parseFloat(data.v);
+        if (data.c !== undefined) dev.current = parseFloat(data.c);
+        if (data.l !== undefined) dev.limit = parseFloat(data.l);
+        if (data.tt !== undefined) dev.tol_time = parseInt(data.tt);
+
+        dev.power = dev.voltage * dev.current;
+
+        // Ensure telemetry arrays exist
+        if (!Array.isArray(dev.historyCurrent)) dev.historyCurrent = [];
+        if (!Array.isArray(dev.historyTime)) dev.historyTime = [];
+
+        if (!dev.lastGraphUpdate || (Date.now() - dev.lastGraphUpdate) >= 1000) {
+            dev.lastGraphUpdate = Date.now();
+            dev.historyCurrent.push(dev.current);
+            dev.historyTime.push(new Date().toLocaleTimeString('en-IN', {
+                timeZone: 'Asia/Kolkata',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            }));
+
+            if (dev.historyCurrent.length > CONFIG.MAX_GRAPH_POINTS) {
+                dev.historyCurrent.shift();
+                dev.historyTime.shift();
+            }
+        }
+        updateDomForDevice(deviceId);
+    } catch (err) {
+        // Drop malformed packets silently without throwing console noise
+        return;
+    }
+}
+            // 5. Process Status Payload (LWT)
+            else if (type === 'status') {
                 const newStatus = message.trim().toUpperCase();
                 dev.status = newStatus;
-                if (newStatus === 'ONLINE') dev.lastSeen = Date.now();
-                else dev.lastSeen = 0; 
+                
+                if (newStatus === 'ONLINE') {
+                    dev.lastSeen = Date.now();
+                } else {
+                    dev.lastSeen = 0; // Force immediate watchdog trigger on next tick
+                }
             }
+
+            // 6. Trigger DOM Update
             updateDomForDevice(deviceId);
         }
 
         function publishCommand(deviceId, command) {
-            if(!state.mqttConnected) return showToast("DATALINK OFFLINE: CMD FAILED", "error");
+            if(!state.mqttConnected) {
+                return showToast("Cannot send command: Cloud Disconnected", "error");
+            }
+
             const dev = state.detectedDevices[deviceId];
             if (!dev) return;
 
+            // OPTIMISTIC UI UPDATE: Assume success for instant visual feedback
             if (dev.status === 'ONLINE' && dev.fault === "NO") {
-                if (command === "ON") { dev.supply = "ON"; dev.voltage = 230.0; }
-                else if (command === "OFF") { dev.supply = "OFF"; dev.voltage = 0.0; dev.current = 0.0; dev.power = 0.0; }
+                if (command === "ON") {
+                    dev.supply = "ON";
+                    dev.voltage = 230.0;
+                    // Note: Current remains 0 until actual telemetry arrives
+                } else if (command === "OFF") {
+                    dev.supply = "OFF";
+                    dev.voltage = 0.0;
+                    dev.current = 0.0;
+                    dev.power = 0.0;
+                }
                 updateDomForDevice(deviceId);
             }
 
+            // Publish actual MQTT command
             const topic = `mrpsp/secure_bms/${deviceId}/command`;
             state.mqttClient.publish(topic, command, { qos: 1 });
-            let actionText = command === 'RESET_FAULT' ? 'RELAY RESET' : `CONTACTOR ${command}`;
-            showToast(`[0x${deviceId.substr(0,4)}] ${actionText} DISPATCHED`, "success");
+            
+            let actionText = command === 'RESET_FAULT' ? 'Fault Reset' : `Supply ${command}`;
+            showToast(`${actionText} command dispatched`, "success");
         }
 
         function updateAdminSettings(deviceId) {
             const limitInput = document.getElementById('set-limit');
             const timeInput = document.getElementById('set-time');
+            
             if (!limitInput || !timeInput) return;
+
             const limit = parseFloat(limitInput.value);
             const time = parseInt(timeInput.value);
 
             if (isNaN(limit) || limit <= 0 || isNaN(time) || time < 500) {
-                return showToast("INVALID PARAMETERS", "error");
+                return showToast("Invalid protection settings entered.", "error");
             }
+
             state.mqttClient.publish(`mrpsp/secure_bms/${deviceId}/command`, `SET_LIMIT:${limit}`);
             state.mqttClient.publish(`mrpsp/secure_bms/${deviceId}/command`, `SET_TIME:${time}`);
-            showToast('FIRMWARE OVERRIDE EXECUTED', 'success');
+            
+            showToast('Protection parameters securely updated', 'success');
         }
 
-        function watchdogTimerLogic() {
-            const now = Date.now();
-            let stateChanged = false;
-            Object.keys(state.detectedDevices).forEach(id => {
-                const dev = state.detectedDevices[id];
-                if (dev.status === 'ONLINE' && (now - dev.lastSeen > CONFIG.OFFLINE_TIMEOUT_MS)) {
-                    dev.status = 'OFFLINE'; dev.voltage = 0.0; dev.current = 0.0; dev.power = 0.0; dev.supply = 'UNKNOWN';
-                    stateChanged = true; updateDomForDevice(id); 
+        /**
+         * ==========================================================================
+         * 6. SYSTEM WATCHDOG & BACKGROUND TASKS
+         * ==========================================================================
+         */
+        function startWatchdog() {
+            if (watchdogTimer) clearInterval(watchdogTimer);
+            
+            watchdogTimer = setInterval(() => {
+                const now = Date.now();
+                let stateChanged = false;
+
+                Object.keys(state.detectedDevices).forEach(id => {
+                    const dev = state.detectedDevices[id];
+                    
+                    // If device is marked ONLINE but no telemetry received for X seconds
+                    if (dev.status === 'ONLINE' && (now - dev.lastSeen > CONFIG.OFFLINE_TIMEOUT_MS)) {
+                        console.warn(`[WATCHDOG] Device ${id} timed out. Marking OFFLINE.`);
+                        dev.status = 'OFFLINE'; 
+                        dev.voltage = 0.0; 
+                        dev.current = 0.0; 
+                        dev.power = 0.0;
+                        dev.supply = 'UNKNOWN';
+                        stateChanged = true; 
+                        updateDomForDevice(id); 
+                    }
+                });
+
+                if (stateChanged) {
+                    updateSidebarStatistics();
                 }
-            });
-            if (stateChanged) updateSidebarStatistics();
+            }, 1000); // Check every second
         }
 
+        /**
+         * ==========================================================================
+         * 7. DOM MANIPULATION & RENDERING
+         * ==========================================================================
+         */
         function navigate(screenName, params = null) {
+            // Update Active Menu State
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            if (event && event.currentTarget) event.currentTarget.classList.add('active');
-            else {
-                const mapping = { 'dashboard': 0, 'register': 1, 'registered': 2, 'system': 3 };
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            } else {
+                // Manual fallback for programmatic navigation
+                const mapping = {
+                    'dashboard': 0, 'register': 1, 'registered': 2, 'system': 3
+                };
                 const items = document.querySelectorAll('.nav-item');
                 if (items[mapping[screenName]]) items[mapping[screenName]].classList.add('active');
             }
+            
+            // Close mobile menu if open
             const sidebar = document.getElementById('sidebar');
-            if (sidebar.classList.contains('mobile-open')) sidebar.classList.remove('mobile-open');
-            state.currentScreen = screenName; state.selectedDeviceId = params;
-            if (currentChartInstance) { currentChartInstance.destroy(); currentChartInstance = null; }
+            if (sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+            }
+
+            state.currentScreen = screenName; 
+            state.selectedDeviceId = params;
+            
+            // Clean up heavy instances before rendering
+            if (currentChartInstance) { 
+                currentChartInstance.destroy(); 
+                currentChartInstance = null; 
+            }
+            
             renderScreen();
         }
 
         function renderScreen() {
             const container = document.getElementById("screen-container");
-            container.innerHTML = ""; 
+            container.innerHTML = ""; // Clear current screen
+            
+            // Route to correct renderer
             if (state.currentScreen === 'dashboard') return renderDashboard(container);
             if (state.currentScreen === 'room_detail') return renderRoomDetail(container);
             
+            // Protected Routes
             if (state.userRole === 'admin') {
                 if (state.currentScreen === 'register') return renderRegister(container);
                 if (state.currentScreen === 'registered') return renderRegistered(container);
                 if (state.currentScreen === 'system') return renderSystem(container);
             } else {
+                // Deny Access
                 if (['register', 'registered', 'system'].includes(state.currentScreen)) {
                     container.innerHTML = `
-                        <div class="empty-state" style="border-color: var(--danger-light);">
-                            <i class="ph ph-lock-key empty-icon" style="color: var(--danger);"></i>
-                            <h3 style="color: var(--danger);">SECURITY CLEARANCE INSUFFICIENT</h3>
-                            <p>Level 0 (SYSADMIN) clearance required for architecture modification.</p>
-                            <button class="btn btn-outline" style="margin-top: 24px;" onclick="navigate('dashboard')">RETURN TO DASHBOARD</button>
+                        <div class="empty-state">
+                            <i class="ph ph-lock-key empty-icon" style="color: var(--warning);"></i>
+                            <h3>Administrator Access Required</h3>
+                            <p>You do not have the required permissions to view or modify this configuration page.</p>
+                            <button class="btn btn-outline" style="margin-top: 24px;" onclick="navigate('dashboard')">Return to Dashboard</button>
                         </div>
                     `;
                 }
             }
         }
 
+        // --- DASHBOARD RENDERER ---
         function renderDashboard(container) {
             const gridHtml = `<div id="dashboard-grid" class="grid"></div>`;
             container.innerHTML = gridHtml;
@@ -866,8 +1413,8 @@
                 container.innerHTML = `
                     <div id="empty-dash" class="empty-state">
                         <i class="ph ph-plugs empty-icon"></i>
-                        <h3>NODE REGISTRY EMPTY</h3>
-                        <p>No active hardware arrays detected in secure zone. Run hardware scan to pair nodes.</p>
+                        <h3>No Authorized Hardware</h3>
+                        <p>Your SCADA dashboard is empty. Contact your system administrator to detect and authorize hardware controller blocks.</p>
                     </div>
                 `;
                 return;
@@ -875,8 +1422,16 @@
 
             state.registeredDevices.forEach(reg => {
                 let dev = state.detectedDevices[reg.device_id];
+                // Ensure placeholder exists if data hasn't arrived yet
                 if (!dev) {
-                    dev = { device_id: reg.device_id, block_name: reg.block_name || reg.device_id, status: 'OFFLINE', supply: 'UNKNOWN', fault: 'NO', voltage: 0, current: 0, power: 0, historyCurrent: [], historyTime: [] };
+                    dev = { 
+                        device_id: reg.device_id, 
+                        block_name: reg.block_name || reg.device_id, 
+                        status: 'OFFLINE', supply: 'UNKNOWN', fault: 'NO', 
+                        voltage: 0, current: 0, power: 0,
+                        historyCurrent: [], 
+                        historyTime: []
+                    };
                     state.detectedDevices[reg.device_id] = dev;
                 }
                 grid.innerHTML += buildCardHtml(dev);
@@ -886,54 +1441,57 @@
         function buildCardHtml(dev) {
             const isOnline = dev.status === 'ONLINE';
             const faultFlag = dev.fault !== 'NO';
-            const faultColor = faultFlag ? 'text-danger' : '';
-            const supplyClass = isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted';
-            const bgStatusClass = isOnline ? 'rgba(0, 255, 102, 0.1)' : 'rgba(255, 0, 60, 0.1)';
+            const faultColor = faultFlag ? 'var(--danger)' : 'var(--text-main)';
+            const supplyColor = isOnline ? (dev.supply === 'ON' ? 'var(--success)' : 'var(--danger)') : 'var(--text-muted)';
+            const bgStatusClass = isOnline ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)';
             const textStatusClass = isOnline ? 'var(--success)' : 'var(--danger)';
             const dotClass = isOnline ? 'dot-online' : 'dot-offline';
-            const shadowClass = isOnline ? 'var(--glow-success)' : 'var(--glow-danger)';
+            const displayStatus = isOnline ? 'ONLINE' : 'OFFLINE';
+            const displaySupply = isOnline ? dev.supply : 'UNKNOWN';
 
             return `
             <div class="card ${isOnline ? '' : 'card-offline'}" id="card-${dev.device_id}">
                 <div class="card-header">
                     <div>
                         <div class="room-name">${dev.block_name}</div>
-                        <div class="hw-id">NODE: ${dev.device_id}</div>
+                        <div class="hw-id" title="Hardware MAC Address">${dev.device_id}</div>
                     </div>
-                    <div class="sys-status" id="badge-${dev.device_id}" style="background: ${bgStatusClass}; color: ${textStatusClass}; box-shadow: 0 0 10px ${bgStatusClass}; border-color: ${textStatusClass}; text-shadow: ${shadowClass}">
+                    <div class="sys-status" id="badge-${dev.device_id}" style="background: ${bgStatusClass}; color: ${textStatusClass}; border: none;">
                         <div class="pulse-dot ${dotClass}" id="dot-${dev.device_id}"></div>
-                        <span id="txt-status-${dev.device_id}">${isOnline ? 'LINK_UP' : 'LINK_DOWN'}</span>
+                        <span id="txt-status-${dev.device_id}">${displayStatus}</span>
                     </div>
                 </div>
                 
                 <div class="metrics-grid">
                     <div class="metric-box">
-                        <div class="metric-label"><i class="ph-fill ph-lightning"></i> CONTACTOR</div>
-                        <div class="metric-val ${supplyClass}" id="s-${dev.device_id}">${isOnline ? dev.supply : 'ERR'}</div>
+                        <div class="metric-label"><i class="ph-fill ph-lightning"></i> Supply</div>
+                        <div class="metric-val" id="s-${dev.device_id}" style="color: ${supplyColor}">${displaySupply}</div>
                     </div>
                     <div class="metric-box">
-                        <div class="metric-label"><i class="ph-fill ph-warning-circle"></i> DIAGNOSTICS</div>
-                        <div class="metric-val ${faultColor}" id="f-${dev.device_id}" style="font-size: 16px;">${dev.fault}</div>
+                        <div class="metric-label"><i class="ph-fill ph-warning-circle"></i> Diagnostics</div>
+                        <div class="metric-val" id="f-${dev.device_id}" style="font-size:18px; color: ${faultColor};">${dev.fault}</div>
                     </div>
                     <div class="metric-box">
-                        <div class="metric-label"><i class="ph-fill ph-wave-sine"></i> VOLTAGE</div>
-                        <div class="metric-val" id="v-${dev.device_id}">${dev.voltage.toFixed(1)}<span>V</span></div>
+                        <div class="metric-label"><i class="ph-fill ph-wave-sine"></i> RMS Voltage</div>
+                        <div class="metric-val" id="v-${dev.device_id}">${dev.voltage.toFixed(1)} <span>V</span></div>
                     </div>
                     <div class="metric-box">
-                        <div class="metric-label"><i class="ph-fill ph-arrow-fat-line-right"></i> CURRENT</div>
-                        <div class="metric-val" id="c-${dev.device_id}">${dev.current.toFixed(2)}<span>A</span></div>
+                        <div class="metric-label"><i class="ph-fill ph-arrow-fat-line-right"></i> Current Draw</div>
+                        <div class="metric-val" id="c-${dev.device_id}">${dev.current.toFixed(2)} <span>A</span></div>
                     </div>
                 </div>
                 
-                <button class="btn btn-outline" style="width:100%; border-color: var(--primary); color: var(--primary);" onclick="navigate('room_detail', '${dev.device_id}')">
-                    <i class="ph-bold ph-chart-line-up"></i> INITIALIZE CONTROL PANEL
+                <button class="btn btn-primary" style="width:100%" onclick="navigate('room_detail', '${dev.device_id}')">
+                    <i class="ph-bold ph-chart-line-up"></i> Manage & View Analytics
                 </button>
             </div>`;
         }
 
+        // --- ROOM DETAIL & CHART RENDERER ---
         function renderRoomDetail(container) {
             const dev = state.detectedDevices[state.selectedDeviceId];
             if (!dev) return;
+            
             const isOnline = dev.status === 'ONLINE';
             const isAdmin = state.userRole === 'admin';
             const faultFlag = dev.fault !== 'NO';
@@ -941,62 +1499,64 @@
             const html = `
                 <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center;">
                     <button class="btn btn-outline" onclick="navigate('dashboard')">
-                        <i class="ph-bold ph-arrow-left"></i> RETURN TO FLEET
+                        <i class="ph-bold ph-arrow-left"></i> Back to Fleet
                     </button>
                     ${isAdmin ? `
-                    <button class="btn btn-outline" style="border-color: var(--success); color: var(--success);" onclick="exportDataToCSV('${dev.device_id}')">
-                        <i class="ph-bold ph-download-simple"></i> EXTRACT LOGS
+                    <button class="btn btn-outline" onclick="exportDataToCSV('${dev.device_id}')">
+                        <i class="ph-bold ph-download-simple"></i> Export CSV
                     </button>` : ''}
                 </div>
                 
                 <div class="room-layout">
-                    <!-- LEFT COLUMN -->
+                    <!-- LEFT COLUMN: Primary Control & Telemetry -->
                     <div class="room-col-left">
+                        
+                        <!-- Main Control Card -->
                         <div class="card">
                             <div class="card-header" style="align-items: center; border-bottom: 1px solid var(--border-light); padding-bottom: 24px;">
                                 <div>
                                     <h2 class="room-name" style="font-size: 32px;">${dev.block_name}</h2>
-                                    <div class="hw-id" style="font-size: 14px;">SYS_ID: ${dev.device_id}</div>
+                                    <div class="hw-id">HWID: ${dev.device_id}</div>
                                 </div>
-                                <div class="sys-status" style="background: ${isOnline ? 'var(--success-light)' : 'var(--danger-light)'}; border-color: ${isOnline ? 'var(--success)' : 'var(--danger)'};">
+                                <div class="sys-status" style="background: ${isOnline ? 'var(--success-light)' : 'var(--danger-light)'}; border:none;">
                                     <div class="pulse-dot ${isOnline ? 'dot-online' : 'dot-offline'}"></div> 
                                     <span class="${isOnline ? 'text-success' : 'text-danger'}">${dev.status}</span>
                                 </div>
                             </div>
                             
-                            <div id="rd-offline" class="${isOnline ? 'hidden' : ''}" style="background: var(--danger-light); color: var(--danger); padding: 16px 24px; border-radius: var(--radius-sm); margin-bottom: 24px; font-weight: 600; display:flex; align-items:center; gap:12px; border: 1px solid var(--danger); text-shadow: var(--glow-danger); font-family: var(--font-mono);">
-                                <i class="ph-bold ph-warning-circle" style="font-size:24px;"></i> HARDWARE CONNECTION LOST - TELEMETRY HALTED
+                            <div id="rd-offline" class="${isOnline ? 'hidden' : ''}" style="background: var(--danger-light); color: var(--danger); padding: 16px 24px; border-radius: var(--radius-sm); margin-bottom: 24px; font-weight: 600; display:flex; align-items:center; gap:12px; border: 1px solid rgba(239, 68, 68, 0.2);">
+                                <i class="ph-bold ph-warning-circle" style="font-size:24px;"></i> HARDWARE DISCONNECTED - TELEMETRY PAUSED
                             </div>
 
-                            <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                            <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 16px;">
                                 <div class="metric-box">
-                                    <div class="metric-label"><i class="ph-fill ph-lightning"></i> STATE</div>
-                                    <div class="metric-val ${isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted'}" id="rd-supply">${isOnline ? dev.supply : 'ERR'}</div>
+                                    <div class="metric-label"><i class="ph-fill ph-lightning"></i> State</div>
+                                    <div class="metric-val ${isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted'}" id="rd-supply">${isOnline ? dev.supply : 'UNKNOWN'}</div>
                                 </div>
                                 <div class="metric-box">
-                                    <div class="metric-label"><i class="ph-fill ph-warning-octagon"></i> TRIP FAULT</div>
-                                    <div class="metric-val ${faultFlag ? 'text-danger' : ''}" id="rd-fault" style="font-size:16px;">${dev.fault}</div>
+                                    <div class="metric-label"><i class="ph-fill ph-warning-octagon"></i> Fault</div>
+                                    <div class="metric-val" id="rd-fault" style="font-size:18px; color: ${faultFlag ? 'var(--danger)' : 'var(--text-main)'};">${dev.fault}</div>
                                 </div>
                                 <div class="metric-box">
-                                    <div class="metric-label"><i class="ph-fill ph-wave-sine"></i> BUS VOLTS</div>
-                                    <div class="metric-val" id="rd-v">${dev.voltage.toFixed(1)}<span>V</span></div>
+                                    <div class="metric-label"><i class="ph-fill ph-wave-sine"></i> Voltage</div>
+                                    <div class="metric-val" id="rd-v">${dev.voltage.toFixed(1)} <span>V</span></div>
                                 </div>
                                 <div class="metric-box">
-                                    <div class="metric-label"><i class="ph-fill ph-arrow-fat-line-right"></i> LOAD AMPS</div>
-                                    <div class="metric-val" id="rd-c">${dev.current.toFixed(2)}<span>A</span></div>
+                                    <div class="metric-label"><i class="ph-fill ph-arrow-fat-line-right"></i> Current</div>
+                                    <div class="metric-val" id="rd-c">${dev.current.toFixed(2)} <span>A</span></div>
                                 </div>
                             </div>
 
                             <!-- Interactive Controls -->
-                            <div style="display:flex; gap:16px; margin-top: 24px; padding-top: 24px; border-top: 1px dashed var(--border-medium);">
-                                <button class="btn btn-success" style="flex:1; padding: 20px; font-size: 16px;" onclick="publishCommand('${dev.device_id}', 'ON')">
-                                    <i class="ph-bold ph-power"></i> ENGAGE RELAY
+                            <div style="display:flex; gap:16px; margin-top: 16px; padding-top: 24px; border-top: 1px solid var(--border-light);">
+                                <button class="btn btn-success" style="flex:1; padding: 18px; font-size: 16px;" onclick="publishCommand('${dev.device_id}', 'ON')">
+                                    <i class="ph-bold ph-power"></i> ENGAGE SUPPLY
                                 </button>
-                                <button class="btn btn-danger" style="flex:1; padding: 20px; font-size: 16px;" onclick="publishCommand('${dev.device_id}', 'OFF')">
-                                    <i class="ph-bold ph-power"></i> CUT POWER
+                                <button class="btn btn-danger" style="flex:1; padding: 18px; font-size: 16px;" onclick="publishCommand('${dev.device_id}', 'OFF')">
+                                    <i class="ph-bold ph-power"></i> ISOLATE SUPPLY
                                 </button>
-                                <button class="btn btn-outline" style="flex:0.5; padding: 20px;" onclick="publishCommand('${dev.device_id}', 'RESET_FAULT')">
-                                    <i class="ph-bold ph-arrow-counter-clockwise"></i> CLR FLT
+                                <button class="btn btn-outline" style="flex:0.5; padding: 18px;" onclick="publishCommand('${dev.device_id}', 'RESET_FAULT')">
+                                    <i class="ph-bold ph-arrow-counter-clockwise"></i> RESET
                                 </button>
                             </div>
                         </div>
@@ -1004,84 +1564,86 @@
                         <!-- Graph Card -->
                         <div class="graph-container">
                             <div class="graph-header">
-                                <h3 style="font-size: 16px; font-family: var(--font-mono); font-weight: 700; display:flex; align-items:center; gap:8px; color: var(--text-light);">
+                                <h3 style="font-size: 18px; font-weight: 700; display:flex; align-items:center; gap:8px;">
                                     <i class="ph-fill ph-chart-line-up" style="color: var(--primary);"></i> 
-                                    LOAD SIGNATURE [4M]
+                                    Real-Time Current Draw (Last 4 Minutes)
                                 </h3>
-                                <div class="sys-status" style="padding: 6px 12px; font-size:11px; font-family:var(--font-mono); color: var(--primary);">
-                                    POLLING: 1Hz
+                                <div class="sys-status" style="padding: 6px 12px; font-size:12px; font-family:monospace;">
+                                    Sampling: 1Hz
                                 </div>
                             </div>
-                            <div style="position: relative; height: 320px; width: 100%;">
+                            <div style="position: relative; height: 350px; width: 100%;">
                                 <canvas id="currentChart"></canvas>
                             </div>
                         </div>
                     </div>
 
-                    <!-- RIGHT COLUMN -->
+                    <!-- RIGHT COLUMN: Settings & Analytics -->
                     <div class="room-col-right">
                         
-                        <div class="card ${isAdmin ? '' : 'hidden'}" style="height: fit-content; border-color: var(--warning);">
-                            <h3 style="margin-bottom: 16px; display:flex; align-items:center; gap:8px; color: var(--warning); text-shadow: 0 0 10px rgba(255,183,0,0.5); text-transform: uppercase;">
-                                <i class="ph-fill ph-shield-check"></i> Logic Breaker Tuning
+                        <!-- Admin Protection Configuration -->
+                        <div class="card ${isAdmin ? '' : 'hidden'}" style="height: fit-content; background: #fefce8; border-color: #fef08a;">
+                            <h3 style="margin-bottom: 16px; display:flex; align-items:center; gap:8px; color: #854d0e;">
+                                <i class="ph-fill ph-shield-check"></i> Software Breaker Setup
                             </h3>
-                            <p style="font-size:12px; font-family: var(--font-mono); color: var(--text-muted); margin-bottom:24px; line-height: 1.5;">
-                                SET LOCAL EDGE OVERRIDE THRESHOLDS. HARDWARE WILL AUTO-TRIP IF EXCEEDED.
+                            <p style="font-size:13px; color: #a16207; margin-bottom:24px; line-height: 1.5;">
+                                Modify the hardware fault trip settings. The ESP8266 will autonomously cut power if these thresholds are exceeded locally.
                             </p>
                             
                             <div class="input-group">
-                                <label class="metric-label" style="color: var(--warning);">PEAK AMP LIMIT (A)</label>
-                                <input type="number" id="set-limit" step="0.1" value="${dev.limit || 5.0}" style="border-color: var(--warning-light);">
+                                <label class="metric-label" style="color: #854d0e;">Max Peak Current Limit (Amps)</label>
+                                <input type="number" id="set-limit" step="0.1" value="${dev.limit || 5.0}" style="border-color: #fde047; padding: 10px;">
                             </div>
                             <div class="input-group">
-                                <label class="metric-label" style="color: var(--warning);">TOLERANCE WINDOW (MS)</label>
-                                <input type="number" id="set-time" step="100" value="${dev.tol_time || 3000}" style="border-color: var(--warning-light);">
+                                <label class="metric-label" style="color: #854d0e;">Trip Tolerance Delay (ms)</label>
+                                <input type="number" id="set-time" step="100" value="${dev.tol_time || 3000}" style="border-color: #fde047; padding: 10px;">
                             </div>
                             
-                            <button class="btn btn-outline" style="width:100%; margin-top: 16px; border-color: var(--warning); color: var(--warning);" onclick="updateAdminSettings('${dev.device_id}')">
-                                <i class="ph-bold ph-floppy-disk"></i> FLASH TO NODE
+                            <button class="btn btn-primary" style="width:100%; margin-top: 16px; background-color: #ca8a04; box-shadow:none;" onclick="updateAdminSettings('${dev.device_id}')">
+                                <i class="ph-bold ph-floppy-disk"></i> Flash Settings to Hardware
                             </button>
                         </div>
 
                         <!-- Live Analytics Panel -->
                         <div class="card" style="height: fit-content;">
-                            <h3 style="margin-bottom: 24px; display:flex; align-items:center; gap:8px; color: var(--text-light); text-transform: uppercase;">
-                                <i class="ph-fill ph-calculator" style="color: var(--primary);"></i> LIVE TELEMETRY
+                            <h3 style="margin-bottom: 24px; display:flex; align-items:center; gap:8px;">
+                                <i class="ph-fill ph-calculator" style="color: var(--primary);"></i> Live Analytics
                             </h3>
-                            <div style="display:flex; flex-direction:column; gap:16px; font-family: var(--font-mono);">
-                                <div style="display:flex; justify-content:space-between; padding-bottom:12px; border-bottom:1px dashed var(--border-dark);">
-                                    <span style="color: var(--text-muted); font-size:12px;">ACTIVE PWR (W)</span>
-                                    <span style="font-weight:700; color: var(--primary);" id="an-power">${dev.power.toFixed(1)}</span>
+                            <div style="display:flex; flex-direction:column; gap:16px;">
+                                <div style="display:flex; justify-content:space-between; padding-bottom:12px; border-bottom:1px dashed var(--border-light);">
+                                    <span style="color: var(--text-muted); font-weight:600; font-size:14px;">Instant Power</span>
+                                    <span style="font-weight:700;" id="an-power">${dev.power.toFixed(1)} W</span>
                                 </div>
-                                <div style="display:flex; justify-content:space-between; padding-bottom:12px; border-bottom:1px dashed var(--border-dark);">
-                                    <span style="color: var(--text-muted); font-size:12px;">APPARENT PWR (KVA)</span>
-                                    <span style="font-weight:700; color: var(--primary);" id="an-kva">${(dev.power / 1000).toFixed(3)}</span>
+                                <div style="display:flex; justify-content:space-between; padding-bottom:12px; border-bottom:1px dashed var(--border-light);">
+                                    <span style="color: var(--text-muted); font-weight:600; font-size:14px;">Apparent Power (kVA)</span>
+                                    <span style="font-weight:700;" id="an-kva">${(dev.power / 1000).toFixed(3)} kVA</span>
                                 </div>
-                                <div style="display:flex; justify-content:space-between; padding-bottom:12px; border-bottom:1px dashed var(--border-dark);">
-                                    <span style="color: var(--text-muted); font-size:12px;">FAULT_REG</span>
-                                    <span style="font-weight:700;" class="${faultFlag ? 'text-danger' : 'text-light'}" id="an-fault">${dev.fault}</span>
+                                <div style="display:flex; justify-content:space-between; padding-bottom:12px; border-bottom:1px dashed var(--border-light);">
+                                    <span style="color: var(--text-muted); font-weight:600; font-size:14px;">Last Known Fault</span>
+                                    <span style="font-weight:700; color: ${faultFlag ? 'var(--danger)' : 'var(--text-main)'};" id="an-fault">${dev.fault}</span>
                                 </div>
                                 <div style="display:flex; justify-content:space-between;">
-                                    <span style="color: var(--text-muted); font-size:12px;">RSSI_STRENGTH</span>
-                                    <span style="font-weight:700; color: var(--success);" id="an-rssi">${dev.rssi || '-65'} dBm</span>
+                                    <span style="color: var(--text-muted); font-weight:600; font-size:14px;">Link Quality</span>
+                                    <span style="font-weight:700;" id="an-rssi">${dev.rssi} dBm</span>
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             `;
+
             container.innerHTML = html;
             initializeChart(dev);
         }
 
         function initializeChart(dev) {
             const ctx = document.getElementById('currentChart').getContext('2d');
+            
+            // Create Deep Neon Gradient Fill
             const gradFill = ctx.createLinearGradient(0, 0, 0, 350);
-            gradFill.addColorStop(0, 'rgba(0, 210, 255, 0.4)'); 
-            gradFill.addColorStop(1, 'rgba(0, 210, 255, 0.0)');  
-
-            Chart.defaults.color = '#64748b';
-            Chart.defaults.font.family = "'JetBrains Mono', monospace";
+            gradFill.addColorStop(0, 'rgba(56, 189, 248, 0.4)'); // Bright Cyan top
+            gradFill.addColorStop(1, 'rgba(37, 99, 235, 0.0)');  // Transparent Blue bottom
 
             currentChartInstance = new Chart(ctx, {
                 type: 'line',
@@ -1090,47 +1652,62 @@
                     datasets: [{ 
                         label: 'Current (Amps)',
                         data: dev.historyCurrent, 
-                        borderColor: '#00d2ff', 
+                        borderColor: '#38bdf8', // Neon Cyan line
                         backgroundColor: gradFill, 
-                        borderWidth: 2, fill: true, pointRadius: 0, 
-                        pointHoverRadius: 5, pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: '#00d2ff', pointHoverBorderWidth: 2,
-                        tension: 0.2
+                        borderWidth: 3, 
+                        fill: true, 
+                        pointRadius: 0, 
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#ffffff',
+                        pointHoverBorderColor: '#38bdf8',
+                        pointHoverBorderWidth: 3,
+                        tension: 0.4 // Ultra-smooth curves
                     }] 
                 },
                 options: { 
-                    responsive: true, maintainAspectRatio: false, animation: false, 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    animation: false, 
                     interaction: { mode: 'index', intersect: false },
                     scales: { 
                         y: { 
-                            beginAtZero: true, suggestedMax: dev.limit + 1, 
-                            grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false },
-                            ticks: { font: { size: 10 } }
+                            beginAtZero: true, 
+                            suggestedMax: dev.limit + 1, 
+                            title: { display: true, text: 'Current Draw (Amps)', color: '#64748b', font: { family: 'Inter', weight: 'bold', size: 12 } },
+                            grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+                            ticks: { font: { family: 'Inter', size: 11 }, color: '#64748b' }
                         }, 
                         x: { 
-                            grid: { display: true, color: 'rgba(255,255,255,0.02)', borderDash: [5, 5], drawBorder: false },
-                            ticks: { maxTicksLimit: 6, font: { size: 10 } } 
+                            title: { display: true, text: 'Time (IST)', color: '#64748b', font: { family: 'Inter', weight: 'bold', size: 12 } },
+                            grid: { display: true, color: 'rgba(0,0,0,0.03)', borderDash: [5, 5], drawBorder: false },
+                            ticks: { maxTicksLimit: 6, font: { family: 'Inter', size: 11 }, color: '#94a3b8' } 
                         } 
                     }, 
                     plugins: { 
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: 'rgba(5, 5, 7, 0.95)',
-                            titleFont: { size: 12 }, bodyFont: { size: 14, weight: 'bold' },
-                            titleColor: '#94a3b8', bodyColor: '#00d2ff', 
-                            padding: 10, cornerRadius: 4, displayColors: false,
-                            borderColor: '#00d2ff', borderWidth: 1
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleFont: { family: 'Inter', size: 13, weight: 'bold' },
+                            bodyFont: { family: 'Inter', size: 14, weight: 'bold' },
+                            titleColor: '#94a3b8',
+                            bodyColor: '#38bdf8', // Cyan tooltip text
+                            padding: 12, cornerRadius: 8, displayColors: false,
+                            callbacks: {
+                                label: function(context) { return context.parsed.y + ' Amps'; }
+                            }
                         }
                     } 
                 }
             });
+           
         }
 
+        // --- REGISTRATION & ADMIN RENDERERS ---
         function renderRegister(container) {
             container.innerHTML = `
                 <div style="margin-bottom: 32px; max-width: 600px;">
-                    <h2 class="header-title" style="font-size: 26px;">Hardware Scan</h2>
-                    <p class="subtitle" style="line-height: 1.6;">Monitoring MQTT fabric for unassigned nodes broadcasting valid cryptographic tokens.</p>
+                    <h2 class="header-title" style="font-size: 26px;">Detect Hardware Controllers</h2>
+                    <p class="subtitle" style="line-height: 1.6;">The system is actively scanning the MQTT broker for unrecognized hardware broadcasting the valid secure token. Click Authorize to add them to your fleet.</p>
                 </div>
                 <div id="reg-list"></div>
             `;
@@ -1138,53 +1715,57 @@
         }
 
         function buildRegisterList() {
-            let html = ""; let count = 0;
+            let html = "";
+            let count = 0;
+            
             Object.keys(state.detectedDevices).forEach(id => {
                 if (!isRegistered(id)) {
-                    count++; const dev = state.detectedDevices[id];
+                    count++;
+                    const dev = state.detectedDevices[id];
                     html += `
                     <div class="list-item">
                         <div class="list-info">
                             <h3>${dev.block_name}</h3>
                             <p title="MAC / Hardware ID">${dev.device_id}</p>
-                            <div style="margin-top: 8px; font-size: 11px; color: var(--success); font-family: var(--font-mono); display:flex; gap:16px;">
-                                <span><i class="ph-fill ph-wifi-high"></i> RSSI: ${dev.rssi || -55} dBm</span>
-                                <span><i class="ph-fill ph-shield-check"></i> CRYPTO_OK</span>
+                            <div style="margin-top: 8px; font-size: 13px; color: var(--text-muted); display:flex; gap:16px;">
+                                <span><i class="ph-fill ph-wifi-high"></i> Signal: ${dev.rssi} dBm</span>
+                                <span><i class="ph-fill ph-activity"></i> Active Payload Verified</span>
                             </div>
                         </div>
-                        <button class="btn btn-outline" style="border-color: var(--primary); color: var(--primary);" onclick="regESP('${dev.device_id}', '${dev.block_name}')">
-                            <i class="ph-bold ph-plus"></i> AUTHORIZE NODE
+                        <button class="btn btn-success" onclick="regESP('${dev.device_id}', '${dev.block_name}')">
+                            <i class="ph-bold ph-plus"></i> Authorize Block
                         </button>
                     </div>`;
                 }
             });
+            
             return count > 0 ? html : `
                 <div class="empty-state">
-                    <i class="ph ph-radar empty-icon" style="color: var(--primary); text-shadow: var(--glow-primary); animation: pulse-cyan 2s infinite; border-radius:50%;"></i>
-                    <h3>LISTENING ON SUBNET...</h3>
-                    <p>No unauthorized packets detected. Awaiting node boot sequence.</p>
+                    <i class="ph ph-radar empty-icon" style="animation: pulse-green 2s infinite; border-radius:50%; color: var(--success);"></i>
+                    <h3>Listening for Broadcasts...</h3>
+                    <p>No unauthorized hardware currently detected on the network. Ensure your ESP8266 is powered on and connected to the configured Wi-Fi network.</p>
                 </div>`;
         }
 
         function regESP(id, name) {
             state.registeredDevices.push({ device_id: id, block_name: name });
             saveRegistrationsToCloud();
-            showToast(`NODE [${name}] ADDED TO REGISTRY`, "success");
+            showToast(`${name} successfully authorized and added to fleet`, "success");
             renderScreen();
         }
 
         function renderRegistered(container) {
             container.innerHTML = `
                 <div style="margin-bottom: 32px; max-width: 600px;">
-                    <h2 class="header-title" style="font-size: 26px;">Fleet Authorization</h2>
-                    <p class="subtitle" style="line-height: 1.6;">Globally synced trusted nodes. Revocation applies network-wide instantly.</p>
+                    <h2 class="header-title" style="font-size: 26px;">Authorized Fleet Management</h2>
+                    <p class="subtitle" style="line-height: 1.6;">These controllers are permanently authorized and synced to the cloud. Revoking a controller removes it from the dashboard for all users instantly.</p>
                 </div>
                 <div id="auth-list"></div>
             `;
             const list = document.getElementById('auth-list');
             
             if (state.registeredDevices.length === 0) {
-                list.innerHTML = `<div class="empty-state"><i class="ph ph-shield-warning empty-icon"></i><h3>REGISTRY EMPTY</h3></div>`;
+                list.innerHTML = `<div class="empty-state"><i class="ph ph-shield-warning empty-icon"></i><h3>No Authorized Fleet</h3><p>Your registry is empty.</p></div>`;
                 return;
             }
             
@@ -1197,70 +1778,78 @@
                     <div class="list-info">
                         <h3>${reg.block_name}</h3>
                         <p>${reg.device_id}</p>
-                        <div style="margin-top: 8px; font-size: 11px; font-family: var(--font-mono); font-weight:700; color: ${isOnline ? 'var(--success)' : 'var(--danger)'};">
+                        <div style="margin-top: 8px; font-size: 13px; font-weight:600; color: ${isOnline ? 'var(--success)' : 'var(--danger)'};">
                             <i class="ph-fill ${isOnline ? 'ph-check-circle' : 'ph-warning-circle'}"></i> 
-                            ${isOnline ? 'HEARTBEAT_ACK' : 'CONNECTION_TIMEOUT'}
+                            CURRENTLY ${isOnline ? 'ONLINE' : 'OFFLINE'}
                         </div>
                     </div>
                     <button class="btn btn-outline" style="color: var(--danger); border-color: var(--danger-light);" onclick="confirmDelete('${reg.device_id}', '${reg.block_name}')">
-                        <i class="ph-bold ph-trash"></i> PURGE NODE
+                        <i class="ph-bold ph-trash"></i> Revoke Access
                     </button>
                 </div>`;
             });
         }
 
+        // --- SYSTEM CONFIG RENDERER ---
         function renderSystem(container) {
             container.innerHTML = `
                 <div style="margin-bottom: 32px;">
-                    <h2 class="header-title" style="font-size: 26px;">System Architecture</h2>
-                    <p class="subtitle">Diagnostic overview & Core state engine.</p>
+                    <h2 class="header-title" style="font-size: 26px;">System Configuration</h2>
+                    <p class="subtitle">Global architecture and diagnostic overview.</p>
                 </div>
                 
                 <div class="grid">
+                    <!-- Cloud Status Card -->
                     <div class="card">
-                        <h3 style="margin-bottom: 24px; display:flex; align-items:center; gap:12px; font-size:18px; color: var(--text-light); text-transform: uppercase;">
-                            <div style="padding: 8px; border: 1px solid var(--primary); background: rgba(0,210,255,0.1); border-radius: 4px; color: var(--primary);">
+                        <h3 style="margin-bottom: 24px; display:flex; align-items:center; gap:12px; font-size:20px;">
+                            <div style="padding: 8px; background: var(--primary-light); border-radius: 8px; color: var(--primary);">
                                 <i class="ph-fill ph-cloud-check"></i>
                             </div>
-                            MQTT Fabric Engine
+                            Cloud State Engine
                         </h3>
-                        <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 13px; font-family: var(--font-mono);">
-                            State synchronized via Retained QoS 1 messaging.
+                        <p style="color: var(--text-muted); margin-bottom: 24px; line-height: 1.6;">
+                            Fleet configuration is synchronized via MQTT Retained messaging. Clients dynamically load state upon connection.
                         </p>
                         <div class="metrics-grid">
                             <div class="metric-box">
-                                <div class="metric-label">UPLINK STATUS</div>
-                                <div class="metric-val" style="font-size: 16px; color: ${state.mqttConnected ? 'var(--success)' : 'var(--danger)'};">${state.mqttConnected ? 'ESTABLISHED' : 'DISCONNECTED'}</div>
+                                <div class="metric-label">Broker Link</div>
+                                <div class="metric-val" style="font-size: 18px; color: ${state.mqttConnected ? 'var(--success)' : 'var(--danger)'};">${state.mqttConnected ? 'STABLE' : 'DISCONNECTED'}</div>
                             </div>
                             <div class="metric-box">
-                                <div class="metric-label">KNOWN NODES</div>
-                                <div class="metric-val" style="font-size: 24px; color: var(--primary);">${state.registeredDevices.length}</div>
+                                <div class="metric-label">Nodes Registered</div>
+                                <div class="metric-val" style="font-size: 24px;">${state.registeredDevices.length}</div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Security Card -->
                     <div class="card">
-                        <h3 style="margin-bottom: 24px; display:flex; align-items:center; gap:12px; font-size:18px; color: var(--text-light); text-transform: uppercase;">
-                            <div style="padding: 8px; border: 1px solid var(--success); background: rgba(0,255,102,0.1); border-radius: 4px; color: var(--success);">
+                        <h3 style="margin-bottom: 24px; display:flex; align-items:center; gap:12px; font-size:20px;">
+                            <div style="padding: 8px; background: var(--success-light); border-radius: 8px; color: var(--success);">
                                 <i class="ph-fill ph-shield-check"></i>
                             </div>
-                            Access Control
+                            Security Firewall
                         </h3>
-                        <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 13px; font-family: var(--font-mono);">
-                            Cryptographic token validation enforces packet dropping on unauthorized payloads.
+                        <p style="color: var(--text-muted); margin-bottom: 24px; line-height: 1.6;">
+                            Strict cryptographic token verification is active. Unauthenticated payloads are dropped at the client level before processing.
                         </p>
-                        <div class="list-item" style="padding: 16px; margin: 0; background: #000;">
+                        <div class="list-item" style="padding: 16px; margin: 0;">
                             <div>
-                                <div style="font-size:10px; color:var(--text-muted); font-family:var(--font-mono); margin-bottom:4px;">REQ_TOKEN</div>
-                                <div style="font-family:var(--font-mono); font-size: 14px; color: var(--success); letter-spacing:1px; text-shadow: var(--glow-success);">MRPSP_AUTH_***</div>
+                                <div style="font-size:12px; color:var(--text-muted); font-weight:700; margin-bottom:4px;">EXPECTED TOKEN</div>
+                                <div style="font-family:monospace; font-weight:700; letter-spacing:1px;">MRPSP_AUTH_***</div>
                             </div>
-                            <i class="ph-fill ph-lock-key" style="font-size:24px; color:var(--success); text-shadow: var(--glow-success);"></i>
+                            <i class="ph-fill ph-lock-key" style="font-size:24px; color:var(--success);"></i>
                         </div>
                     </div>
                 </div>
             `;
         }
 
+        /**
+         * ==========================================================================
+         * 8. IN-PLACE DOM UPDATERS (Prevents re-rendering entire screen)
+         * ==========================================================================
+         */
         function updateDomForDevice(deviceId) {
             updateSidebarStatistics();
             const dev = state.detectedDevices[deviceId];
@@ -1268,87 +1857,105 @@
 
             const isOnline = dev.status === 'ONLINE';
 
+            // 1. Dashboard Update
             if (state.currentScreen === 'dashboard' && isRegistered(deviceId)) {
                 const card = document.getElementById(`card-${deviceId}`);
                 if (!card) {
+                    // Inject new card if it doesn't exist
                     const grid = document.getElementById('dashboard-grid');
-                    if (grid) { grid.insertAdjacentHTML('beforeend', buildCardHtml(dev)); checkDashboardEmpty(); }
+                    if (grid) { 
+                        grid.insertAdjacentHTML('beforeend', buildCardHtml(dev)); 
+                        checkDashboardEmpty(); 
+                    }
                     return;
                 }
 
+                // Modify existing card classes
                 isOnline ? card.classList.remove('card-offline') : card.classList.add('card-offline');
 
+                // Update Status Badge
                 const badge = document.getElementById(`badge-${deviceId}`);
                 const dot = document.getElementById(`dot-${deviceId}`);
                 const txt = document.getElementById(`txt-status-${deviceId}`);
                 if (badge && dot && txt) {
-                    badge.style.background = isOnline ? 'rgba(0, 255, 102, 0.1)' : 'rgba(255, 0, 60, 0.1)';
+                    badge.style.background = isOnline ? 'var(--success-light)' : 'var(--danger-light)';
                     badge.style.color = isOnline ? 'var(--success)' : 'var(--danger)';
-                    badge.style.borderColor = isOnline ? 'var(--success)' : 'var(--danger)';
-                    badge.style.boxShadow = isOnline ? '0 0 10px rgba(0,255,102,0.1)' : '0 0 10px rgba(255,0,60,0.1)';
-                    badge.style.textShadow = isOnline ? 'var(--glow-success)' : 'var(--glow-danger)';
                     dot.className = `pulse-dot ${isOnline ? 'dot-online' : 'dot-offline'}`;
-                    txt.innerText = isOnline ? 'LINK_UP' : 'LINK_DOWN';
+                    txt.innerText = isOnline ? 'ONLINE' : 'OFFLINE';
                 }
 
+                // Safely update values
                 if (document.getElementById(`v-${deviceId}`)) {
-                    document.getElementById(`v-${deviceId}`).innerHTML = `${dev.voltage.toFixed(1)}<span>V</span>`;
-                    document.getElementById(`c-${deviceId}`).innerHTML = `${dev.current.toFixed(2)}<span>A</span>`;
+                    document.getElementById(`v-${deviceId}`).innerHTML = `${dev.voltage.toFixed(1)} <span>V</span>`;
+                    document.getElementById(`c-${deviceId}`).innerHTML = `${dev.current.toFixed(2)} <span>A</span>`;
                     
                     const supplyEl = document.getElementById(`s-${deviceId}`);
-                    supplyEl.innerText = isOnline ? dev.supply : 'ERR';
-                    supplyEl.className = `metric-val ${isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted'}`;
+                    supplyEl.innerText = isOnline ? dev.supply : 'UNKNOWN';
+                    supplyEl.style.color = isOnline ? (dev.supply === 'ON' ? 'var(--success)' : 'var(--danger)') : 'var(--text-muted)';
                     
                     const faultEl = document.getElementById(`f-${deviceId}`);
                     faultEl.innerText = dev.fault;
-                    faultEl.className = `metric-val ${dev.fault !== 'NO' ? 'text-danger' : ''}`;
+                    faultEl.style.color = dev.fault !== 'NO' ? 'var(--danger)' : 'var(--text-main)';
                 }
             }
             
+            // 2. Room Detail Update
             else if (state.currentScreen === 'room_detail' && state.selectedDeviceId === deviceId) {
                 if (document.getElementById('rd-v')) {
-                    document.getElementById('rd-v').innerHTML = `${dev.voltage.toFixed(1)}<span>V</span>`;
-                    document.getElementById('rd-c').innerHTML = `${dev.current.toFixed(2)}<span>A</span>`;
+                    document.getElementById('rd-v').innerHTML = `${dev.voltage.toFixed(1)} <span>V</span>`;
+                    document.getElementById('rd-c').innerHTML = `${dev.current.toFixed(2)} <span>A</span>`;
                     
                     const rdSupply = document.getElementById('rd-supply');
-                    rdSupply.innerText = isOnline ? dev.supply : 'ERR';
+                    rdSupply.innerText = isOnline ? dev.supply : 'UNKNOWN';
                     rdSupply.className = `metric-val ${isOnline ? (dev.supply === 'ON' ? 'text-success' : 'text-danger') : 'text-muted'}`;
                     
                     const rdFault = document.getElementById('rd-fault');
                     rdFault.innerText = dev.fault;
-                    rdFault.className = `metric-val ${dev.fault !== 'NO' ? 'text-danger' : ''}`;
+                    rdFault.style.color = dev.fault !== 'NO' ? 'var(--danger)' : 'var(--text-main)';
 
                     document.getElementById('rd-offline').className = isOnline ? 'hidden' : '';
                     
+                    // Update Analytics Box
                     if(document.getElementById('an-power')) {
-                        document.getElementById('an-power').innerText = dev.power.toFixed(1);
-                        document.getElementById('an-kva').innerText = (dev.power / 1000).toFixed(3);
+                        document.getElementById('an-power').innerText = `${dev.power.toFixed(1)} W`;
+                        document.getElementById('an-kva').innerText = `${(dev.power / 1000).toFixed(3)} kVA`;
                         document.getElementById('an-fault').innerText = dev.fault;
-                        document.getElementById('an-fault').className = dev.fault !== 'NO' ? 'text-danger' : 'text-light';
-                        document.getElementById('an-rssi').innerText = `${dev.rssi || '-65'} dBm`;
+                        document.getElementById('an-fault').style.color = dev.fault !== 'NO' ? 'var(--danger)' : 'var(--text-main)';
+                        document.getElementById('an-rssi').innerText = `${dev.rssi} dBm`;
                     }
                 }
 
+                // Fast update Chart.js
+                // Fast update Chart.js (Added safety check for dev.historyCurrent)
                 if (currentChartInstance && dev.historyCurrent && dev.historyCurrent.length > 0) {
                     currentChartInstance.data.labels = dev.historyTime;
                     currentChartInstance.data.datasets[0].data = dev.historyCurrent;
-                    currentChartInstance.update('none'); 
+                    currentChartInstance.update('none'); // Update without animation blocking
                 }
             }
             
+            // 3. Register Screen Update
             else if (state.currentScreen === 'register') {
                 const list = document.getElementById('reg-list');
                 if (list) list.innerHTML = buildRegisterList();
             }
         }
 
+        /**
+         * ==========================================================================
+         * 9. UTILITIES, NOTIFICATIONS & MODALS
+         * ==========================================================================
+         */
         function setSystemStatus(isOnline, text) {
             const txt = document.getElementById("system-status-text");
             const dot = document.getElementById("system-status-dot");
             const container = document.getElementById("sys-status-container");
+            
             if(txt) txt.innerText = text;
             if(dot) dot.className = `pulse-dot ${isOnline ? "dot-online" : "dot-offline"}`;
-            if(container) container.style.borderColor = isOnline ? 'var(--success)' : 'var(--danger)';
+            if(container) {
+                container.style.borderColor = isOnline ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)';
+            }
         }
 
         function updateSidebarStatistics() {
@@ -1360,83 +1967,145 @@
         function checkDashboardEmpty() {
             const emptyState = document.getElementById('empty-dash');
             const grid = document.getElementById('dashboard-grid');
-            if (emptyState && grid) emptyState.className = grid.children.length === 0 ? "empty-state" : "hidden";
+            if (emptyState && grid) {
+                emptyState.className = grid.children.length === 0 ? "empty-state" : "hidden";
+            }
         }
 
-        function isRegistered(id) { return state.registeredDevices.some(d => d.device_id === id); }
-        function toggleMobileMenu() { document.getElementById('sidebar').classList.toggle('mobile-open'); }
+        function isRegistered(id) { 
+            return state.registeredDevices.some(d => d.device_id === id); 
+        }
 
-        let toastQueue = []; let isToastPlaying = false;
-        function showToast(message, type = 'info') { toastQueue.push({message, type}); if (!isToastPlaying) playNextToast(); }
+        function toggleMobileMenu() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        }
+
+        // --- Custom Toast System Queue ---
+        let toastQueue = [];
+        let isToastPlaying = false;
+
+        function showToast(message, type = 'info') {
+            toastQueue.push({message, type});
+            if (!isToastPlaying) playNextToast();
+        }
 
         function playNextToast() {
-            if (toastQueue.length === 0) { isToastPlaying = false; return; }
+            if (toastQueue.length === 0) {
+                isToastPlaying = false;
+                return;
+            }
             isToastPlaying = true;
             const {message, type} = toastQueue.shift();
+            
             const container = document.getElementById("toast-container");
             
-            let icon = 'ph-terminal-window'; let color = 'var(--text-light)'; let borderColor = 'var(--border-medium)';
-            if (type === 'success') { icon = 'ph-check-square'; color = 'var(--success)'; borderColor = 'var(--success)'; }
-            if (type === 'error') { icon = 'ph-warning'; color = 'var(--danger)'; borderColor = 'var(--danger)'; }
+            // Define Icons and Colors based on type
+            let icon = 'ph-info';
+            let color = 'var(--text-light)';
+            if (type === 'success') { icon = 'ph-check-circle'; color = 'var(--success)'; }
+            if (type === 'error') { icon = 'ph-warning-circle'; color = 'var(--danger)'; }
             
             const toastHtml = `
-                <div class="toast" style="border-left-color: ${borderColor};">
-                    <i class="ph-fill ${icon} toast-icon" style="color: ${color}; text-shadow: 0 0 10px ${color}"></i>
-                    <span>> ${message}</span>
+                <div class="toast">
+                    <i class="ph-fill ${icon} toast-icon" style="color: ${color};"></i>
+                    <span>${message}</span>
                 </div>
             `;
+            
             container.insertAdjacentHTML('beforeend', toastHtml);
             const activeToast = container.lastElementChild;
             
-            requestAnimationFrame(() => requestAnimationFrame(() => activeToast.classList.add('show')));
+            // Trigger animation frame for CSS transition
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    activeToast.classList.add('show');
+                });
+            });
+            
+            // Remove after 3.5 seconds
             setTimeout(() => {
                 activeToast.classList.remove('show');
-                setTimeout(() => { activeToast.remove(); playNextToast(); }, 400); 
-            }, 3000);
+                setTimeout(() => {
+                    activeToast.remove();
+                    playNextToast(); // Play next in queue
+                }, 400); // Wait for transition
+            }, 3500);
         }
 
+        // --- Custom Modal System ---
         let pendingAction = null;
+
         function confirmDelete(deviceId, blockName) {
-            document.getElementById('modal-title').innerHTML = `<i class="ph-fill ph-warning-circle" style="color: var(--danger);"></i> OVERRIDE CONFIRMATION`;
-            document.getElementById('modal-body').innerHTML = `Are you absolutely sure you want to purge <strong>${blockName}</strong> [${deviceId}] from the trusted fleet matrix? All automated control will cease.`;
+            document.getElementById('modal-title').innerHTML = `<i class="ph-fill ph-warning-circle" style="color: var(--danger);"></i> Revoke Authorization`;
+            document.getElementById('modal-body').innerHTML = `Are you absolutely sure you want to revoke access for <strong>${blockName}</strong> (${deviceId})? This device will be removed from the fleet across all synchronized dashboards.`;
+            
             pendingAction = () => {
                 state.registeredDevices = state.registeredDevices.filter(d => d.device_id !== deviceId);
                 saveRegistrationsToCloud();
-                showToast(`NODE [${blockName}] PURGED FROM FLEET`, 'error');
-                renderScreen(); closeModal();
+                showToast(`Fleet authorization revoked for ${blockName}`, 'error');
+                renderScreen();
+                closeModal();
             };
+            
             document.getElementById('modal-confirm-btn').onclick = pendingAction;
             document.getElementById('global-modal').classList.add('active');
         }
 
-        function closeModal() { document.getElementById('global-modal').classList.remove('active'); pendingAction = null; }
-
+        function closeModal() {
+            document.getElementById('global-modal').classList.remove('active');
+            pendingAction = null;
+        }
+        // --- ADVANCED IST CLOCK TICKER ---
         function runISTClock() {
             const timeEl = document.getElementById('ist-time');
             const dateEl = document.getElementById('ist-date');
+            
             if (timeEl && dateEl) {
                 const now = new Date();
-                dateEl.innerText = now.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'short', month: 'short', day: '2-digit' }).toUpperCase() + ' //';
-                timeEl.innerText = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                
+                // Format Date (e.g. "Wed, Sep 16 •")
+                dateEl.innerText = now.toLocaleDateString('en-IN', {
+                    timeZone: 'Asia/Kolkata', weekday: 'short', month: 'short', day: 'numeric'
+                }) + ' •';
+                
+                // Format Time (e.g. "11:58:04 PM")
+                timeEl.innerText = now.toLocaleTimeString('en-IN', {
+                    timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+                });
             }
         }
-        setInterval(runISTClock, 1000); runISTClock();
+        setInterval(runISTClock, 1000); 
+        runISTClock();
 
+        // --- CSV Export Engine ---
         function exportDataToCSV(deviceId) {
             const dev = state.detectedDevices[deviceId];
-            if (!dev || dev.historyCurrent.length === 0) return showToast("NO TELEMETRY IN BUFFER", "error");
+            if (!dev || dev.historyCurrent.length === 0) {
+                return showToast("No telemetry data available to export.", "error");
+            }
 
-            let csvContent = "data:text/csv;charset=utf-8,Timestamp,Current_Amps\n";
-            for (let i = 0; i < dev.historyTime.length; i++) csvContent += `${dev.historyTime[i]},${dev.historyCurrent[i]}\n`;
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Timestamp,Current_Amps\n";
+
+            for (let i = 0; i < dev.historyTime.length; i++) {
+                csvContent += `${dev.historyTime[i]},${dev.historyCurrent[i]}\n`;
+            }
 
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `NEXUS_SCADA_${dev.device_id}_${new Date().getTime()}.csv`);
-            document.body.appendChild(link); link.click(); document.body.removeChild(link);
-            showToast("DATA EXTRACT SECURED", "success");
+            
+            const dateStr = new Date().toISOString().slice(0,10);
+            link.setAttribute("download", `BMS_Telemetry_${dev.block_name.replace(/\s+/g, '_')}_${dateStr}.csv`);
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast("CSV Export downloaded successfully", "success");
         }
 
+        // Start Application
         window.onload = initApp;
     </script>
 </body>
