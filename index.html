@@ -10,24 +10,12 @@
 
 <title>SCADA OCC</title>
 
-
-<!-- =====================================================
-     FIREBASE ONLY
-     NO MQTT
-     ===================================================== -->
-
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 
 <style>
-
-/* =====================================================
-   GLOBAL
-   ===================================================== */
 
 * {
     box-sizing: border-box;
@@ -37,10 +25,7 @@ body {
 
     margin: 0;
 
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
+    font-family: Arial, sans-serif;
 
     background: #0d1117;
 
@@ -49,13 +34,15 @@ body {
 }
 
 
-/* =====================================================
-   HEADER
-   ===================================================== */
+/* HEADER */
 
 header {
 
     height: 70px;
+
+    background: #161b22;
+
+    border-bottom: 1px solid #30363d;
 
     display: flex;
 
@@ -64,11 +51,6 @@ header {
     justify-content: space-between;
 
     padding: 0 25px;
-
-    background: #161b22;
-
-    border-bottom:
-        1px solid #30363d;
 
 }
 
@@ -86,11 +68,11 @@ header {
 
     color: #8b949e;
 
-    margin-top: 3px;
+    margin-top: 4px;
 
 }
 
-.cloud-status {
+.cloud {
 
     display: flex;
 
@@ -118,15 +100,12 @@ header {
 
     background: #3fb950;
 
-    box-shadow:
-        0 0 10px #3fb950;
+    box-shadow: 0 0 10px #3fb950;
 
 }
 
 
-/* =====================================================
-   MAIN
-   ===================================================== */
+/* MAIN */
 
 main {
 
@@ -135,9 +114,7 @@ main {
 }
 
 
-/* =====================================================
-   SUMMARY
-   ===================================================== */
+/* SUMMARY */
 
 .summary {
 
@@ -156,8 +133,7 @@ main {
 
     background: #161b22;
 
-    border:
-        1px solid #30363d;
+    border: 1px solid #30363d;
 
     border-radius: 10px;
 
@@ -167,9 +143,9 @@ main {
 
 .summary-title {
 
-    font-size: 12px;
-
     color: #8b949e;
+
+    font-size: 12px;
 
 }
 
@@ -184,9 +160,7 @@ main {
 }
 
 
-/* =====================================================
-   DEVICES
-   ===================================================== */
+/* DEVICES */
 
 .devices {
 
@@ -203,24 +177,17 @@ main {
 }
 
 
-/* =====================================================
-   DEVICE CARD
-   ===================================================== */
+/* DEVICE */
 
 .device {
 
     background: #161b22;
 
-    border:
-        1px solid #30363d;
+    border: 1px solid #30363d;
 
     border-radius: 12px;
 
     padding: 20px;
-
-    transition:
-        border 0.2s,
-        opacity 0.2s;
 
 }
 
@@ -237,19 +204,15 @@ main {
 }
 
 
-/* =====================================================
-   DEVICE HEADER
-   ===================================================== */
+/* DEVICE HEADER */
 
 .device-header {
 
     display: flex;
 
-    justify-content:
-        space-between;
+    justify-content: space-between;
 
-    align-items:
-        flex-start;
+    align-items: flex-start;
 
 }
 
@@ -282,23 +245,17 @@ main {
 }
 
 
-/* =====================================================
-   ONLINE STATUS
-   ===================================================== */
+/* STATUS */
 
 .status {
 
-    padding:
-        5px 10px;
+    padding: 5px 10px;
 
-    border-radius:
-        20px;
+    border-radius: 20px;
 
-    font-size:
-        11px;
+    font-size: 11px;
 
-    font-weight:
-        bold;
+    font-weight: bold;
 
 }
 
@@ -306,8 +263,7 @@ main {
 
     color: #3fb950;
 
-    background:
-        #0d2818;
+    background: #0d2818;
 
 }
 
@@ -315,15 +271,12 @@ main {
 
     color: #f85149;
 
-    background:
-        #2d1111;
+    background: #2d1111;
 
 }
 
 
-/* =====================================================
-   DATA
-   ===================================================== */
+/* DATA */
 
 .data-grid {
 
@@ -367,9 +320,7 @@ main {
 }
 
 
-/* =====================================================
-   BUTTONS
-   ===================================================== */
+/* BUTTONS */
 
 .controls {
 
@@ -397,8 +348,6 @@ button {
     font-weight: bold;
 
     cursor: pointer;
-
-    font-size: 12px;
 
 }
 
@@ -445,11 +394,9 @@ button:hover {
 }
 
 
-/* =====================================================
-   COMMAND STATUS
-   ===================================================== */
+/* COMMAND */
 
-.command-status {
+.command {
 
     margin-top: 12px;
 
@@ -466,9 +413,7 @@ button:hover {
 }
 
 
-/* =====================================================
-   EMPTY
-   ===================================================== */
+/* EMPTY */
 
 .empty {
 
@@ -483,9 +428,7 @@ button:hover {
 }
 
 
-/* =====================================================
-   RESPONSIVE
-   ===================================================== */
+/* MOBILE */
 
 @media(max-width: 900px) {
 
@@ -524,10 +467,6 @@ button:hover {
 <body>
 
 
-<!-- =====================================================
-     HEADER
-     ===================================================== -->
-
 <header>
 
     <div>
@@ -543,7 +482,7 @@ button:hover {
     </div>
 
 
-    <div class="cloud-status">
+    <div class="cloud">
 
         <span
             id="cloudDot"
@@ -563,11 +502,9 @@ button:hover {
 <main>
 
 
-<!-- =====================================================
-     SUMMARY
-     ===================================================== -->
+<!-- SUMMARY -->
 
-<section class="summary">
+<div class="summary">
 
 
     <div class="summary-card">
@@ -588,7 +525,7 @@ button:hover {
     <div class="summary-card">
 
         <div class="summary-title">
-            ONLINE DEVICES
+            ONLINE
         </div>
 
         <div
@@ -630,25 +567,23 @@ button:hover {
     </div>
 
 
-</section>
+</div>
 
 
 
-<!-- =====================================================
-     DEVICES
-     ===================================================== -->
+<!-- DEVICES -->
 
-<section
+<div
     id="devices"
     class="devices">
 
     <div class="empty">
 
-        Waiting for Raspberry Pi devices...
+        Connecting to SCADA database...
 
     </div>
 
-</section>
+</div>
 
 
 </main>
@@ -657,9 +592,10 @@ button:hover {
 
 <script>
 
-/* =========================================================
-   FIREBASE CONFIGURATION
-   ========================================================= */
+
+/* =====================================================
+   FIREBASE CONFIG
+   ===================================================== */
 
 const firebaseConfig = {
 
@@ -687,68 +623,26 @@ const firebaseConfig = {
 };
 
 
-/* =========================================================
-   INITIALIZE FIREBASE
-   ========================================================= */
+/* =====================================================
+   START FIREBASE
+   ===================================================== */
 
-firebase.initializeApp(firebaseConfig);
-
-
-const auth =
-    firebase.auth();
+firebase.initializeApp(
+    firebaseConfig
+);
 
 
 const db =
     firebase.database();
 
 
-/* =========================================================
-   GLOBAL DEVICE DATA
-   ========================================================= */
-
-let devices = {};
-
-
-/* =========================================================
-   FIREBASE AUTHENTICATION
-   ========================================================= */
-
-auth.signInAnonymously()
-
-.then(() => {
-
-    console.log(
-        "Firebase authentication successful"
-    );
-
-    setCloudStatus(true);
-
-    startDeviceListener();
-
-})
-
-.catch(error => {
-
-    console.error(
-        "Firebase authentication error:",
-        error
-    );
-
-    setCloudStatus(false);
-
-    document.getElementById(
-        "cloudText"
-    ).textContent =
-        "Firebase authentication failed";
-
-});
-
-
-/* =========================================================
+/* =====================================================
    CLOUD STATUS
-   ========================================================= */
+   ===================================================== */
 
-function setCloudStatus(online) {
+function setCloudStatus(
+    online
+) {
 
     const dot =
         document.getElementById(
@@ -786,52 +680,70 @@ function setCloudStatus(online) {
 }
 
 
-/* =========================================================
-   REAL-TIME DEVICE LISTENER
-   ========================================================= */
+/* =====================================================
+   DEVICE LISTENER
+   ===================================================== */
 
-function startDeviceListener() {
+db.ref(
+    "scada/devices"
+)
 
-    db.ref(
-        "scada/devices"
-    )
+.on(
 
-    .on(
+    "value",
 
-        "value",
+    snapshot => {
 
-        snapshot => {
+        setCloudStatus(true);
 
-            devices =
-                snapshot.val() || {};
+        const devices =
+            snapshot.val() || {};
 
-            renderDevices();
+        renderDevices(
+            devices
+        );
 
-            setCloudStatus(true);
+    },
 
-        },
+    error => {
 
-        error => {
+        console.error(
+            "Firebase error:",
+            error
+        );
 
-            console.error(
-                "Firebase listener error:",
-                error
-            );
+        setCloudStatus(false);
 
-            setCloudStatus(false);
+        document.getElementById(
+            "devices"
+        ).innerHTML = `
 
-        }
+            <div class="empty">
 
-    );
+                Firebase connection failed.
 
-}
+                <br><br>
+
+                ${escapeHTML(
+                    error.message
+                )}
+
+            </div>
+
+        `;
+
+    }
+
+);
 
 
-/* =========================================================
+/* =====================================================
    RENDER DEVICES
-   ========================================================= */
+   ===================================================== */
 
-function renderDevices() {
+function renderDevices(
+    devices
+) {
 
     const container =
         document.getElementById(
@@ -846,11 +758,14 @@ function renderDevices() {
         Object.keys(devices);
 
 
-    let onlineCount = 0;
+    let online =
+        0;
 
-    let runningCount = 0;
+    let running =
+        0;
 
-    let totalCurrent = 0;
+    let totalCurrent =
+        0;
 
 
     if (ids.length === 0) {
@@ -860,11 +775,6 @@ function renderDevices() {
             <div class="empty">
 
                 No Raspberry Pi registered.
-
-                <br><br>
-
-                Start the SCADA program on a
-                Raspberry Pi to register it.
 
             </div>
 
@@ -882,47 +792,49 @@ function renderDevices() {
     }
 
 
-    ids.forEach(piId => {
+    ids.forEach(
+        piId => {
 
 
-        const device =
+        const d =
             devices[piId] || {};
 
 
-        const online =
-            device.online === true;
+        const isOnline =
+            d.online === true;
 
 
         const current =
             Number(
-                device.current || 0
+                d.current || 0
             );
 
 
-        if (online) {
+        if (isOnline) {
 
-            onlineCount++;
+            online++;
 
         }
 
 
-        totalCurrent += current;
-
-
         if (
 
-            online &&
+            isOnline &&
 
             String(
-                device.motor_status || ""
+                d.motor_status || ""
             ).toUpperCase() ===
             "RUNNING"
 
         ) {
 
-            runningCount++;
+            running++;
 
         }
+
+
+        totalCurrent +=
+            current;
 
 
         const card =
@@ -934,7 +846,7 @@ function renderDevices() {
         card.className =
             "device " +
             (
-                online
+                isOnline
                 ? "online"
                 : "offline"
             );
@@ -944,12 +856,13 @@ function renderDevices() {
 
             <div class="device-header">
 
+
                 <div>
 
                     <div class="motor-name">
 
                         ${escapeHTML(
-                            device.motor_name ||
+                            d.motor_name ||
                             "UNKNOWN MOTOR"
                         )}
 
@@ -968,8 +881,8 @@ function renderDevices() {
                     <div class="location">
 
                         ${escapeHTML(
-                            device.location ||
-                            "Location not specified"
+                            d.location ||
+                            "-"
                         )}
 
                     </div>
@@ -978,18 +891,19 @@ function renderDevices() {
 
 
                 <div class="status ${
-                    online
+                    isOnline
                     ? "online"
                     : "offline"
                 }">
 
                     ${
-                        online
+                        isOnline
                         ? "ONLINE"
                         : "OFFLINE"
                     }
 
                 </div>
+
 
             </div>
 
@@ -1008,13 +922,11 @@ function renderDevices() {
 
                         ${
                             current.toFixed(3)
-                        }
-                        A
+                        } A
 
                     </div>
 
                 </div>
-
 
 
                 <div class="data">
@@ -1026,14 +938,13 @@ function renderDevices() {
                     <div class="data-value">
 
                         ${escapeHTML(
-                            device.motor_status ||
+                            d.motor_status ||
                             "STOPPED"
                         )}
 
                     </div>
 
                 </div>
-
 
 
                 <div class="data">
@@ -1045,14 +956,13 @@ function renderDevices() {
                     <div class="data-value">
 
                         ${escapeHTML(
-                            device.mode ||
+                            d.mode ||
                             "LOCAL"
                         )}
 
                     </div>
 
                 </div>
-
 
 
                 <div class="data">
@@ -1064,33 +974,13 @@ function renderDevices() {
                     <div class="data-value">
 
                         ${escapeHTML(
-                            device.relay ||
+                            d.relay ||
                             "OFF"
                         )}
 
                     </div>
 
                 </div>
-
-
-
-                <div class="data">
-
-                    <div class="data-label">
-                        LOCATION
-                    </div>
-
-                    <div class="data-value">
-
-                        ${escapeHTML(
-                            device.location ||
-                            "-"
-                        )}
-
-                    </div>
-
-                </div>
-
 
 
                 <div class="data">
@@ -1103,9 +993,27 @@ function renderDevices() {
 
                         ${
                             formatTime(
-                                device.last_seen
+                                d.last_seen
                             )
                         }
+
+                    </div>
+
+                </div>
+
+
+                <div class="data">
+
+                    <div class="data-label">
+                        LOCATION
+                    </div>
+
+                    <div class="data-value">
+
+                        ${escapeHTML(
+                            d.location ||
+                            "-"
+                        )}
 
                     </div>
 
@@ -1122,7 +1030,7 @@ function renderDevices() {
                 <button
                     class="remote"
                     onclick="sendCommand(
-                        '${safeId(piId)}',
+                        '${jsEscape(piId)}',
                         'MODE_REMOTE'
                     )">
 
@@ -1131,11 +1039,10 @@ function renderDevices() {
                 </button>
 
 
-
                 <button
                     class="local"
                     onclick="sendCommand(
-                        '${safeId(piId)}',
+                        '${jsEscape(piId)}',
                         'MODE_LOCAL'
                     )">
 
@@ -1144,11 +1051,10 @@ function renderDevices() {
                 </button>
 
 
-
                 <button
                     class="start"
                     onclick="sendCommand(
-                        '${safeId(piId)}',
+                        '${jsEscape(piId)}',
                         'START'
                     )">
 
@@ -1157,11 +1063,10 @@ function renderDevices() {
                 </button>
 
 
-
                 <button
                     class="stop"
                     onclick="sendCommand(
-                        '${safeId(piId)}',
+                        '${jsEscape(piId)}',
                         'STOP'
                     )">
 
@@ -1170,11 +1075,10 @@ function renderDevices() {
                 </button>
 
 
-
                 <button
                     class="relay-on"
                     onclick="sendCommand(
-                        '${safeId(piId)}',
+                        '${jsEscape(piId)}',
                         'RELAY_ON'
                     )">
 
@@ -1183,11 +1087,10 @@ function renderDevices() {
                 </button>
 
 
-
                 <button
                     class="relay-off"
                     onclick="sendCommand(
-                        '${safeId(piId)}',
+                        '${jsEscape(piId)}',
                         'RELAY_OFF'
                     )">
 
@@ -1199,10 +1102,9 @@ function renderDevices() {
             </div>
 
 
-
             <div
                 id="command-${safeId(piId)}"
-                class="command-status">
+                class="command">
 
                 Ready
 
@@ -1215,6 +1117,7 @@ function renderDevices() {
             card
         );
 
+
     });
 
 
@@ -1222,9 +1125,9 @@ function renderDevices() {
 
         ids.length,
 
-        onlineCount,
+        online,
 
-        runningCount,
+        running,
 
         totalCurrent
 
@@ -1233,9 +1136,9 @@ function renderDevices() {
 }
 
 
-/* =========================================================
-   SEND COMMAND TO RASPBERRY PI
-   ========================================================= */
+/* =====================================================
+   SEND COMMAND
+   ===================================================== */
 
 function sendCommand(
     piId,
@@ -1243,31 +1146,23 @@ function sendCommand(
 ) {
 
 
-    console.log(
-        "Sending:",
-        command,
-        "to:",
-        piId
-    );
-
-
-    const statusElement =
+    const commandElement =
         document.getElementById(
             "command-" +
             safeId(piId)
         );
 
 
-    if (statusElement) {
+    if (commandElement) {
 
-        statusElement.textContent =
-            "Sending command: " +
+        commandElement.textContent =
+            "Sending: " +
             command;
 
     }
 
 
-    const commandData = {
+    const data = {
 
         command:
             command,
@@ -1285,26 +1180,25 @@ function sendCommand(
         piId
     )
 
-    .set(
-        commandData
-    )
+    .set(data)
 
     .then(() => {
 
 
         console.log(
-            "Command successfully sent"
+            "Command sent:",
+            piId,
+            command
         );
 
 
-        if (statusElement) {
+        if (commandElement) {
 
-            statusElement.textContent =
+            commandElement.textContent =
                 "Command sent: " +
                 command;
 
         }
-
 
     })
 
@@ -1312,14 +1206,14 @@ function sendCommand(
 
 
         console.error(
-            "Command error:",
+            "Command failed:",
             error
         );
 
 
-        if (statusElement) {
+        if (commandElement) {
 
-            statusElement.textContent =
+            commandElement.textContent =
                 "Command failed";
 
         }
@@ -1335,9 +1229,9 @@ function sendCommand(
 }
 
 
-/* =========================================================
+/* =====================================================
    SUMMARY
-   ========================================================= */
+   ===================================================== */
 
 function updateSummary(
     total,
@@ -1345,7 +1239,6 @@ function updateSummary(
     running,
     current
 ) {
-
 
     document.getElementById(
         "totalDevices"
@@ -1374,9 +1267,9 @@ function updateSummary(
 }
 
 
-/* =========================================================
-   FORMAT TIME
-   ========================================================= */
+/* =====================================================
+   TIME
+   ===================================================== */
 
 function formatTime(
     timestamp
@@ -1410,14 +1303,11 @@ function formatTime(
         "en-IN",
         {
 
-            hour:
-                "2-digit",
+            hour: "2-digit",
 
-            minute:
-                "2-digit",
+            minute: "2-digit",
 
-            second:
-                "2-digit"
+            second: "2-digit"
 
         }
     );
@@ -1425,9 +1315,9 @@ function formatTime(
 }
 
 
-/* =========================================================
+/* =====================================================
    HTML ESCAPE
-   ========================================================= */
+   ===================================================== */
 
 function escapeHTML(
     value
@@ -1463,9 +1353,30 @@ function escapeHTML(
 }
 
 
-/* =========================================================
-   SAFE FIREBASE ID
-   ========================================================= */
+/* =====================================================
+   JAVASCRIPT STRING ESCAPE
+   ===================================================== */
+
+function jsEscape(
+    value
+) {
+
+    return String(value)
+        .replaceAll(
+            "\\",
+            "\\\\"
+        )
+        .replaceAll(
+            "'",
+            "\\'"
+        );
+
+}
+
+
+/* =====================================================
+   SAFE HTML ID
+   ===================================================== */
 
 function safeId(
     value
@@ -1480,6 +1391,7 @@ function safeId(
 }
 
 </script>
+
 
 </body>
 
