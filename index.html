@@ -1,291 +1,659 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
 <title>SCADA OCC</title>
 
+
+<!-- =====================================================
+     FIREBASE ONLY
+     NO MQTT
+     ===================================================== -->
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
+
 <style>
+
+/* =====================================================
+   GLOBAL
+   ===================================================== */
+
 * {
     box-sizing: border-box;
 }
 
 body {
+
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: #10141a;
-    color: #ffffff;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background: #0d1117;
+
+    color: white;
+
 }
 
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+
 header {
+
     height: 70px;
-    background: #171d25;
+
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
+
     padding: 0 25px;
-    border-bottom: 1px solid #303844;
+
+    background: #161b22;
+
+    border-bottom:
+        1px solid #30363d;
+
 }
 
 .title {
+
     font-size: 24px;
+
     font-weight: bold;
+
 }
 
-.cloud {
+.subtitle {
+
+    font-size: 12px;
+
+    color: #8b949e;
+
+    margin-top: 3px;
+
+}
+
+.cloud-status {
+
     display: flex;
+
     align-items: center;
+
     gap: 8px;
+
+    font-size: 13px;
+
 }
 
-.dot {
-    width: 10px;
-    height: 10px;
+.cloud-dot {
+
+    width: 11px;
+
+    height: 11px;
+
     border-radius: 50%;
-    background: #777;
+
+    background: #f85149;
+
 }
 
-.dot.online {
-    background: #00e676;
-    box-shadow: 0 0 10px #00e676;
+.cloud-dot.online {
+
+    background: #3fb950;
+
+    box-shadow:
+        0 0 10px #3fb950;
+
 }
+
+
+/* =====================================================
+   MAIN
+   ===================================================== */
 
 main {
+
     padding: 25px;
+
 }
+
+
+/* =====================================================
+   SUMMARY
+   ===================================================== */
 
 .summary {
+
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
     gap: 15px;
+
     margin-bottom: 25px;
+
 }
 
-.card {
-    background: #181f28;
-    border: 1px solid #303844;
+.summary-card {
+
+    background: #161b22;
+
+    border:
+        1px solid #30363d;
+
     border-radius: 10px;
+
     padding: 18px;
+
 }
 
-.card-title {
-    color: #9da7b3;
-    font-size: 13px;
+.summary-title {
+
+    font-size: 12px;
+
+    color: #8b949e;
+
 }
 
-.card-value {
+.summary-value {
+
     font-size: 28px;
-    margin-top: 8px;
+
     font-weight: bold;
+
+    margin-top: 7px;
+
 }
+
+
+/* =====================================================
+   DEVICES
+   ===================================================== */
 
 .devices {
+
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(350px, 1fr)
+        );
+
     gap: 20px;
+
 }
 
+
+/* =====================================================
+   DEVICE CARD
+   ===================================================== */
+
 .device {
-    background: #181f28;
-    border: 1px solid #303844;
+
+    background: #161b22;
+
+    border:
+        1px solid #30363d;
+
     border-radius: 12px;
+
     padding: 20px;
+
+    transition:
+        border 0.2s,
+        opacity 0.2s;
+
 }
 
 .device.online {
-    border-color: #00c853;
+
+    border-color: #238636;
+
 }
 
 .device.offline {
+
     opacity: 0.55;
+
 }
 
+
+/* =====================================================
+   DEVICE HEADER
+   ===================================================== */
+
 .device-header {
+
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        flex-start;
+
 }
 
 .motor-name {
+
     font-size: 21px;
+
     font-weight: bold;
+
 }
 
 .pi-id {
-    color: #8994a3;
+
     font-size: 12px;
-    margin-top: 4px;
+
+    color: #8b949e;
+
+    margin-top: 5px;
+
 }
 
+.location {
+
+    font-size: 12px;
+
+    color: #8b949e;
+
+    margin-top: 3px;
+
+}
+
+
+/* =====================================================
+   ONLINE STATUS
+   ===================================================== */
+
 .status {
-    padding: 5px 9px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: bold;
+
+    padding:
+        5px 10px;
+
+    border-radius:
+        20px;
+
+    font-size:
+        11px;
+
+    font-weight:
+        bold;
+
 }
 
 .status.online {
-    background: #063d21;
-    color: #00e676;
+
+    color: #3fb950;
+
+    background:
+        #0d2818;
+
 }
 
 .status.offline {
-    background: #3b1717;
-    color: #ff5252;
+
+    color: #f85149;
+
+    background:
+        #2d1111;
+
 }
 
+
+/* =====================================================
+   DATA
+   ===================================================== */
+
 .data-grid {
+
     display: grid;
-    grid-template-columns: 1fr 1fr;
+
+    grid-template-columns:
+        1fr 1fr;
+
     gap: 10px;
+
     margin-top: 20px;
+
 }
 
 .data {
-    background: #11161d;
-    padding: 12px;
+
+    background: #0d1117;
+
     border-radius: 7px;
+
+    padding: 12px;
+
 }
 
 .data-label {
-    color: #8994a3;
+
+    color: #8b949e;
+
     font-size: 11px;
+
 }
 
 .data-value {
+
     margin-top: 5px;
+
     font-size: 17px;
+
     font-weight: bold;
+
 }
 
+
+/* =====================================================
+   BUTTONS
+   ===================================================== */
+
 .controls {
-    margin-top: 20px;
+
     display: grid;
-    grid-template-columns: 1fr 1fr;
+
+    grid-template-columns:
+        1fr 1fr;
+
     gap: 8px;
+
+    margin-top: 20px;
+
 }
 
 button {
+
     border: none;
-    padding: 11px;
+
     border-radius: 7px;
-    cursor: pointer;
-    font-weight: bold;
+
+    padding: 11px 8px;
+
     color: white;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    font-size: 12px;
+
 }
 
 button:hover {
-    filter: brightness(1.15);
+
+    opacity: 0.85;
+
 }
 
 .remote {
-    background: #1565c0;
-}
 
-.start {
-    background: #00897b;
-}
+    background: #1f6feb;
 
-.stop {
-    background: #d32f2f;
-}
-
-.relay-on {
-    background: #2e7d32;
-}
-
-.relay-off {
-    background: #6d1b1b;
 }
 
 .local {
-    background: #455a64;
+
+    background: #57606a;
+
 }
 
-.event {
-    margin-top: 15px;
-    padding: 10px;
-    background: #0d1117;
-    border-radius: 7px;
-    font-size: 12px;
-    color: #aeb8c4;
+.start {
+
+    background: #238636;
+
 }
+
+.stop {
+
+    background: #da3633;
+
+}
+
+.relay-on {
+
+    background: #2ea043;
+
+}
+
+.relay-off {
+
+    background: #a40e26;
+
+}
+
+
+/* =====================================================
+   COMMAND STATUS
+   ===================================================== */
+
+.command-status {
+
+    margin-top: 12px;
+
+    padding: 9px;
+
+    border-radius: 6px;
+
+    background: #0d1117;
+
+    color: #8b949e;
+
+    font-size: 11px;
+
+}
+
+
+/* =====================================================
+   EMPTY
+   ===================================================== */
 
 .empty {
-    padding: 50px;
+
+    grid-column: 1 / -1;
+
     text-align: center;
-    color: #7d8794;
+
+    padding: 70px;
+
+    color: #8b949e;
+
 }
 
-@media(max-width:900px) {
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media(max-width: 900px) {
+
     .summary {
-        grid-template-columns: 1fr 1fr;
+
+        grid-template-columns:
+            1fr 1fr;
+
     }
+
 }
 
-@media(max-width:600px) {
+@media(max-width: 600px) {
+
     .summary {
-        grid-template-columns: 1fr;
+
+        grid-template-columns:
+            1fr;
+
     }
+
+    .devices {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
 }
+
 </style>
+
 </head>
+
 
 <body>
 
+
+<!-- =====================================================
+     HEADER
+     ===================================================== -->
+
 <header>
 
-    <div class="title">
-        SCADA OCC
+    <div>
+
+        <div class="title">
+            SCADA OCC
+        </div>
+
+        <div class="subtitle">
+            Cloud Based Motor Monitoring & Control
+        </div>
+
     </div>
 
-    <div class="cloud">
-        <span id="cloudDot" class="dot"></span>
-        <span id="cloudText">Connecting...</span>
+
+    <div class="cloud-status">
+
+        <span
+            id="cloudDot"
+            class="cloud-dot">
+        </span>
+
+        <span id="cloudText">
+            Connecting...
+        </span>
+
     </div>
 
 </header>
 
+
+
 <main>
 
-<div class="summary">
 
-    <div class="card">
-        <div class="card-title">TOTAL DEVICES</div>
-        <div class="card-value" id="totalDevices">0</div>
+<!-- =====================================================
+     SUMMARY
+     ===================================================== -->
+
+<section class="summary">
+
+
+    <div class="summary-card">
+
+        <div class="summary-title">
+            TOTAL DEVICES
+        </div>
+
+        <div
+            id="totalDevices"
+            class="summary-value">
+            0
+        </div>
+
     </div>
 
-    <div class="card">
-        <div class="card-title">ONLINE</div>
-        <div class="card-value" id="onlineDevices">0</div>
+
+    <div class="summary-card">
+
+        <div class="summary-title">
+            ONLINE DEVICES
+        </div>
+
+        <div
+            id="onlineDevices"
+            class="summary-value">
+            0
+        </div>
+
     </div>
 
-    <div class="card">
-        <div class="card-title">MOTORS RUNNING</div>
-        <div class="card-value" id="runningMotors">0</div>
+
+    <div class="summary-card">
+
+        <div class="summary-title">
+            MOTORS RUNNING
+        </div>
+
+        <div
+            id="runningMotors"
+            class="summary-value">
+            0
+        </div>
+
     </div>
 
-    <div class="card">
-        <div class="card-title">TOTAL CURRENT</div>
-        <div class="card-value" id="totalCurrent">0.000 A</div>
+
+    <div class="summary-card">
+
+        <div class="summary-title">
+            TOTAL CURRENT
+        </div>
+
+        <div
+            id="totalCurrent"
+            class="summary-value">
+            0.000 A
+        </div>
+
     </div>
 
-</div>
 
-<div id="devices" class="devices">
+</section>
+
+
+
+<!-- =====================================================
+     DEVICES
+     ===================================================== -->
+
+<section
+    id="devices"
+    class="devices">
 
     <div class="empty">
+
         Waiting for Raspberry Pi devices...
+
     </div>
 
-</div>
+</section>
+
 
 </main>
+
+
 
 <script>
 
@@ -295,7 +663,8 @@ button:hover {
 
 const firebaseConfig = {
 
-    apiKey: "YOUR_FIREBASE_WEB_API_KEY",
+    apiKey:
+        "YOUR_FIREBASE_WEB_API_KEY",
 
     authDomain:
         "monitoring-3fb9f.firebaseapp.com",
@@ -314,48 +683,62 @@ const firebaseConfig = {
 
     appId:
         "YOUR_FIREBASE_APP_ID"
+
 };
 
 
 /* =========================================================
-   FIREBASE INITIALIZATION
+   INITIALIZE FIREBASE
    ========================================================= */
 
 firebase.initializeApp(firebaseConfig);
 
-const auth = firebase.auth();
 
-const db = firebase.database();
+const auth =
+    firebase.auth();
+
+
+const db =
+    firebase.database();
 
 
 /* =========================================================
-   GLOBAL DATA
+   GLOBAL DEVICE DATA
    ========================================================= */
 
 let devices = {};
 
 
 /* =========================================================
-   FIREBASE LOGIN
+   FIREBASE AUTHENTICATION
    ========================================================= */
 
 auth.signInAnonymously()
+
 .then(() => {
 
-    console.log("Firebase authentication successful");
+    console.log(
+        "Firebase authentication successful"
+    );
 
     setCloudStatus(true);
 
     startDeviceListener();
 
 })
+
 .catch(error => {
 
-    console.error(error);
+    console.error(
+        "Firebase authentication error:",
+        error
+    );
 
     setCloudStatus(false);
 
-    document.getElementById("cloudText").textContent =
+    document.getElementById(
+        "cloudText"
+    ).textContent =
         "Firebase authentication failed";
 
 });
@@ -368,22 +751,35 @@ auth.signInAnonymously()
 function setCloudStatus(online) {
 
     const dot =
-        document.getElementById("cloudDot");
+        document.getElementById(
+            "cloudDot"
+        );
 
     const text =
-        document.getElementById("cloudText");
+        document.getElementById(
+            "cloudText"
+        );
+
 
     if (online) {
 
-        dot.classList.add("online");
+        dot.classList.add(
+            "online"
+        );
 
-        text.textContent = "Firebase ONLINE";
+        text.textContent =
+            "Firebase ONLINE";
 
-    } else {
+    }
 
-        dot.classList.remove("online");
+    else {
 
-        text.textContent = "Firebase OFFLINE";
+        dot.classList.remove(
+            "online"
+        );
+
+        text.textContent =
+            "Firebase OFFLINE";
 
     }
 
@@ -391,26 +787,36 @@ function setCloudStatus(online) {
 
 
 /* =========================================================
-   DEVICE LISTENER
+   REAL-TIME DEVICE LISTENER
    ========================================================= */
 
 function startDeviceListener() {
 
-    db.ref("scada/devices").on(
+    db.ref(
+        "scada/devices"
+    )
+
+    .on(
 
         "value",
 
         snapshot => {
 
-            devices = snapshot.val() || {};
+            devices =
+                snapshot.val() || {};
 
             renderDevices();
+
+            setCloudStatus(true);
 
         },
 
         error => {
 
-            console.error(error);
+            console.error(
+                "Firebase listener error:",
+                error
+            );
 
             setCloudStatus(false);
 
@@ -428,12 +834,17 @@ function startDeviceListener() {
 function renderDevices() {
 
     const container =
-        document.getElementById("devices");
+        document.getElementById(
+            "devices"
+        );
+
 
     container.innerHTML = "";
 
+
     const ids =
         Object.keys(devices);
+
 
     let onlineCount = 0;
 
@@ -444,10 +855,20 @@ function renderDevices() {
 
     if (ids.length === 0) {
 
-        container.innerHTML =
-            `<div class="empty">
-                No Raspberry Pi connected
-             </div>`;
+        container.innerHTML = `
+
+            <div class="empty">
+
+                No Raspberry Pi registered.
+
+                <br><br>
+
+                Start the SCADA program on a
+                Raspberry Pi to register it.
+
+            </div>
+
+        `;
 
         updateSummary(
             0,
@@ -457,29 +878,46 @@ function renderDevices() {
         );
 
         return;
+
     }
 
 
-    ids.forEach(id => {
+    ids.forEach(piId => {
 
-        const d = devices[id] || {};
+
+        const device =
+            devices[piId] || {};
+
 
         const online =
-            d.online === true;
-
-        if (online)
-            onlineCount++;
+            device.online === true;
 
 
         const current =
-            Number(d.current || 0);
+            Number(
+                device.current || 0
+            );
+
+
+        if (online) {
+
+            onlineCount++;
+
+        }
+
 
         totalCurrent += current;
 
 
         if (
+
             online &&
-            String(d.motor_status).toUpperCase() === "RUNNING"
+
+            String(
+                device.motor_status || ""
+            ).toUpperCase() ===
+            "RUNNING"
+
         ) {
 
             runningCount++;
@@ -488,11 +926,18 @@ function renderDevices() {
 
 
         const card =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
+
 
         card.className =
             "device " +
-            (online ? "online" : "offline");
+            (
+                online
+                ? "online"
+                : "offline"
+            );
 
 
         card.innerHTML = `
@@ -502,19 +947,40 @@ function renderDevices() {
                 <div>
 
                     <div class="motor-name">
+
                         ${escapeHTML(
-                            d.motor_name || "UNKNOWN MOTOR"
+                            device.motor_name ||
+                            "UNKNOWN MOTOR"
                         )}
+
                     </div>
 
+
                     <div class="pi-id">
-                        ${escapeHTML(id)}
+
+                        ${escapeHTML(
+                            piId
+                        )}
+
+                    </div>
+
+
+                    <div class="location">
+
+                        ${escapeHTML(
+                            device.location ||
+                            "Location not specified"
+                        )}
+
                     </div>
 
                 </div>
 
+
                 <div class="status ${
-                    online ? "online" : "offline"
+                    online
+                    ? "online"
+                    : "offline"
                 }">
 
                     ${
@@ -528,7 +994,9 @@ function renderDevices() {
             </div>
 
 
+
             <div class="data-grid">
+
 
                 <div class="data">
 
@@ -537,10 +1005,16 @@ function renderDevices() {
                     </div>
 
                     <div class="data-value">
-                        ${current.toFixed(3)} A
+
+                        ${
+                            current.toFixed(3)
+                        }
+                        A
+
                     </div>
 
                 </div>
+
 
 
                 <div class="data">
@@ -550,12 +1024,16 @@ function renderDevices() {
                     </div>
 
                     <div class="data-value">
+
                         ${escapeHTML(
-                            d.motor_status || "STOPPED"
+                            device.motor_status ||
+                            "STOPPED"
                         )}
+
                     </div>
 
                 </div>
+
 
 
                 <div class="data">
@@ -565,12 +1043,16 @@ function renderDevices() {
                     </div>
 
                     <div class="data-value">
+
                         ${escapeHTML(
-                            d.mode || "LOCAL"
+                            device.mode ||
+                            "LOCAL"
                         )}
+
                     </div>
 
                 </div>
+
 
 
                 <div class="data">
@@ -580,12 +1062,16 @@ function renderDevices() {
                     </div>
 
                     <div class="data-value">
+
                         ${escapeHTML(
-                            d.relay || "OFF"
+                            device.relay ||
+                            "OFF"
                         )}
+
                     </div>
 
                 </div>
+
 
 
                 <div class="data">
@@ -595,12 +1081,16 @@ function renderDevices() {
                     </div>
 
                     <div class="data-value">
+
                         ${escapeHTML(
-                            d.location || "-"
+                            device.location ||
+                            "-"
                         )}
+
                     </div>
 
                 </div>
+
 
 
                 <div class="data">
@@ -613,7 +1103,7 @@ function renderDevices() {
 
                         ${
                             formatTime(
-                                d.last_seen
+                                device.last_seen
                             )
                         }
 
@@ -621,15 +1111,18 @@ function renderDevices() {
 
                 </div>
 
+
             </div>
+
 
 
             <div class="controls">
 
+
                 <button
                     class="remote"
                     onclick="sendCommand(
-                        '${id}',
+                        '${safeId(piId)}',
                         'MODE_REMOTE'
                     )">
 
@@ -638,10 +1131,11 @@ function renderDevices() {
                 </button>
 
 
+
                 <button
                     class="local"
                     onclick="sendCommand(
-                        '${id}',
+                        '${safeId(piId)}',
                         'MODE_LOCAL'
                     )">
 
@@ -650,10 +1144,11 @@ function renderDevices() {
                 </button>
 
 
+
                 <button
                     class="start"
                     onclick="sendCommand(
-                        '${id}',
+                        '${safeId(piId)}',
                         'START'
                     )">
 
@@ -662,10 +1157,11 @@ function renderDevices() {
                 </button>
 
 
+
                 <button
                     class="stop"
                     onclick="sendCommand(
-                        '${id}',
+                        '${safeId(piId)}',
                         'STOP'
                     )">
 
@@ -674,10 +1170,11 @@ function renderDevices() {
                 </button>
 
 
+
                 <button
                     class="relay-on"
                     onclick="sendCommand(
-                        '${id}',
+                        '${safeId(piId)}',
                         'RELAY_ON'
                     )">
 
@@ -686,10 +1183,11 @@ function renderDevices() {
                 </button>
 
 
+
                 <button
                     class="relay-off"
                     onclick="sendCommand(
-                        '${id}',
+                        '${safeId(piId)}',
                         'RELAY_OFF'
                     )">
 
@@ -697,25 +1195,25 @@ function renderDevices() {
 
                 </button>
 
+
             </div>
 
 
-            <div class="event">
 
-                PI:
-                ${escapeHTML(id)}
+            <div
+                id="command-${safeId(piId)}"
+                class="command-status">
 
-                <br>
-
-                Command path:
-                scada/commands/${escapeHTML(id)}
+                Ready
 
             </div>
 
         `;
 
 
-        container.appendChild(card);
+        container.appendChild(
+            card
+        );
 
     });
 
@@ -736,49 +1234,99 @@ function renderDevices() {
 
 
 /* =========================================================
-   SEND COMMAND
+   SEND COMMAND TO RASPBERRY PI
    ========================================================= */
 
-function sendCommand(piId, command) {
+function sendCommand(
+    piId,
+    command
+) {
 
-    if (!piId)
-        return;
+
+    console.log(
+        "Sending:",
+        command,
+        "to:",
+        piId
+    );
+
+
+    const statusElement =
+        document.getElementById(
+            "command-" +
+            safeId(piId)
+        );
+
+
+    if (statusElement) {
+
+        statusElement.textContent =
+            "Sending command: " +
+            command;
+
+    }
 
 
     const commandData = {
 
-        command: command,
+        command:
+            command,
 
         timestamp:
-            firebase.database.ServerValue.TIMESTAMP
+            firebase.database
+                .ServerValue
+                .TIMESTAMP
 
     };
 
 
     db.ref(
-        "scada/commands/" + piId
+        "scada/commands/" +
+        piId
     )
-    .set(commandData)
+
+    .set(
+        commandData
+    )
 
     .then(() => {
 
+
         console.log(
-            "Command sent:",
-            piId,
-            command
+            "Command successfully sent"
         );
+
+
+        if (statusElement) {
+
+            statusElement.textContent =
+                "Command sent: " +
+                command;
+
+        }
+
 
     })
 
     .catch(error => {
 
+
         console.error(
-            "Command failed:",
+            "Command error:",
             error
         );
 
+
+        if (statusElement) {
+
+            statusElement.textContent =
+                "Command failed";
+
+        }
+
+
         alert(
-            "Command failed: " +
+            "Command failed:\n" +
             error.message
         );
 
@@ -798,49 +1346,79 @@ function updateSummary(
     current
 ) {
 
+
     document.getElementById(
         "totalDevices"
-    ).textContent = total;
+    ).textContent =
+        total;
 
 
     document.getElementById(
         "onlineDevices"
-    ).textContent = online;
+    ).textContent =
+        online;
 
 
     document.getElementById(
         "runningMotors"
-    ).textContent = running;
+    ).textContent =
+        running;
 
 
     document.getElementById(
         "totalCurrent"
     ).textContent =
-        current.toFixed(3) + " A";
+        current.toFixed(3) +
+        " A";
 
 }
 
 
 /* =========================================================
-   TIME
+   FORMAT TIME
    ========================================================= */
 
-function formatTime(timestamp) {
+function formatTime(
+    timestamp
+) {
 
-    if (!timestamp)
+    if (!timestamp) {
+
         return "-";
+
+    }
 
 
     const date =
-        new Date(timestamp);
+        new Date(
+            Number(timestamp)
+        );
+
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "-";
+
+    }
 
 
     return date.toLocaleTimeString(
         "en-IN",
         {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit"
+
+            hour:
+                "2-digit",
+
+            minute:
+                "2-digit",
+
+            second:
+                "2-digit"
+
         }
     );
 
@@ -851,23 +1429,58 @@ function formatTime(timestamp) {
    HTML ESCAPE
    ========================================================= */
 
-function escapeHTML(value) {
+function escapeHTML(
+    value
+) {
 
     return String(value)
 
-        .replaceAll("&", "&amp;")
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
 
-        .replaceAll("<", "&lt;")
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
 
-        .replaceAll(">", "&gt;")
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
 
-        .replaceAll('"', "&quot;")
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
 
-        .replaceAll("'", "&#039;");
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+/* =========================================================
+   SAFE FIREBASE ID
+   ========================================================= */
+
+function safeId(
+    value
+) {
+
+    return String(value)
+        .replace(
+            /[^a-zA-Z0-9_-]/g,
+            "_"
+        );
 
 }
 
 </script>
 
 </body>
+
 </html>
