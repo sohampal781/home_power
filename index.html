@@ -1,2086 +1,873 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
-
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0">
+<title>SCADA OCC</title>
 
-<title>
-Central Electrical Operation Control Center
-</title>
-
-<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <style>
-
 * {
-    box-sizing:border-box;
+    box-sizing: border-box;
 }
 
 body {
-
-    margin:0;
-
-    background:
-        #030712;
-
-    color:#e5e7eb;
-
-    font-family:
-        Arial,
-        sans-serif;
-
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #10141a;
+    color: #ffffff;
 }
 
-.header {
-
-    height:75px;
-
-    background:
-        #111827;
-
-    border-bottom:
-        1px solid #334155;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:space-between;
-
-    padding:
-        0 25px;
-
+header {
+    height: 70px;
+    background: #171d25;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+    border-bottom: 1px solid #303844;
 }
 
-.logo {
-
-    font-size:
-        23px;
-
-    font-weight:
-        800;
-
-    letter-spacing:
-        1px;
-
+.title {
+    font-size: 24px;
+    font-weight: bold;
 }
 
-.subtitle {
-
-    font-size:
-        11px;
-
-    color:
-        #64748b;
-
-    margin-top:
-        4px;
-
+.cloud {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
-
-.clock {
-
-    font-family:
-        monospace;
-
-    font-size:
-        18px;
-
-}
-
-.network {
-
-    padding:
-        5px 10px;
-
-    border-radius:
-        5px;
-
-    font-size:
-        12px;
-
-    margin-left:
-        20px;
-
-}
-
-.online {
-
-    background:
-        #064e3b;
-
-    color:
-        #34d399;
-
-}
-
-.offline {
-
-    background:
-        #450a0a;
-
-    color:
-        #f87171;
-
-}
-
-
-.container {
-
-    padding:
-        20px;
-
-}
-
-
-.summary {
-
-    display:grid;
-
-    grid-template-columns:
-        repeat(
-            5,
-            1fr
-        );
-
-    gap:
-        12px;
-
-    margin-bottom:
-        20px;
-
-}
-
-.summary-card {
-
-    background:
-        #111827;
-
-    border:
-        1px solid #1f2937;
-
-    border-radius:
-        8px;
-
-    padding:
-        15px;
-
-}
-
-.summary-title {
-
-    color:
-        #64748b;
-
-    font-size:
-        11px;
-
-    text-transform:
-        uppercase;
-
-}
-
-.summary-value {
-
-    font-size:
-        25px;
-
-    font-weight:
-        bold;
-
-    margin-top:
-        8px;
-
-}
-
-
-.section-title {
-
-    color:
-        #94a3b8;
-
-    font-size:
-        13px;
-
-    letter-spacing:
-        1px;
-
-    margin:
-        20px 0 10px;
-
-}
-
-
-.fleet {
-
-    display:grid;
-
-    grid-template-columns:
-        repeat(
-            auto-fill,
-            minmax(
-                250px,
-                1fr
-            )
-        );
-
-    gap:
-        12px;
-
-}
-
-
-.pi-card {
-
-    background:
-        #0f172a;
-
-    border:
-        1px solid #1e293b;
-
-    border-radius:
-        10px;
-
-    padding:
-        16px;
-
-    cursor:
-        pointer;
-
-    transition:
-        0.2s;
-
-}
-
-.pi-card:hover {
-
-    border-color:
-        #38bdf8;
-
-    transform:
-        translateY(-2px);
-
-}
-
-
-.pi-header {
-
-    display:flex;
-
-    justify-content:
-        space-between;
-
-    align-items:
-        center;
-
-}
-
-
-.pi-id {
-
-    font-size:
-        18px;
-
-    font-weight:
-        bold;
-
-}
-
 
 .dot {
-
-    width:
-        9px;
-
-    height:
-        9px;
-
-    border-radius:
-        50%;
-
-    display:
-        inline-block;
-
-    margin-right:
-        6px;
-
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #777;
 }
 
-
-.dot-online {
-
-    background:
-        #22c55e;
-
-    box-shadow:
-        0 0 10px #22c55e;
-
+.dot.online {
+    background: #00e676;
+    box-shadow: 0 0 10px #00e676;
 }
 
-
-.dot-offline {
-
-    background:
-        #ef4444;
-
+main {
+    padding: 25px;
 }
 
+.summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.card {
+    background: #181f28;
+    border: 1px solid #303844;
+    border-radius: 10px;
+    padding: 18px;
+}
+
+.card-title {
+    color: #9da7b3;
+    font-size: 13px;
+}
+
+.card-value {
+    font-size: 28px;
+    margin-top: 8px;
+    font-weight: bold;
+}
+
+.devices {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 20px;
+}
+
+.device {
+    background: #181f28;
+    border: 1px solid #303844;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.device.online {
+    border-color: #00c853;
+}
+
+.device.offline {
+    opacity: 0.55;
+}
+
+.device-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
 .motor-name {
-
-    margin-top:
-        12px;
-
-    color:
-        #38bdf8;
-
-    font-size:
-        16px;
-
-    font-weight:
-        bold;
-
+    font-size: 21px;
+    font-weight: bold;
 }
 
-
-.location {
-
-    color:
-        #64748b;
-
-    font-size:
-        12px;
-
-    margin-top:
-        5px;
-
+.pi-id {
+    color: #8994a3;
+    font-size: 12px;
+    margin-top: 4px;
 }
 
-
-.card-grid {
-
-    display:grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
-    gap:
-        10px;
-
-    margin-top:
-        15px;
-
+.status {
+    padding: 5px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: bold;
 }
 
-
-.metric {
-
-    background:
-        #111827;
-
-    padding:
-        10px;
-
-    border-radius:
-        6px;
-
+.status.online {
+    background: #063d21;
+    color: #00e676;
 }
 
-
-.metric-label {
-
-    color:
-        #64748b;
-
-    font-size:
-        10px;
-
+.status.offline {
+    background: #3b1717;
+    color: #ff5252;
 }
 
-
-.metric-value {
-
-    margin-top:
-        4px;
-
-    font-size:
-        16px;
-
-    font-weight:
-        bold;
-
+.data-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
 }
 
-
-.control-panel {
-
-    margin-top:
-        20px;
-
-    background:
-        #111827;
-
-    border:
-        1px solid #1f2937;
-
-    border-radius:
-        10px;
-
-    padding:
-        20px;
-
+.data {
+    background: #11161d;
+    padding: 12px;
+    border-radius: 7px;
 }
 
-
-.selected-header {
-
-    display:flex;
-
-    justify-content:
-        space-between;
-
+.data-label {
+    color: #8994a3;
+    font-size: 11px;
 }
 
-
-.selected-name {
-
-    font-size:
-        22px;
-
-    font-weight:
-        bold;
-
+.data-value {
+    margin-top: 5px;
+    font-size: 17px;
+    font-weight: bold;
 }
 
-
-.buttons {
-
-    display:flex;
-
-    gap:
-        10px;
-
-    margin-top:
-        20px;
-
+.controls {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
 }
-
 
 button {
-
-    border:
-        none;
-
-    padding:
-        14px 25px;
-
-    border-radius:
-        6px;
-
-    color:
-        white;
-
-    font-weight:
-        bold;
-
-    cursor:
-        pointer;
-
+    border: none;
+    padding: 11px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
 }
-
-
-.start {
-
-    background:
-        #15803d;
-
-}
-
-
-.stop {
-
-    background:
-        #b91c1c;
-
-}
-
-
-.remote {
-
-    background:
-        #0369a1;
-
-}
-
 
 button:hover {
-
-    opacity:
-        0.85;
-
+    filter: brightness(1.15);
 }
 
-
-.events {
-
-    margin-top:
-        20px;
-
-    background:
-        #020617;
-
-    border:
-        1px solid #1e293b;
-
-    border-radius:
-        8px;
-
-    padding:
-        15px;
-
+.remote {
+    background: #1565c0;
 }
 
-
-.event-list {
-
-    max-height:
-        250px;
-
-    overflow:
-        auto;
-
-    font-family:
-        monospace;
-
-    font-size:
-        12px;
-
+.start {
+    background: #00897b;
 }
 
+.stop {
+    background: #d32f2f;
+}
+
+.relay-on {
+    background: #2e7d32;
+}
+
+.relay-off {
+    background: #6d1b1b;
+}
+
+.local {
+    background: #455a64;
+}
 
 .event {
-
-    padding:
-        6px;
-
-    border-bottom:
-        1px solid #111827;
-
+    margin-top: 15px;
+    padding: 10px;
+    background: #0d1117;
+    border-radius: 7px;
+    font-size: 12px;
+    color: #aeb8c4;
 }
 
-
-canvas {
-
-    width:
-        100%;
-
-    height:
-        250px;
-
-    background:
-        #020617;
-
-    margin-top:
-        15px;
-
+.empty {
+    padding: 50px;
+    text-align: center;
+    color: #7d8794;
 }
-
 
 @media(max-width:900px) {
-
     .summary {
-
-        grid-template-columns:
-            repeat(
-                2,
-                1fr
-            );
-
+        grid-template-columns: 1fr 1fr;
     }
-
 }
 
+@media(max-width:600px) {
+    .summary {
+        grid-template-columns: 1fr;
+    }
+}
 </style>
-
 </head>
-
 
 <body>
 
+<header>
 
-<div class="header">
+    <div class="title">
+        SCADA OCC
+    </div>
 
-<div>
+    <div class="cloud">
+        <span id="cloudDot" class="dot"></span>
+        <span id="cloudText">Connecting...</span>
+    </div>
 
-<div class="logo">
+</header>
 
-⚡ CENTRAL ELECTRICAL
-OPERATION CONTROL CENTER
-
-</div>
-
-<div class="subtitle">
-
-MULTI RASPBERRY PI / MOTOR SUPERVISORY SYSTEM
-
-</div>
-
-</div>
-
-
-<div>
-
-<span
-id="brokerStatus"
-class="network offline">
-
-MQTT OFFLINE
-
-</span>
-
-<span
-id="clock"
-class="clock">
-
---
-
-</span>
-
-</div>
-
-</div>
-
-
-<div class="container">
-
-
-<!-- ================================================= -->
-<!-- SUMMARY -->
-<!-- ================================================= -->
-
+<main>
 
 <div class="summary">
 
+    <div class="card">
+        <div class="card-title">TOTAL DEVICES</div>
+        <div class="card-value" id="totalDevices">0</div>
+    </div>
 
-<div class="summary-card">
+    <div class="card">
+        <div class="card-title">ONLINE</div>
+        <div class="card-value" id="onlineDevices">0</div>
+    </div>
 
-<div class="summary-title">
-TOTAL RASPBERRY PI
-</div>
+    <div class="card">
+        <div class="card-title">MOTORS RUNNING</div>
+        <div class="card-value" id="runningMotors">0</div>
+    </div>
 
-<div
-id="totalPi"
-class="summary-value">
-
-0
-
-</div>
-
-</div>
-
-
-<div class="summary-card">
-
-<div class="summary-title">
-ONLINE
-</div>
-
-<div
-id="onlinePi"
-class="summary-value">
-
-0
+    <div class="card">
+        <div class="card-title">TOTAL CURRENT</div>
+        <div class="card-value" id="totalCurrent">0.000 A</div>
+    </div>
 
 </div>
 
-</div>
+<div id="devices" class="devices">
 
-
-<div class="summary-card">
-
-<div class="summary-title">
-MOTORS RUNNING
-</div>
-
-<div
-id="runningMotors"
-class="summary-value">
-
-0
+    <div class="empty">
+        Waiting for Raspberry Pi devices...
+    </div>
 
 </div>
 
-</div>
-
-
-<div class="summary-card">
-
-<div class="summary-title">
-TOTAL CURRENT
-</div>
-
-<div
-id="totalCurrent"
-class="summary-value">
-
-0.000 A
-
-</div>
-
-</div>
-
-
-<div class="summary-card">
-
-<div class="summary-title">
-ALARMS
-</div>
-
-<div
-id="alarms"
-class="summary-value">
-
-0
-
-</div>
-
-</div>
-
-
-</div>
-
-
-<!-- ================================================= -->
-<!-- FLEET -->
-<!-- ================================================= -->
-
-
-<div class="section-title">
-
-RASPBERRY PI FLEET
-
-</div>
-
-
-<div
-id="fleet"
-class="fleet">
-
-</div>
-
-
-<!-- ================================================= -->
-<!-- SELECTED -->
-<!-- ================================================= -->
-
-
-<div
-class="control-panel">
-
-
-<div
-class="selected-header">
-
-
-<div>
-
-<div
-id="selectedName"
-class="selected-name">
-
-NO UNIT SELECTED
-
-</div>
-
-<div
-id="selectedLocation"
-class="location">
-
-Select a Raspberry Pi
-
-</div>
-
-</div>
-
-
-<div
-id="selectedStatus">
-
---
-
-</div>
-
-
-</div>
-
-
-<div class="card-grid">
-
-
-<div class="metric">
-
-<div class="metric-label">
-CURRENT
-</div>
-
-<div
-id="selectedCurrent"
-class="metric-value">
-
-0.000 A
-
-</div>
-
-</div>
-
-
-<div class="metric">
-
-<div class="metric-label">
-MODE
-</div>
-
-<div
-id="selectedMode"
-class="metric-value">
-
---
-
-</div>
-
-</div>
-
-
-<div class="metric">
-
-<div class="metric-label">
-MOTOR
-</div>
-
-<div
-id="selectedMotor"
-class="metric-value">
-
---
-
-</div>
-
-</div>
-
-
-<div class="metric">
-
-<div class="metric-label">
-ARDUINO
-</div>
-
-<div
-id="selectedArduino"
-class="metric-value">
-
---
-
-</div>
-
-</div>
-
-
-</div>
-
-
-<canvas
-id="chart">
-
-</canvas>
-
-
-<div class="buttons">
-
-
-<button
-class="start"
-onclick="sendCommand('START')">
-
-▶ START MOTOR
-
-</button>
-
-
-<button
-class="stop"
-onclick="sendCommand('STOP')">
-
-■ STOP MOTOR
-
-</button>
-
-
-<button
-class="remote"
-onclick="sendCommand('MODE_REMOTE')">
-
-REMOTE MODE
-
-</button>
-
-
-</div>
-
-
-</div>
-
-
-<!-- ================================================= -->
-<!-- EVENTS -->
-<!-- ================================================= -->
-
-
-<div class="events">
-
-<div class="section-title">
-
-EVENT LOG
-
-</div>
-
-
-<div
-id="events"
-class="event-list">
-
-Waiting for MQTT events...
-
-</div>
-
-</div>
-
-
-</div>
-
+</main>
 
 <script>
 
+/* =========================================================
+   FIREBASE CONFIGURATION
+   ========================================================= */
 
-// ======================================================
-// MQTT CONFIGURATION
-// ======================================================
+const firebaseConfig = {
 
-// IMPORTANT:
-// GitHub Pages needs MQTT over WebSockets.
-//
-// Example:
-// wss://mqtt.example.com:8084/mqtt
+    apiKey: "YOUR_FIREBASE_WEB_API_KEY",
 
-const MQTT_URL =
-"wss://YOUR-MQTT-BROKER:8084/mqtt";
+    authDomain:
+        "monitoring-3fb9f.firebaseapp.com",
 
+    databaseURL:
+        "https://monitoring-3fb9f-default-rtdb.europe-west1.firebasedatabase.app",
 
-const MQTT_USERNAME =
-"YOUR_USERNAME";
+    projectId:
+        "monitoring-3fb9f",
 
+    storageBucket:
+        "monitoring-3fb9f.appspot.com",
 
-const MQTT_PASSWORD =
-"YOUR_PASSWORD";
+    messagingSenderId:
+        "YOUR_MESSAGING_SENDER_ID",
 
-
-// ======================================================
-// DATA
-// ======================================================
-
-const devices = {};
-
-let selectedPi = null;
-
-const events = [];
+    appId:
+        "YOUR_FIREBASE_APP_ID"
+};
 
 
-// ======================================================
-// MQTT CONNECT
-// ======================================================
+/* =========================================================
+   FIREBASE INITIALIZATION
+   ========================================================= */
 
-const client =
-mqtt.connect(
-    MQTT_URL,
-    {
+firebase.initializeApp(firebaseConfig);
 
-        username:
-            MQTT_USERNAME,
+const auth = firebase.auth();
 
-        password:
-            MQTT_PASSWORD,
-
-        clientId:
-            "GITHUB_OCC_" +
-            Math.random()
-            .toString(16)
-            .slice(2),
-
-        clean:
-            true,
-
-        reconnectPeriod:
-            3000
-
-    }
-);
+const db = firebase.database();
 
 
-// ======================================================
-// CONNECTED
-// ======================================================
+/* =========================================================
+   GLOBAL DATA
+   ========================================================= */
 
-client.on(
-    "connect",
-    function() {
-
-        setBrokerStatus(
-            true
-        );
+let devices = {};
 
 
-        // Discover every Pi
+/* =========================================================
+   FIREBASE LOGIN
+   ========================================================= */
 
-        client.subscribe(
-            "scada/+/discovery",
-            {
-                qos:1
-            }
-        );
+auth.signInAnonymously()
+.then(() => {
+
+    console.log("Firebase authentication successful");
+
+    setCloudStatus(true);
+
+    startDeviceListener();
+
+})
+.catch(error => {
+
+    console.error(error);
+
+    setCloudStatus(false);
+
+    document.getElementById("cloudText").textContent =
+        "Firebase authentication failed";
+
+});
 
 
-        // Receive telemetry
+/* =========================================================
+   CLOUD STATUS
+   ========================================================= */
 
-        client.subscribe(
-            "scada/+/telemetry"
-        );
+function setCloudStatus(online) {
 
+    const dot =
+        document.getElementById("cloudDot");
 
-        // Receive events
+    const text =
+        document.getElementById("cloudText");
 
-        client.subscribe(
-            "scada/+/event"
-        );
+    if (online) {
+
+        dot.classList.add("online");
+
+        text.textContent = "Firebase ONLINE";
+
+    } else {
+
+        dot.classList.remove("online");
+
+        text.textContent = "Firebase OFFLINE";
 
     }
-);
-
-
-// ======================================================
-// DISCONNECTED
-// ======================================================
-
-client.on(
-    "offline",
-    function() {
-
-        setBrokerStatus(
-            false
-        );
-
-    }
-);
-
-
-client.on(
-    "error",
-    function() {
-
-        setBrokerStatus(
-            false
-        );
-
-    }
-);
-
-
-// ======================================================
-// MQTT MESSAGE
-// ======================================================
-
-client.on(
-    "message",
-    function(topic, message) {
-
-        try {
-
-            const data =
-                JSON.parse(
-                    message.toString()
-                );
-
-
-            // ==========================================
-            // DISCOVERY
-            // ==========================================
-
-            if (
-                topic.endsWith(
-                    "/discovery"
-                )
-            ) {
-
-                registerDevice(
-                    data
-                );
-
-            }
-
-
-            // ==========================================
-            // TELEMETRY
-            // ==========================================
-
-            else if (
-                topic.endsWith(
-                    "/telemetry"
-                )
-            ) {
-
-                updateDevice(
-                    data
-                );
-
-            }
-
-
-            // ==========================================
-            // EVENT
-            // ==========================================
-
-            else if (
-                topic.endsWith(
-                    "/event"
-                )
-            ) {
-
-                addEvent(
-                    data
-                );
-
-            }
-
-        }
-
-        catch(error) {
-
-            console.log(
-                error
-            );
-
-        }
-
-    }
-);
-
-
-// ======================================================
-// REGISTER DEVICE
-// ======================================================
-
-function registerDevice(
-    data
-) {
-
-    const id =
-        data.pi_id;
-
-    if (!devices[id]) {
-
-        devices[id] = {
-
-            pi_id:
-                id,
-
-            motor_name:
-                data.motor_name,
-
-            location:
-                data.location,
-
-            online:
-                true,
-
-            current:
-                0,
-
-            relay:
-                false,
-
-            mode:
-                "LOCAL",
-
-            motor_status:
-                "STOPPED",
-
-            arduino:
-                false,
-
-            history: [],
-
-            lastSeen:
-                Date.now()
-
-        };
-
-    }
-
-
-    renderFleet();
 
 }
 
 
-// ======================================================
-// UPDATE DEVICE
-// ======================================================
+/* =========================================================
+   DEVICE LISTENER
+   ========================================================= */
 
-function updateDevice(
-    data
-) {
+function startDeviceListener() {
 
-    const id =
-        data.pi_id;
+    db.ref("scada/devices").on(
 
+        "value",
 
-    if (!devices[id]) {
+        snapshot => {
 
-        registerDevice(
-            data
-        );
+            devices = snapshot.val() || {};
 
-    }
+            renderDevices();
 
+        },
 
-    const d =
-        devices[id];
+        error => {
 
+            console.error(error);
 
-    d.motor_name =
-        data.motor_name;
-
-    d.location =
-        data.location;
-
-    d.current =
-        Number(
-            data.current ||
-            0
-        );
-
-    d.relay =
-        Boolean(
-            data.relay
-        );
-
-    d.mode =
-        data.mode;
-
-    d.motor_status =
-        data.motor_status;
-
-    d.arduino =
-        data.arduino;
-
-    d.online =
-        true;
-
-    d.lastSeen =
-        Date.now();
-
-
-    d.history.push({
-        time:
-            Date.now(),
-
-        value:
-            d.current
-
-    });
-
-
-    if (
-        d.history.length >
-        180
-    ) {
-
-        d.history.shift();
-
-    }
-
-
-    renderFleet();
-
-
-    updateSelected();
-
-
-    updateSummary();
-
-}
-
-
-// ======================================================
-// OFFLINE DETECTION
-// ======================================================
-
-setInterval(
-    function() {
-
-        let changed =
-            false;
-
-
-        Object.values(
-            devices
-        ).forEach(
-            function(d) {
-
-                if (
-                    Date.now()
-                    -
-                    d.lastSeen
-                    >
-                    5000
-                ) {
-
-                    if (
-                        d.online
-                    ) {
-
-                        d.online =
-                            false;
-
-                        changed =
-                            true;
-
-                    }
-
-                }
-
-            }
-        );
-
-
-        if (changed) {
-
-            renderFleet();
-
-            updateSummary();
-
-            updateSelected();
+            setCloudStatus(false);
 
         }
 
-    },
-    1000
-);
-
-
-// ======================================================
-// RENDER FLEET
-// ======================================================
-
-function renderFleet() {
-
-    const fleet =
-        document.getElementById(
-            "fleet"
-        );
-
-
-    fleet.innerHTML = "";
-
-
-    Object.values(
-        devices
-    )
-    .sort(
-        (a,b) =>
-            a.pi_id.localeCompare(
-                b.pi_id
-            )
-    )
-    .forEach(
-        function(d) {
-
-
-            const card =
-                document.createElement(
-                    "div"
-                );
-
-
-            card.className =
-                "pi-card";
-
-
-            card.onclick =
-                function() {
-
-                    selectedPi =
-                        d.pi_id;
-
-                    updateSelected();
-
-                    updateChart();
-
-                };
-
-
-            const dotClass =
-                d.online
-                ?
-                "dot-online"
-                :
-                "dot-offline";
-
-
-            const status =
-                d.online
-                ?
-                d.motor_status
-                :
-                "OFFLINE";
-
-
-            card.innerHTML = `
-
-                <div class="pi-header">
-
-                    <div class="pi-id">
-
-                        <span
-                        class="dot ${dotClass}">
-                        </span>
-
-                        ${d.pi_id}
-
-                    </div>
-
-                </div>
-
-
-                <div class="motor-name">
-
-                    ${d.motor_name}
-
-                </div>
-
-
-                <div class="location">
-
-                    ${d.location}
-
-                </div>
-
-
-                <div class="card-grid">
-
-
-                    <div class="metric">
-
-                        <div
-                        class="metric-label">
-
-                        CURRENT
-
-                        </div>
-
-                        <div
-                        class="metric-value">
-
-                        ${d.current.toFixed(3)}
-                        A
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="metric">
-
-                        <div
-                        class="metric-label">
-
-                        STATUS
-
-                        </div>
-
-                        <div
-                        class="metric-value">
-
-                        ${status}
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="metric">
-
-                        <div
-                        class="metric-label">
-
-                        MODE
-
-                        </div>
-
-                        <div
-                        class="metric-value">
-
-                        ${d.mode}
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="metric">
-
-                        <div
-                        class="metric-label">
-
-                        RELAY
-
-                        </div>
-
-                        <div
-                        class="metric-value">
-
-                        ${d.relay
-                            ? "ON"
-                            : "OFF"}
-
-                        </div>
-
-                    </div>
-
-
-                </div>
-
-            `;
-
-
-            fleet.appendChild(
-                card
-            );
-
-        }
     );
 
 }
 
 
-// ======================================================
-// SELECTED PI
-// ======================================================
+/* =========================================================
+   RENDER DEVICES
+   ========================================================= */
 
-function updateSelected() {
+function renderDevices() {
 
-    if (!selectedPi) {
+    const container =
+        document.getElementById("devices");
+
+    container.innerHTML = "";
+
+    const ids =
+        Object.keys(devices);
+
+    let onlineCount = 0;
+
+    let runningCount = 0;
+
+    let totalCurrent = 0;
+
+
+    if (ids.length === 0) {
+
+        container.innerHTML =
+            `<div class="empty">
+                No Raspberry Pi connected
+             </div>`;
+
+        updateSummary(
+            0,
+            0,
+            0,
+            0
+        );
 
         return;
-
     }
 
 
-    const d =
-        devices[
-            selectedPi
-        ];
+    ids.forEach(id => {
+
+        const d = devices[id] || {};
+
+        const online =
+            d.online === true;
+
+        if (online)
+            onlineCount++;
 
 
-    if (!d) {
+        const current =
+            Number(d.current || 0);
 
-        return;
-
-    }
-
-
-    document.getElementById(
-        "selectedName"
-    ).innerText =
-        d.pi_id +
-        " / " +
-        d.motor_name;
+        totalCurrent += current;
 
 
-    document.getElementById(
-        "selectedLocation"
-    ).innerText =
-        d.location;
+        if (
+            online &&
+            String(d.motor_status).toUpperCase() === "RUNNING"
+        ) {
+
+            runningCount++;
+
+        }
 
 
-    document.getElementById(
-        "selectedStatus"
-    ).innerText =
-        d.online
-        ?
-        "● ONLINE"
-        :
-        "○ OFFLINE";
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "device " +
+            (online ? "online" : "offline");
 
 
-    document.getElementById(
-        "selectedCurrent"
-    ).innerText =
-        d.current.toFixed(3)
-        +
-        " A";
+        card.innerHTML = `
+
+            <div class="device-header">
+
+                <div>
+
+                    <div class="motor-name">
+                        ${escapeHTML(
+                            d.motor_name || "UNKNOWN MOTOR"
+                        )}
+                    </div>
+
+                    <div class="pi-id">
+                        ${escapeHTML(id)}
+                    </div>
+
+                </div>
+
+                <div class="status ${
+                    online ? "online" : "offline"
+                }">
+
+                    ${
+                        online
+                        ? "ONLINE"
+                        : "OFFLINE"
+                    }
+
+                </div>
+
+            </div>
 
 
-    document.getElementById(
-        "selectedMode"
-    ).innerText =
-        d.mode;
+            <div class="data-grid">
+
+                <div class="data">
+
+                    <div class="data-label">
+                        CURRENT
+                    </div>
+
+                    <div class="data-value">
+                        ${current.toFixed(3)} A
+                    </div>
+
+                </div>
 
 
-    document.getElementById(
-        "selectedMotor"
-    ).innerText =
-        d.motor_status;
+                <div class="data">
+
+                    <div class="data-label">
+                        MOTOR
+                    </div>
+
+                    <div class="data-value">
+                        ${escapeHTML(
+                            d.motor_status || "STOPPED"
+                        )}
+                    </div>
+
+                </div>
 
 
-    document.getElementById(
-        "selectedArduino"
-    ).innerText =
-        d.arduino
-        ?
-        "ONLINE"
-        :
-        "OFFLINE";
+                <div class="data">
+
+                    <div class="data-label">
+                        MODE
+                    </div>
+
+                    <div class="data-value">
+                        ${escapeHTML(
+                            d.mode || "LOCAL"
+                        )}
+                    </div>
+
+                </div>
 
 
-    updateChart();
+                <div class="data">
+
+                    <div class="data-label">
+                        RELAY
+                    </div>
+
+                    <div class="data-value">
+                        ${escapeHTML(
+                            d.relay || "OFF"
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div class="data">
+
+                    <div class="data-label">
+                        LOCATION
+                    </div>
+
+                    <div class="data-value">
+                        ${escapeHTML(
+                            d.location || "-"
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div class="data">
+
+                    <div class="data-label">
+                        LAST SEEN
+                    </div>
+
+                    <div class="data-value">
+
+                        ${
+                            formatTime(
+                                d.last_seen
+                            )
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="controls">
+
+                <button
+                    class="remote"
+                    onclick="sendCommand(
+                        '${id}',
+                        'MODE_REMOTE'
+                    )">
+
+                    REMOTE MODE
+
+                </button>
+
+
+                <button
+                    class="local"
+                    onclick="sendCommand(
+                        '${id}',
+                        'MODE_LOCAL'
+                    )">
+
+                    LOCAL MODE
+
+                </button>
+
+
+                <button
+                    class="start"
+                    onclick="sendCommand(
+                        '${id}',
+                        'START'
+                    )">
+
+                    START MOTOR
+
+                </button>
+
+
+                <button
+                    class="stop"
+                    onclick="sendCommand(
+                        '${id}',
+                        'STOP'
+                    )">
+
+                    STOP MOTOR
+
+                </button>
+
+
+                <button
+                    class="relay-on"
+                    onclick="sendCommand(
+                        '${id}',
+                        'RELAY_ON'
+                    )">
+
+                    RELAY ON
+
+                </button>
+
+
+                <button
+                    class="relay-off"
+                    onclick="sendCommand(
+                        '${id}',
+                        'RELAY_OFF'
+                    )">
+
+                    RELAY OFF
+
+                </button>
+
+            </div>
+
+
+            <div class="event">
+
+                PI:
+                ${escapeHTML(id)}
+
+                <br>
+
+                Command path:
+                scada/commands/${escapeHTML(id)}
+
+            </div>
+
+        `;
+
+
+        container.appendChild(card);
+
+    });
+
+
+    updateSummary(
+
+        ids.length,
+
+        onlineCount,
+
+        runningCount,
+
+        totalCurrent
+
+    );
 
 }
 
 
-// ======================================================
-// SUMMARY
-// ======================================================
+/* =========================================================
+   SEND COMMAND
+   ========================================================= */
 
-function updateSummary() {
+function sendCommand(piId, command) {
 
-    const list =
-        Object.values(
-            devices
+    if (!piId)
+        return;
+
+
+    const commandData = {
+
+        command: command,
+
+        timestamp:
+            firebase.database.ServerValue.TIMESTAMP
+
+    };
+
+
+    db.ref(
+        "scada/commands/" + piId
+    )
+    .set(commandData)
+
+    .then(() => {
+
+        console.log(
+            "Command sent:",
+            piId,
+            command
         );
+
+    })
+
+    .catch(error => {
+
+        console.error(
+            "Command failed:",
+            error
+        );
+
+        alert(
+            "Command failed: " +
+            error.message
+        );
+
+    });
+
+}
+
+
+/* =========================================================
+   SUMMARY
+   ========================================================= */
+
+function updateSummary(
+    total,
+    online,
+    running,
+    current
+) {
+
+    document.getElementById(
+        "totalDevices"
+    ).textContent = total;
 
 
     document.getElementById(
-        "totalPi"
-    ).innerText =
-        list.length;
-
-
-    const online =
-        list.filter(
-            d => d.online
-        );
-
-
-    document.getElementById(
-        "onlinePi"
-    ).innerText =
-        online.length;
+        "onlineDevices"
+    ).textContent = online;
 
 
     document.getElementById(
         "runningMotors"
-    ).innerText =
-        online.filter(
-            d =>
-                d.motor_status
-                ===
-                "RUNNING"
-        ).length;
-
-
-    const total =
-        online.reduce(
-            (
-                sum,
-                d
-            ) =>
-                sum +
-                d.current,
-            0
-        );
+    ).textContent = running;
 
 
     document.getElementById(
         "totalCurrent"
-    ).innerText =
-        total.toFixed(3)
-        +
-        " A";
+    ).textContent =
+        current.toFixed(3) + " A";
 
 }
 
 
-// ======================================================
-// SEND COMMAND
-// ======================================================
+/* =========================================================
+   TIME
+   ========================================================= */
 
-function sendCommand(
-    command
-) {
+function formatTime(timestamp) {
 
-    if (!selectedPi) {
-
-        alert(
-            "Select a Raspberry Pi first."
-        );
-
-        return;
-
-    }
+    if (!timestamp)
+        return "-";
 
 
-    const d =
-        devices[
-            selectedPi
-        ];
+    const date =
+        new Date(timestamp);
 
 
-    if (!d || !d.online) {
-
-        alert(
-            "Raspberry Pi is offline."
-        );
-
-        return;
-
-    }
-
-
-    const topic =
-        "scada/" +
-        selectedPi +
-        "/command";
-
-
-    const payload =
-        JSON.stringify({
-
-            command:
-                command,
-
-            source:
-                "GITHUB_OCC",
-
-            timestamp:
-                new Date()
-                .toISOString()
-
-        });
-
-
-    client.publish(
-        topic,
-        payload,
+    return date.toLocaleTimeString(
+        "en-IN",
         {
-            qos:1
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
         }
     );
 
-
-    addEvent({
-
-        pi_id:
-            selectedPi,
-
-        motor_name:
-            d.motor_name,
-
-        event:
-            "COMMAND",
-
-        message:
-            command
-
-    });
-
 }
 
 
-// ======================================================
-// EVENT
-// ======================================================
+/* =========================================================
+   HTML ESCAPE
+   ========================================================= */
 
-function addEvent(
-    data
-) {
+function escapeHTML(value) {
 
-    const text =
-        `${new Date().toLocaleTimeString()}  ` +
-        `${data.pi_id || ""}  ` +
-        `${data.motor_name || ""}  ` +
-        `${data.message || data.event}`;
+    return String(value)
 
+        .replaceAll("&", "&amp;")
 
-    events.unshift(
-        text
-    );
+        .replaceAll("<", "&lt;")
 
+        .replaceAll(">", "&gt;")
 
-    if (
-        events.length >
-        100
-    ) {
+        .replaceAll('"', "&quot;")
 
-        events.pop();
-
-    }
-
-
-    document.getElementById(
-        "events"
-    ).innerHTML =
-        events
-        .map(
-            e =>
-                `<div class="event">
-                    ${e}
-                </div>`
-        )
-        .join("");
+        .replaceAll("'", "&#039;");
 
 }
-
-
-// ======================================================
-// GRAPH
-// ======================================================
-
-function updateChart() {
-
-    const canvas =
-        document.getElementById(
-            "chart"
-        );
-
-    const ctx =
-        canvas.getContext(
-            "2d"
-        );
-
-
-    const d =
-        devices[
-            selectedPi
-        ];
-
-
-    if (!d) {
-
-        return;
-
-    }
-
-
-    const width =
-        canvas.clientWidth;
-
-    const height =
-        canvas.clientHeight;
-
-
-    canvas.width =
-        width;
-
-    canvas.height =
-        height;
-
-
-    ctx.clearRect(
-        0,
-        0,
-        width,
-        height
-    );
-
-
-    if (
-        d.history.length <
-        2
-    ) {
-
-        return;
-
-    }
-
-
-    const values =
-        d.history.map(
-            x =>
-                x.value
-        );
-
-
-    const min =
-        Math.min(
-            ...values
-        );
-
-
-    const max =
-        Math.max(
-            ...values
-        );
-
-
-    const range =
-        max -
-        min ||
-        1;
-
-
-    ctx.beginPath();
-
-
-    values.forEach(
-        function(
-            value,
-            index
-        ) {
-
-
-            const x =
-                index /
-                (
-                    values.length -
-                    1
-                )
-                *
-                width;
-
-
-            const y =
-                height -
-                (
-                    (
-                        value -
-                        min
-                    )
-                    /
-                    range
-                )
-                *
-                (
-                    height -
-                    20
-                )
-                -
-                10;
-
-
-            if (
-                index ===
-                0
-            ) {
-
-                ctx.moveTo(
-                    x,
-                    y
-                );
-
-            }
-
-            else {
-
-                ctx.lineTo(
-                    x,
-                    y
-                );
-
-            }
-
-        }
-    );
-
-
-    ctx.strokeStyle =
-        "#38bdf8";
-
-    ctx.lineWidth =
-        3;
-
-    ctx.stroke();
-
-}
-
-
-// ======================================================
-// BROKER STATUS
-// ======================================================
-
-function setBrokerStatus(
-    online
-) {
-
-    const element =
-        document.getElementById(
-            "brokerStatus"
-        );
-
-
-    if (online) {
-
-        element.innerText =
-            "● MQTT ONLINE";
-
-        element.className =
-            "network online";
-
-    }
-
-    else {
-
-        element.innerText =
-            "○ MQTT OFFLINE";
-
-        element.className =
-            "network offline";
-
-    }
-
-}
-
-
-// ======================================================
-// CLOCK
-// ======================================================
-
-setInterval(
-    function() {
-
-        document.getElementById(
-            "clock"
-        ).innerText =
-            new Date()
-            .toLocaleString();
-
-    },
-    1000
-);
-
-
-// ======================================================
-// INITIAL
-// ======================================================
-
-updateSummary();
 
 </script>
 
 </body>
-
 </html>
