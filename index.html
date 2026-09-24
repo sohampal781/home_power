@@ -1021,87 +1021,58 @@ function renderDevices(
 
 
             </div>
-
-
-
             <div class="controls">
 
 
-                <button
-                    class="remote"
-                    onclick="sendCommand(
-                        '${jsEscape(piId)}',
-                        'MODE_REMOTE'
-                    )">
+    <button
+        class="start"
+        onclick="sendCommand(
+            '${jsEscape(piId)}',
+            'START'
+        )">
 
-                    REMOTE MODE
+        START MOTOR
 
-                </button>
-
-
-                <button
-                    class="local"
-                    onclick="sendCommand(
-                        '${jsEscape(piId)}',
-                        'MODE_LOCAL'
-                    )">
-
-                    LOCAL MODE
-
-                </button>
+    </button>
 
 
-                <button
-                    class="start"
-                    onclick="sendCommand(
-                        '${jsEscape(piId)}',
-                        'START'
-                    )">
+    <button
+        class="stop"
+        onclick="sendCommand(
+            '${jsEscape(piId)}',
+            'STOP'
+        )">
 
-                    START MOTOR
+        STOP MOTOR
 
-                </button>
-
-
-                <button
-                    class="stop"
-                    onclick="sendCommand(
-                        '${jsEscape(piId)}',
-                        'STOP'
-                    )">
-
-                    STOP MOTOR
-
-                </button>
+    </button>
 
 
-                <button
-                    class="relay-on"
-                    onclick="sendCommand(
-                        '${jsEscape(piId)}',
-                        'RELAY_ON'
-                    )">
+    <button
+        class="relay-on"
+        onclick="sendCommand(
+            '${jsEscape(piId)}',
+            'RELAY_ON'
+        )">
 
-                    RELAY ON
+        RELAY ON
 
-                </button>
-
-
-                <button
-                    class="relay-off"
-                    onclick="sendCommand(
-                        '${jsEscape(piId)}',
-                        'RELAY_OFF'
-                    )">
-
-                    RELAY OFF
-
-                </button>
+    </button>
 
 
-            </div>
+    <button
+        class="relay-off"
+        onclick="sendCommand(
+            '${jsEscape(piId)}',
+            'RELAY_OFF'
+        )">
+
+        RELAY OFF
+
+    </button>
 
 
+</div>
             <div
                 id="command-${safeId(piId)}"
                 class="command">
