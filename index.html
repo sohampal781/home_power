@@ -1,11 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
 <title>Remote Current Monitoring System</title>
 
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
 <style>
+
 * {
     box-sizing: border-box;
 }
@@ -20,8 +28,8 @@ body {
 .header {
     background: #17202a;
     color: white;
-    padding: 25px;
     text-align: center;
+    padding: 25px;
 }
 
 .header h1 {
@@ -38,7 +46,7 @@ body {
 .card {
     background: white;
     border-radius: 18px;
-    padding: 28px;
+    padding: 30px;
     margin-bottom: 22px;
     box-shadow: 0 7px 25px rgba(0,0,0,0.08);
 }
@@ -47,40 +55,6 @@ body {
     font-size: 18px;
     color: #555;
     margin-bottom: 15px;
-}
-
-.ip-row {
-    display: flex;
-    gap: 10px;
-}
-
-.ip-input {
-    flex: 1;
-    padding: 15px;
-    border: 1px solid #ccd2d8;
-    border-radius: 9px;
-    font-size: 17px;
-}
-
-.find-button {
-    padding: 15px 25px;
-    border: 0;
-    border-radius: 9px;
-    background: #1565c0;
-    color: white;
-    font-size: 17px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.status {
-    margin-top: 15px;
-    padding: 13px;
-    border-radius: 9px;
-    background: #fff3cd;
-    color: #856404;
-    font-weight: bold;
-    text-align: center;
 }
 
 .current {
@@ -98,11 +72,20 @@ body {
     margin: 20px 0;
 }
 
+.status {
+    padding: 14px;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: bold;
+    background: #fff3cd;
+    color: #856404;
+}
+
 .buttons {
     text-align: center;
 }
 
-button.control {
+button {
     width: 190px;
     padding: 17px;
     margin: 8px;
@@ -123,13 +106,9 @@ button.control {
     color: white;
 }
 
-.row {
+.info {
     padding: 13px 0;
     border-bottom: 1px solid #eeeeee;
-}
-
-.hidden {
-    display: none;
 }
 
 .small {
@@ -140,353 +119,340 @@ button.control {
 }
 
 @media (max-width: 600px) {
-    .ip-row {
-        flex-direction: column;
-    }
 
     .current {
         font-size: 48px;
     }
 
-    button.control {
+    button {
         width: 90%;
     }
+
 }
+
 </style>
+
 </head>
 
 <body>
 
 <div class="header">
-    <h1>Remote Current Monitoring System</h1>
+
+<h1>
+Remote Current Monitoring System
+</h1>
+
 </div>
 
 <div class="container">
 
-    <div class="card">
-        <div class="title">ESP8266 System</div>
+<div class="card">
 
-        <div class="ip-row">
-            <input
-                id="ipAddress"
-                class="ip-input"
-                type="text"
-                placeholder="Enter ESP8266 IP"
-                value="192.168.1.100"
-            >
+<div class="title">
+MQTT Connection
+</div>
 
-            <button class="find-button" onclick="findSystem()">
-                FIND SYSTEM
-            </button>
-        </div>
-
-        <div id="systemStatus" class="status">
-            Enter ESP8266 IP and press FIND SYSTEM
-        </div>
-    </div>
-
-    <div id="dashboard" class="hidden">
-
-        <div class="card">
-            <div class="title">Current Measurement</div>
-
-            <div id="current" class="current">
-                Waiting
-            </div>
-
-            <div id="arduinoStatus" class="status">
-                Waiting for Arduino
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="title">Load Control</div>
-
-            <div id="loadState" class="load-state">
-                UNKNOWN
-            </div>
-
-            <div class="buttons">
-
-                <button class="control on" onclick="loadOn()">
-                    LOAD ON
-                </button>
-
-                <button class="control off" onclick="loadOff()">
-                    LOAD OFF
-                </button>
-
-            </div>
-
-            <div class="small">
-                NC relay configuration
-            </div>
-        </div>
-
-        <div class="card">
-
-            <div class="row">
-                Controller: Arduino UNO
-            </div>
-
-            <div class="row">
-                Receiver: ESP8266
-            </div>
-
-            <div class="row">
-                Current Sensor: ACS712 20A
-            </div>
-
-            <div class="row">
-                Current Input: A0
-            </div>
-
-            <div class="row">
-                Relay Output: D7
-            </div>
-
-            <div class="row">
-                Relay Contact: NC
-            </div>
-
-            <div class="row">
-                ESP8266 IP: <span id="displayIP">Not connected</span>
-            </div>
-
-        </div>
-
-    </div>
+<div id="mqttStatus"
+class="status">
+Connecting to MQTT
+</div>
 
 </div>
 
+
+<div class="card">
+
+<div class="title">
+Current Measurement
+</div>
+
+<div id="current"
+class="current">
+Waiting
+</div>
+
+<div id="deviceStatus"
+class="status">
+Waiting for ESP8266
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="title">
+Load Control
+</div>
+
+<div id="loadState"
+class="load-state">
+UNKNOWN
+</div>
+
+<div class="buttons">
+
+<button
+class="on"
+onclick="loadOn()">
+LOAD ON
+</button>
+
+<button
+class="off"
+onclick="loadOff()">
+LOAD OFF
+</button>
+
+</div>
+
+<div class="small">
+NC relay configuration
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="title">
+System Information
+</div>
+
+<div class="info">
+Controller: Arduino UNO
+</div>
+
+<div class="info">
+Receiver: ESP8266
+</div>
+
+<div class="info">
+Current Sensor: ACS712 20A
+</div>
+
+<div class="info">
+Relay Output: D7
+</div>
+
+<div class="info">
+Relay Contact: NC
+</div>
+
+<div class="info">
+MQTT Broker: test.mosquitto.org
+</div>
+
+<div class="info">
+Protocol: MQTT
+</div>
+
+</div>
+
+</div>
+
+
 <script>
 
-let espIP = "";
-let updateTimer = null;
+const mqttBroker =
+"wss://test.mosquitto.org:8081";
 
-function cleanIP(value)
+const controlTopic =
+"soham/acs712/control/4027A9C1";
+
+const currentTopic =
+"soham/acs712/current/4027A9C1";
+
+const statusTopic =
+"soham/acs712/status/4027A9C1";
+
+let mqttClient = null;
+
+
+function setMQTTStatus(message)
 {
-    value = value.trim();
-
-    value = value.replace(/^https?:\/\//, "");
-
-    value = value.replace(/\/+$/, "");
-
-    return value;
+    document.getElementById("mqttStatus").innerHTML =
+        message;
 }
 
-function getBaseURL()
+
+function setDeviceStatus(message)
 {
-    return "http://" + espIP;
+    document.getElementById("deviceStatus").innerHTML =
+        message;
 }
 
-function findSystem()
+
+function connectMQTT()
 {
-    espIP = cleanIP(
-        document.getElementById("ipAddress").value
+    setMQTTStatus("Connecting to MQTT");
+
+    const clientID =
+        "github_web_" +
+        Math.random()
+        .toString(16)
+        .substring(2);
+
+    mqttClient = mqtt.connect(
+        mqttBroker,
+        {
+            clientId: clientID,
+            clean: true,
+            reconnectPeriod: 3000,
+            connectTimeout: 10000
+        }
     );
 
-    if (espIP === "")
+
+    mqttClient.on("connect", function()
     {
-        document.getElementById("systemStatus").innerHTML =
-            "Please enter ESP8266 IP";
+        setMQTTStatus("MQTT Connected");
 
-        return;
-    }
+        mqttClient.subscribe(
+            currentTopic
+        );
 
-    document.getElementById("systemStatus").innerHTML =
-        "Searching for ESP8266";
-
-    fetch(getBaseURL() + "/data", {
-        method: "GET",
-        cache: "no-store"
-    })
-    .then(function(response)
-    {
-        if (!response.ok)
-        {
-            throw new Error("ESP8266 response error");
-        }
-
-        return response.json();
-    })
-    .then(function(data)
-    {
-        document.getElementById("systemStatus").innerHTML =
-            "ESP8266 Found";
-
-        document.getElementById("systemStatus").style.background =
-            "#e8f5e9";
-
-        document.getElementById("systemStatus").style.color =
-            "#2e7d32";
-
-        document.getElementById("dashboard").classList.remove("hidden");
-
-        document.getElementById("displayIP").innerHTML =
-            espIP;
-
-        updateDashboard(data);
-
-        if (updateTimer !== null)
-        {
-            clearInterval(updateTimer);
-        }
-
-        updateTimer = setInterval(updateData, 1000);
-    })
-    .catch(function(error)
-    {
-        document.getElementById("systemStatus").innerHTML =
-            "ESP8266 Not Found";
-
-        document.getElementById("systemStatus").style.background =
-            "#ffebee";
-
-        document.getElementById("systemStatus").style.color =
-            "#c62828";
-
-        document.getElementById("dashboard").classList.add("hidden");
+        mqttClient.subscribe(
+            statusTopic
+        );
     });
-}
 
-function updateData()
-{
-    if (espIP === "")
-    {
-        return;
-    }
 
-    fetch(getBaseURL() + "/data", {
-        method: "GET",
-        cache: "no-store"
-    })
-    .then(function(response)
+    mqttClient.on("message",
+    function(topic, message)
     {
-        if (!response.ok)
+        const value =
+            message.toString().trim();
+
+
+        if (topic === currentTopic)
         {
-            throw new Error("No response");
+            document.getElementById(
+                "current"
+            ).innerHTML = value;
+
+            setDeviceStatus(
+                "ESP8266 Online"
+            );
         }
 
-        return response.json();
-    })
-    .then(function(data)
-    {
-        updateDashboard(data);
 
-        document.getElementById("systemStatus").innerHTML =
-            "ESP8266 Connected";
+        if (topic === statusTopic)
+        {
 
-        document.getElementById("systemStatus").style.background =
-            "#e8f5e9";
+            if (value === "ONLINE")
+            {
+                setDeviceStatus(
+                    "ESP8266 Online"
+                );
+            }
 
-        document.getElementById("systemStatus").style.color =
-            "#2e7d32";
-    })
-    .catch(function()
-    {
-        document.getElementById("systemStatus").innerHTML =
-            "ESP8266 Connection Lost";
 
-        document.getElementById("systemStatus").style.background =
-            "#ffebee";
+            if (value === "LOAD_ON")
+            {
+                document.getElementById(
+                    "loadState"
+                ).innerHTML = "LOAD ON";
 
-        document.getElementById("systemStatus").style.color =
-            "#c62828";
+                setDeviceStatus(
+                    "ESP8266 Online"
+                );
+            }
 
-        document.getElementById("arduinoStatus").innerHTML =
-            "ESP8266 Not Connected";
+
+            if (value === "LOAD_OFF")
+            {
+                document.getElementById(
+                    "loadState"
+                ).innerHTML = "LOAD OFF";
+
+                setDeviceStatus(
+                    "ESP8266 Online"
+                );
+            }
+
+        }
+
     });
+
+
+    mqttClient.on("reconnect",
+    function()
+    {
+        setMQTTStatus(
+            "Reconnecting to MQTT"
+        );
+    });
+
+
+    mqttClient.on("offline",
+    function()
+    {
+        setMQTTStatus(
+            "MQTT Offline"
+        );
+    });
+
+
+    mqttClient.on("error",
+    function()
+    {
+        setMQTTStatus(
+            "MQTT Connection Error"
+        );
+    });
+
 }
 
-function updateDashboard(data)
-{
-    if (data.current !== undefined)
-    {
-        document.getElementById("current").innerHTML =
-            data.current;
-    }
-
-    if (data.relay !== undefined)
-    {
-        document.getElementById("loadState").innerHTML =
-            data.relay;
-    }
-
-    if (data.online === true)
-    {
-        document.getElementById("arduinoStatus").innerHTML =
-            "Arduino Connected";
-    }
-    else
-    {
-        document.getElementById("arduinoStatus").innerHTML =
-            "Arduino Not Connected";
-    }
-}
 
 function loadOn()
 {
-    if (espIP === "")
+
+    if (!mqttClient ||
+        !mqttClient.connected)
     {
+        setMQTTStatus(
+            "MQTT Not Connected"
+        );
+
         return;
     }
 
-    fetch(getBaseURL() + "/relay/off", {
-        method: "GET",
-        cache: "no-store"
-    })
-    .then(function()
-    {
-        document.getElementById("loadState").innerHTML =
-            "LOAD ON";
 
-        setTimeout(updateData, 300);
-    })
-    .catch(function()
-    {
-        document.getElementById("systemStatus").innerHTML =
-            "LOAD ON command failed";
-    });
+    mqttClient.publish(
+        controlTopic,
+        "LOAD_ON"
+    );
+
 }
+
 
 function loadOff()
 {
-    if (espIP === "")
+
+    if (!mqttClient ||
+        !mqttClient.connected)
     {
+        setMQTTStatus(
+            "MQTT Not Connected"
+        );
+
         return;
     }
 
-    fetch(getBaseURL() + "/relay/on", {
-        method: "GET",
-        cache: "no-store"
-    })
-    .then(function()
-    {
-        document.getElementById("loadState").innerHTML =
-            "LOAD OFF";
 
-        setTimeout(updateData, 300);
-    })
-    .catch(function()
-    {
-        document.getElementById("systemStatus").innerHTML =
-            "LOAD OFF command failed";
-    });
+    mqttClient.publish(
+        controlTopic,
+        "LOAD_OFF"
+    );
+
 }
 
-document.getElementById("ipAddress").addEventListener(
-    "keydown",
-    function(event)
-    {
-        if (event.key === "Enter")
-        {
-            findSystem();
-        }
-    }
-);
+
+connectMQTT();
 
 </script>
 
 </body>
+
 </html>
