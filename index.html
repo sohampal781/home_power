@@ -1,1348 +1,492 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
-
-<title>SCADA OCC</title>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Remote Current Monitoring System</title>
 
 <style>
-
 * {
     box-sizing: border-box;
 }
 
 body {
-
     margin: 0;
-
     font-family: Arial, sans-serif;
-
-    background: #0d1117;
-
-    color: white;
-
+    background: #eef2f6;
+    color: #17202a;
 }
 
+.header {
+    background: #17202a;
+    color: white;
+    padding: 25px;
+    text-align: center;
+}
 
-/* HEADER */
+.header h1 {
+    margin: 0;
+    font-size: 28px;
+}
 
-header {
+.container {
+    width: 92%;
+    max-width: 900px;
+    margin: 30px auto;
+}
 
-    height: 70px;
-
-    background: #161b22;
-
-    border-bottom: 1px solid #30363d;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    padding: 0 25px;
-
+.card {
+    background: white;
+    border-radius: 18px;
+    padding: 28px;
+    margin-bottom: 22px;
+    box-shadow: 0 7px 25px rgba(0,0,0,0.08);
 }
 
 .title {
-
-    font-size: 24px;
-
-    font-weight: bold;
-
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 15px;
 }
 
-.subtitle {
-
-    font-size: 12px;
-
-    color: #8b949e;
-
-    margin-top: 4px;
-
-}
-
-.cloud {
-
+.ip-row {
     display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-    font-size: 13px;
-
+    gap: 10px;
 }
 
-.cloud-dot {
-
-    width: 11px;
-
-    height: 11px;
-
-    border-radius: 50%;
-
-    background: #f85149;
-
+.ip-input {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid #ccd2d8;
+    border-radius: 9px;
+    font-size: 17px;
 }
 
-.cloud-dot.online {
-
-    background: #3fb950;
-
-    box-shadow: 0 0 10px #3fb950;
-
-}
-
-
-/* MAIN */
-
-main {
-
-    padding: 25px;
-
-}
-
-
-/* SUMMARY */
-
-.summary {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(4, 1fr);
-
-    gap: 15px;
-
-    margin-bottom: 25px;
-
-}
-
-.summary-card {
-
-    background: #161b22;
-
-    border: 1px solid #30363d;
-
-    border-radius: 10px;
-
-    padding: 18px;
-
-}
-
-.summary-title {
-
-    color: #8b949e;
-
-    font-size: 12px;
-
-}
-
-.summary-value {
-
-    font-size: 28px;
-
+.find-button {
+    padding: 15px 25px;
+    border: 0;
+    border-radius: 9px;
+    background: #1565c0;
+    color: white;
+    font-size: 17px;
     font-weight: bold;
-
-    margin-top: 7px;
-
+    cursor: pointer;
 }
-
-
-/* DEVICES */
-
-.devices {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(
-            auto-fill,
-            minmax(350px, 1fr)
-        );
-
-    gap: 20px;
-
-}
-
-
-/* DEVICE */
-
-.device {
-
-    background: #161b22;
-
-    border: 1px solid #30363d;
-
-    border-radius: 12px;
-
-    padding: 20px;
-
-}
-
-.device.online {
-
-    border-color: #238636;
-
-}
-
-.device.offline {
-
-    opacity: 0.55;
-
-}
-
-
-/* DEVICE HEADER */
-
-.device-header {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: flex-start;
-
-}
-
-.motor-name {
-
-    font-size: 21px;
-
-    font-weight: bold;
-
-}
-
-.pi-id {
-
-    font-size: 12px;
-
-    color: #8b949e;
-
-    margin-top: 5px;
-
-}
-
-.location {
-
-    font-size: 12px;
-
-    color: #8b949e;
-
-    margin-top: 3px;
-
-}
-
-
-/* STATUS */
 
 .status {
-
-    padding: 5px 10px;
-
-    border-radius: 20px;
-
-    font-size: 11px;
-
+    margin-top: 15px;
+    padding: 13px;
+    border-radius: 9px;
+    background: #fff3cd;
+    color: #856404;
     font-weight: bold;
-
-}
-
-.status.online {
-
-    color: #3fb950;
-
-    background: #0d2818;
-
-}
-
-.status.offline {
-
-    color: #f85149;
-
-    background: #2d1111;
-
-}
-
-
-/* DATA */
-
-.data-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
-    gap: 10px;
-
-    margin-top: 20px;
-
-}
-
-.data {
-
-    background: #0d1117;
-
-    border-radius: 7px;
-
-    padding: 12px;
-
-}
-
-.data-label {
-
-    color: #8b949e;
-
-    font-size: 11px;
-
-}
-
-.data-value {
-
-    margin-top: 5px;
-
-    font-size: 17px;
-
-    font-weight: bold;
-
-}
-
-
-/* BUTTONS */
-
-.controls {
-
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
-    gap: 8px;
-
-    margin-top: 20px;
-
-}
-
-button {
-
-    border: none;
-
-    border-radius: 7px;
-
-    padding: 11px 8px;
-
-    color: white;
-
-    font-weight: bold;
-
-    cursor: pointer;
-
-}
-
-button:hover {
-
-    opacity: 0.85;
-
-}
-
-.remote {
-
-    background: #1f6feb;
-
-}
-
-.local {
-
-    background: #57606a;
-
-}
-
-.start {
-
-    background: #238636;
-
-}
-
-.stop {
-
-    background: #da3633;
-
-}
-
-.relay-on {
-
-    background: #2ea043;
-
-}
-
-.relay-off {
-
-    background: #a40e26;
-
-}
-
-
-/* COMMAND */
-
-.command {
-
-    margin-top: 12px;
-
-    padding: 9px;
-
-    border-radius: 6px;
-
-    background: #0d1117;
-
-    color: #8b949e;
-
-    font-size: 11px;
-
-}
-
-
-/* EMPTY */
-
-.empty {
-
-    grid-column: 1 / -1;
-
     text-align: center;
-
-    padding: 70px;
-
-    color: #8b949e;
-
 }
 
-
-/* MOBILE */
-
-@media(max-width: 900px) {
-
-    .summary {
-
-        grid-template-columns:
-            1fr 1fr;
-
-    }
-
+.current {
+    text-align: center;
+    font-size: 64px;
+    font-weight: bold;
+    color: #1565c0;
+    margin: 15px 0;
 }
 
-@media(max-width: 600px) {
-
-    .summary {
-
-        grid-template-columns:
-            1fr;
-
-    }
-
-    .devices {
-
-        grid-template-columns:
-            1fr;
-
-    }
-
+.load-state {
+    text-align: center;
+    font-size: 32px;
+    font-weight: bold;
+    margin: 20px 0;
 }
 
+.buttons {
+    text-align: center;
+}
+
+button.control {
+    width: 190px;
+    padding: 17px;
+    margin: 8px;
+    border: 0;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.on {
+    background: #2e7d32;
+    color: white;
+}
+
+.off {
+    background: #c62828;
+    color: white;
+}
+
+.row {
+    padding: 13px 0;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.hidden {
+    display: none;
+}
+
+.small {
+    color: #666;
+    font-size: 14px;
+    margin-top: 12px;
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    .ip-row {
+        flex-direction: column;
+    }
+
+    .current {
+        font-size: 48px;
+    }
+
+    button.control {
+        width: 90%;
+    }
+}
 </style>
-
 </head>
-
 
 <body>
 
-
-<header>
-
-    <div>
-
-        <div class="title">
-            SCADA OCC
-        </div>
-
-        <div class="subtitle">
-            Cloud Based Motor Monitoring & Control
-        </div>
-
-    </div>
-
-
-    <div class="cloud">
-
-        <span
-            id="cloudDot"
-            class="cloud-dot">
-        </span>
-
-        <span id="cloudText">
-            Connecting...
-        </span>
-
-    </div>
-
-</header>
-
-
-
-<main>
-
-
-<!-- SUMMARY -->
-
-<div class="summary">
-
-
-    <div class="summary-card">
-
-        <div class="summary-title">
-            TOTAL DEVICES
-        </div>
-
-        <div
-            id="totalDevices"
-            class="summary-value">
-            0
-        </div>
-
-    </div>
-
-
-    <div class="summary-card">
-
-        <div class="summary-title">
-            ONLINE
-        </div>
-
-        <div
-            id="onlineDevices"
-            class="summary-value">
-            0
-        </div>
-
-    </div>
-
-
-    <div class="summary-card">
-
-        <div class="summary-title">
-            MOTORS RUNNING
-        </div>
-
-        <div
-            id="runningMotors"
-            class="summary-value">
-            0
-        </div>
-
-    </div>
-
-
-    <div class="summary-card">
-
-        <div class="summary-title">
-            TOTAL CURRENT
-        </div>
-
-        <div
-            id="totalCurrent"
-            class="summary-value">
-            0.000 A
-        </div>
-
-    </div>
-
-
+<div class="header">
+    <h1>Remote Current Monitoring System</h1>
 </div>
 
+<div class="container">
 
+    <div class="card">
+        <div class="title">ESP8266 System</div>
 
-<!-- DEVICES -->
+        <div class="ip-row">
+            <input
+                id="ipAddress"
+                class="ip-input"
+                type="text"
+                placeholder="Enter ESP8266 IP"
+                value="192.168.1.100"
+            >
 
-<div
-    id="devices"
-    class="devices">
+            <button class="find-button" onclick="findSystem()">
+                FIND SYSTEM
+            </button>
+        </div>
 
-    <div class="empty">
+        <div id="systemStatus" class="status">
+            Enter ESP8266 IP and press FIND SYSTEM
+        </div>
+    </div>
 
-        Connecting to SCADA database...
+    <div id="dashboard" class="hidden">
+
+        <div class="card">
+            <div class="title">Current Measurement</div>
+
+            <div id="current" class="current">
+                Waiting
+            </div>
+
+            <div id="arduinoStatus" class="status">
+                Waiting for Arduino
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="title">Load Control</div>
+
+            <div id="loadState" class="load-state">
+                UNKNOWN
+            </div>
+
+            <div class="buttons">
+
+                <button class="control on" onclick="loadOn()">
+                    LOAD ON
+                </button>
+
+                <button class="control off" onclick="loadOff()">
+                    LOAD OFF
+                </button>
+
+            </div>
+
+            <div class="small">
+                NC relay configuration
+            </div>
+        </div>
+
+        <div class="card">
+
+            <div class="row">
+                Controller: Arduino UNO
+            </div>
+
+            <div class="row">
+                Receiver: ESP8266
+            </div>
+
+            <div class="row">
+                Current Sensor: ACS712 20A
+            </div>
+
+            <div class="row">
+                Current Input: A0
+            </div>
+
+            <div class="row">
+                Relay Output: D7
+            </div>
+
+            <div class="row">
+                Relay Contact: NC
+            </div>
+
+            <div class="row">
+                ESP8266 IP: <span id="displayIP">Not connected</span>
+            </div>
+
+        </div>
 
     </div>
 
 </div>
-
-
-</main>
-
-
 
 <script>
 
+let espIP = "";
+let updateTimer = null;
 
-/* =====================================================
-   FIREBASE CONFIG
-   ===================================================== */
+function cleanIP(value)
+{
+    value = value.trim();
 
-const firebaseConfig = {
+    value = value.replace(/^https?:\/\//, "");
 
-    apiKey:
-        "YOUR_FIREBASE_WEB_API_KEY",
+    value = value.replace(/\/+$/, "");
 
-    authDomain:
-        "monitoring-3fb9f.firebaseapp.com",
-
-    databaseURL:
-        "https://monitoring-3fb9f-default-rtdb.europe-west1.firebasedatabase.app",
-
-    projectId:
-        "monitoring-3fb9f",
-
-    storageBucket:
-        "monitoring-3fb9f.appspot.com",
-
-    messagingSenderId:
-        "YOUR_MESSAGING_SENDER_ID",
-
-    appId:
-        "YOUR_FIREBASE_APP_ID"
-
-};
-
-
-/* =====================================================
-   START FIREBASE
-   ===================================================== */
-
-firebase.initializeApp(
-    firebaseConfig
-);
-
-
-const db =
-    firebase.database();
-
-
-/* =====================================================
-   CLOUD STATUS
-   ===================================================== */
-
-function setCloudStatus(
-    online
-) {
-
-    const dot =
-        document.getElementById(
-            "cloudDot"
-        );
-
-    const text =
-        document.getElementById(
-            "cloudText"
-        );
-
-
-    if (online) {
-
-        dot.classList.add(
-            "online"
-        );
-
-        text.textContent =
-            "Firebase ONLINE";
-
-    }
-
-    else {
-
-        dot.classList.remove(
-            "online"
-        );
-
-        text.textContent =
-            "Firebase OFFLINE";
-
-    }
-
+    return value;
 }
 
+function getBaseURL()
+{
+    return "http://" + espIP;
+}
 
-/* =====================================================
-   DEVICE LISTENER
-   ===================================================== */
+function findSystem()
+{
+    espIP = cleanIP(
+        document.getElementById("ipAddress").value
+    );
 
-db.ref(
-    "scada/devices"
-)
-
-.on(
-
-    "value",
-
-    snapshot => {
-
-        setCloudStatus(true);
-
-        const devices =
-            snapshot.val() || {};
-
-        renderDevices(
-            devices
-        );
-
-    },
-
-    error => {
-
-        console.error(
-            "Firebase error:",
-            error
-        );
-
-        setCloudStatus(false);
-
-        document.getElementById(
-            "devices"
-        ).innerHTML = `
-
-            <div class="empty">
-
-                Firebase connection failed.
-
-                <br><br>
-
-                ${escapeHTML(
-                    error.message
-                )}
-
-            </div>
-
-        `;
-
-    }
-
-);
-
-
-/* =====================================================
-   RENDER DEVICES
-   ===================================================== */
-
-function renderDevices(
-    devices
-) {
-
-    const container =
-        document.getElementById(
-            "devices"
-        );
-
-
-    container.innerHTML = "";
-
-
-    const ids =
-        Object.keys(devices);
-
-
-    let online =
-        0;
-
-    let running =
-        0;
-
-    let totalCurrent =
-        0;
-
-
-    if (ids.length === 0) {
-
-        container.innerHTML = `
-
-            <div class="empty">
-
-                No Raspberry Pi registered.
-
-            </div>
-
-        `;
-
-        updateSummary(
-            0,
-            0,
-            0,
-            0
-        );
+    if (espIP === "")
+    {
+        document.getElementById("systemStatus").innerHTML =
+            "Please enter ESP8266 IP";
 
         return;
-
     }
 
-
-    ids.forEach(
-        piId => {
-
-
-        const d =
-            devices[piId] || {};
-
-
-        const isOnline =
-            d.online === true;
-
-
-        const current =
-            Number(
-                d.current || 0
-            );
-
-
-        if (isOnline) {
-
-            online++;
-
-        }
-
-
-        if (
-
-            isOnline &&
-
-            String(
-                d.motor_status || ""
-            ).toUpperCase() ===
-            "RUNNING"
-
-        ) {
-
-            running++;
-
-        }
-
-
-        totalCurrent +=
-            current;
-
-
-        const card =
-            document.createElement(
-                "div"
-            );
-
-
-        card.className =
-            "device " +
-            (
-                isOnline
-                ? "online"
-                : "offline"
-            );
-
-
-        card.innerHTML = `
-
-            <div class="device-header">
-
-
-                <div>
-
-                    <div class="motor-name">
-
-                        ${escapeHTML(
-                            d.motor_name ||
-                            "UNKNOWN MOTOR"
-                        )}
-
-                    </div>
-
-
-                    <div class="pi-id">
-
-                        ${escapeHTML(
-                            piId
-                        )}
-
-                    </div>
-
-
-                    <div class="location">
-
-                        ${escapeHTML(
-                            d.location ||
-                            "-"
-                        )}
-
-                    </div>
-
-                </div>
-
-
-                <div class="status ${
-                    isOnline
-                    ? "online"
-                    : "offline"
-                }">
-
-                    ${
-                        isOnline
-                        ? "ONLINE"
-                        : "OFFLINE"
-                    }
-
-                </div>
-
-
-            </div>
-
-
-
-            <div class="data-grid">
-
-
-                <div class="data">
-
-                    <div class="data-label">
-                        CURRENT
-                    </div>
-
-                    <div class="data-value">
-
-                        ${
-                            current.toFixed(3)
-                        } A
-
-                    </div>
-
-                </div>
-
-
-                <div class="data">
-
-                    <div class="data-label">
-                        MOTOR
-                    </div>
-
-                    <div class="data-value">
-
-                        ${escapeHTML(
-                            d.motor_status ||
-                            "STOPPED"
-                        )}
-
-                    </div>
-
-                </div>
-
-
-                <div class="data">
-
-                    <div class="data-label">
-                        MODE
-                    </div>
-
-                    <div class="data-value">
-
-                        ${escapeHTML(
-                            d.mode ||
-                            "LOCAL"
-                        )}
-
-                    </div>
-
-                </div>
-
-
-                <div class="data">
-
-                    <div class="data-label">
-                        RELAY
-                    </div>
-
-                    <div class="data-value">
-
-                        ${escapeHTML(
-                            d.relay ||
-                            "OFF"
-                        )}
-
-                    </div>
-
-                </div>
-
-
-                <div class="data">
-
-                    <div class="data-label">
-                        LAST SEEN
-                    </div>
-
-                    <div class="data-value">
-
-                        ${
-                            formatTime(
-                                d.last_seen
-                            )
-                        }
-
-                    </div>
-
-                </div>
-
-
-                <div class="data">
-
-                    <div class="data-label">
-                        LOCATION
-                    </div>
-
-                    <div class="data-value">
-
-                        ${escapeHTML(
-                            d.location ||
-                            "-"
-                        )}
-
-                    </div>
-
-                </div>
-
-
-            </div>
-            <div class="controls">
-
-
-    <button
-        class="start"
-        onclick="sendCommand(
-            '${jsEscape(piId)}',
-            'START'
-        )">
-
-        START MOTOR
-
-    </button>
-
-
-    <button
-        class="stop"
-        onclick="sendCommand(
-            '${jsEscape(piId)}',
-            'STOP'
-        )">
-
-        STOP MOTOR
-
-    </button>
-
-
-    
-
-
-</div>
-            <div
-                id="command-${safeId(piId)}"
-                class="command">
-
-                Ready
-
-            </div>
-
-        `;
-
-
-        container.appendChild(
-            card
-        );
-
-
-    });
-
-
-    updateSummary(
-
-        ids.length,
-
-        online,
-
-        running,
-
-        totalCurrent
-
-    );
-
-}
-
-
-/* =====================================================
-   SEND COMMAND
-   ===================================================== */
-
-function sendCommand(
-    piId,
-    command
-) {
-
-
-    const commandElement =
-        document.getElementById(
-            "command-" +
-            safeId(piId)
-        );
-
-
-    if (commandElement) {
-
-        commandElement.textContent =
-            "Sending: " +
-            command;
-
-    }
-
-
-    const data = {
-
-        command:
-            command,
-
-        timestamp:
-            firebase.database
-                .ServerValue
-                .TIMESTAMP
-
-    };
-
-
-    db.ref(
-        "scada/commands/" +
-        piId
-    )
-
-    .set(data)
-
-    .then(() => {
-
-
-        console.log(
-            "Command sent:",
-            piId,
-            command
-        );
-
-
-        if (commandElement) {
-
-            commandElement.textContent =
-                "Command sent: " +
-                command;
-
-        }
-
+    document.getElementById("systemStatus").innerHTML =
+        "Searching for ESP8266";
+
+    fetch(getBaseURL() + "/data", {
+        method: "GET",
+        cache: "no-store"
     })
-
-    .catch(error => {
-
-
-        console.error(
-            "Command failed:",
-            error
-        );
-
-
-        if (commandElement) {
-
-            commandElement.textContent =
-                "Command failed";
-
-        }
-
-
-        alert(
-            "Command failed:\n" +
-            error.message
-        );
-
-    });
-
-}
-
-
-/* =====================================================
-   SUMMARY
-   ===================================================== */
-
-function updateSummary(
-    total,
-    online,
-    running,
-    current
-) {
-
-    document.getElementById(
-        "totalDevices"
-    ).textContent =
-        total;
-
-
-    document.getElementById(
-        "onlineDevices"
-    ).textContent =
-        online;
-
-
-    document.getElementById(
-        "runningMotors"
-    ).textContent =
-        running;
-
-
-    document.getElementById(
-        "totalCurrent"
-    ).textContent =
-        current.toFixed(3) +
-        " A";
-
-}
-
-
-/* =====================================================
-   TIME
-   ===================================================== */
-
-function formatTime(
-    timestamp
-) {
-
-    if (!timestamp) {
-
-        return "-";
-
-    }
-
-
-    const date =
-        new Date(
-            Number(timestamp)
-        );
-
-
-    if (
-        isNaN(
-            date.getTime()
-        )
-    ) {
-
-        return "-";
-
-    }
-
-
-    return date.toLocaleTimeString(
-        "en-IN",
+    .then(function(response)
+    {
+        if (!response.ok)
         {
-
-            hour: "2-digit",
-
-            minute: "2-digit",
-
-            second: "2-digit"
-
+            throw new Error("ESP8266 response error");
         }
-    );
 
+        return response.json();
+    })
+    .then(function(data)
+    {
+        document.getElementById("systemStatus").innerHTML =
+            "ESP8266 Found";
+
+        document.getElementById("systemStatus").style.background =
+            "#e8f5e9";
+
+        document.getElementById("systemStatus").style.color =
+            "#2e7d32";
+
+        document.getElementById("dashboard").classList.remove("hidden");
+
+        document.getElementById("displayIP").innerHTML =
+            espIP;
+
+        updateDashboard(data);
+
+        if (updateTimer !== null)
+        {
+            clearInterval(updateTimer);
+        }
+
+        updateTimer = setInterval(updateData, 1000);
+    })
+    .catch(function(error)
+    {
+        document.getElementById("systemStatus").innerHTML =
+            "ESP8266 Not Found";
+
+        document.getElementById("systemStatus").style.background =
+            "#ffebee";
+
+        document.getElementById("systemStatus").style.color =
+            "#c62828";
+
+        document.getElementById("dashboard").classList.add("hidden");
+    });
 }
 
+function updateData()
+{
+    if (espIP === "")
+    {
+        return;
+    }
 
-/* =====================================================
-   HTML ESCAPE
-   ===================================================== */
+    fetch(getBaseURL() + "/data", {
+        method: "GET",
+        cache: "no-store"
+    })
+    .then(function(response)
+    {
+        if (!response.ok)
+        {
+            throw new Error("No response");
+        }
 
-function escapeHTML(
-    value
-) {
+        return response.json();
+    })
+    .then(function(data)
+    {
+        updateDashboard(data);
 
-    return String(value)
+        document.getElementById("systemStatus").innerHTML =
+            "ESP8266 Connected";
 
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
+        document.getElementById("systemStatus").style.background =
+            "#e8f5e9";
 
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
+        document.getElementById("systemStatus").style.color =
+            "#2e7d32";
+    })
+    .catch(function()
+    {
+        document.getElementById("systemStatus").innerHTML =
+            "ESP8266 Connection Lost";
 
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
+        document.getElementById("systemStatus").style.background =
+            "#ffebee";
 
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
+        document.getElementById("systemStatus").style.color =
+            "#c62828";
 
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
-
+        document.getElementById("arduinoStatus").innerHTML =
+            "ESP8266 Not Connected";
+    });
 }
 
+function updateDashboard(data)
+{
+    if (data.current !== undefined)
+    {
+        document.getElementById("current").innerHTML =
+            data.current;
+    }
 
-/* =====================================================
-   JAVASCRIPT STRING ESCAPE
-   ===================================================== */
+    if (data.relay !== undefined)
+    {
+        document.getElementById("loadState").innerHTML =
+            data.relay;
+    }
 
-function jsEscape(
-    value
-) {
-
-    return String(value)
-        .replaceAll(
-            "\\",
-            "\\\\"
-        )
-        .replaceAll(
-            "'",
-            "\\'"
-        );
-
+    if (data.online === true)
+    {
+        document.getElementById("arduinoStatus").innerHTML =
+            "Arduino Connected";
+    }
+    else
+    {
+        document.getElementById("arduinoStatus").innerHTML =
+            "Arduino Not Connected";
+    }
 }
 
+function loadOn()
+{
+    if (espIP === "")
+    {
+        return;
+    }
 
-/* =====================================================
-   SAFE HTML ID
-   ===================================================== */
+    fetch(getBaseURL() + "/relay/off", {
+        method: "GET",
+        cache: "no-store"
+    })
+    .then(function()
+    {
+        document.getElementById("loadState").innerHTML =
+            "LOAD ON";
 
-function safeId(
-    value
-) {
-
-    return String(value)
-        .replace(
-            /[^a-zA-Z0-9_-]/g,
-            "_"
-        );
-
+        setTimeout(updateData, 300);
+    })
+    .catch(function()
+    {
+        document.getElementById("systemStatus").innerHTML =
+            "LOAD ON command failed";
+    });
 }
+
+function loadOff()
+{
+    if (espIP === "")
+    {
+        return;
+    }
+
+    fetch(getBaseURL() + "/relay/on", {
+        method: "GET",
+        cache: "no-store"
+    })
+    .then(function()
+    {
+        document.getElementById("loadState").innerHTML =
+            "LOAD OFF";
+
+        setTimeout(updateData, 300);
+    })
+    .catch(function()
+    {
+        document.getElementById("systemStatus").innerHTML =
+            "LOAD OFF command failed";
+    });
+}
+
+document.getElementById("ipAddress").addEventListener(
+    "keydown",
+    function(event)
+    {
+        if (event.key === "Enter")
+        {
+            findSystem();
+        }
+    }
+);
 
 </script>
 
-
 </body>
-
 </html>
