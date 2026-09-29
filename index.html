@@ -1,458 +1,474 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AC Power & Current Dashboard</title>
+    
+    <!-- MQTT & Chart.js Libraries -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<meta charset="UTF-8">
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #0f172a;
+            --blue: #3b82f6;
+            --orange: #f59e0b;
+            --purple: #8b5cf6;
+            --green: #10b981;
+            --red: #ef4444;
+        }
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-<title>Remote Current Monitoring System</title>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-main);
+        }
 
-<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
 
-<style>
+        .header h1 { font-size: 24px; font-weight: 600; margin-bottom: 5px; }
+        .header p { font-size: 14px; color: #cbd5e1; }
 
-* {
-    box-sizing: border-box;
-}
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #eef2f6;
-    color: #17202a;
-}
+        /* Top Status Bar */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .status-indicator { display: flex; align-items: center; gap: 8px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--orange); }
+        .dot.connected { background: var(--green); }
+        .dot.error { background: var(--red); }
 
-.header {
-    background: #17202a;
-    color: white;
-    text-align: center;
-    padding: 25px;
-}
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
 
-.header h1 {
-    margin: 0;
-    font-size: 28px;
-}
+        .metric-card {
+            background: var(--card-bg);
+            padding: 25px 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            text-align: center;
+            border-bottom: 4px solid transparent;
+        }
 
-.container {
-    width: 92%;
-    max-width: 900px;
-    margin: 30px auto;
-}
+        .metric-card.voltage { border-bottom-color: var(--orange); }
+        .metric-card.current { border-bottom-color: var(--blue); }
+        .metric-card.power { border-bottom-color: var(--purple); }
+        .metric-card.energy { border-bottom-color: var(--green); }
 
-.card {
-    background: white;
-    border-radius: 18px;
-    padding: 30px;
-    margin-bottom: 22px;
-    box-shadow: 0 7px 25px rgba(0,0,0,0.08);
-}
+        .metric-title {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
 
-.title {
-    font-size: 18px;
-    color: #555;
-    margin-bottom: 15px;
-}
+        .metric-value {
+            font-size: 38px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
 
-.current {
-    text-align: center;
-    font-size: 64px;
-    font-weight: bold;
-    color: #1565c0;
-    margin: 15px 0;
-}
+        .metric-unit { font-size: 18px; color: var(--text-muted); font-weight: 500; }
 
-.load-state {
-    text-align: center;
-    font-size: 32px;
-    font-weight: bold;
-    margin: 20px 0;
-}
+        /* Chart & Controls Layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
 
-.status {
-    padding: 14px;
-    border-radius: 10px;
-    text-align: center;
-    font-weight: bold;
-    background: #fff3cd;
-    color: #856404;
-}
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
 
-.buttons {
-    text-align: center;
-}
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 10px;
+        }
 
-button {
-    width: 190px;
-    padding: 17px;
-    margin: 8px;
-    border: 0;
-    border-radius: 10px;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-}
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
 
-.on {
-    background: #2e7d32;
-    color: white;
-}
+        /* Controls */
+        .load-status {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: var(--bg-color);
+        }
 
-.off {
-    background: #c62828;
-    color: white;
-}
+        .btn-group { display: flex; flex-direction: column; gap: 12px; }
 
-.info {
-    padding: 13px 0;
-    border-bottom: 1px solid #eeeeee;
-}
+        button {
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
 
-.small {
-    color: #666;
-    font-size: 14px;
-    margin-top: 12px;
-    text-align: center;
-}
+        button:active { transform: scale(0.98); }
+        button:hover { opacity: 0.9; }
 
-@media (max-width: 600px) {
+        .btn-on { background: var(--green); color: white; }
+        .btn-off { background: var(--red); color: white; }
+        .btn-reset { background: var(--text-muted); color: white; margin-top: 15px;}
 
-    .current {
-        font-size: 48px;
-    }
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-content { grid-template-columns: 1fr; }
+            .btn-group { flex-direction: row; }
+            .btn-group button { flex: 1; }
+        }
 
-    button {
-        width: 90%;
-    }
-
-}
-
-</style>
-
+        @media (max-width: 600px) {
+            .metrics-grid { grid-template-columns: 1fr 1fr; }
+            .metric-value { font-size: 28px; }
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="header">
+    <div class="header">
+        <h1>AC Power & Energy Monitor</h1>
+        <p>Real-time Apparent Power Dashboard</p>
+    </div>
 
-<h1>
-Remote Current Monitoring System
-</h1>
+    <div class="container">
+        
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="dot" id="mqttDot"></div>
+                <span id="mqttStatus">Connecting Broker...</span>
+            </div>
+            <div class="status-indicator">
+                <div class="dot" id="deviceDot"></div>
+                <span id="deviceStatus">Waiting for Sensor...</span>
+            </div>
+        </div>
 
-</div>
+        <!-- Metric Cards -->
+        <div class="metrics-grid">
+            <div class="metric-card voltage">
+                <div class="metric-title">Voltage</div>
+                <div class="metric-value"><span id="valVoltage">230.0</span> <span class="metric-unit">V</span></div>
+            </div>
+            <div class="metric-card current">
+                <div class="metric-title">Current</div>
+                <div class="metric-value"><span id="valCurrent">0.00</span> <span class="metric-unit">A</span></div>
+            </div>
+            <div class="metric-card power">
+                <div class="metric-title">Apparent Power</div>
+                <div class="metric-value"><span id="valPower">0</span> <span class="metric-unit">VA</span></div>
+            </div>
+            <div class="metric-card energy">
+                <div class="metric-title">Energy (Stored)</div>
+                <div class="metric-value"><span id="valEnergy">0.000</span> <span class="metric-unit">kWh</span></div>
+            </div>
+        </div>
 
-<div class="container">
+        <!-- Main Content Layout -->
+        <div class="main-content">
+            
+            <!-- Graph Section -->
+            <div class="card">
+                <div class="card-title">Live Trend (Last 5 Minutes)</div>
+                <div class="chart-container">
+                    <canvas id="liveChart"></canvas>
+                </div>
+            </div>
 
-<div class="card">
+            <!-- Control & Info Section -->
+            <div class="card">
+                <div class="card-title">Load Control</div>
+                
+                <div id="loadState" class="load-status" style="color: var(--text-muted);">
+                    UNKNOWN
+                </div>
 
-<div class="title">
-MQTT Connection
-</div>
+                <div class="btn-group">
+                    <button class="btn-on" onclick="loadOn()">TURN LOAD ON</button>
+                    <button class="btn-off" onclick="loadOff()">TURN LOAD OFF</button>
+                </div>
+                
+                <button class="btn-reset" style="width: 100%;" onclick="resetEnergy()">Reset Energy Meter</button>
 
-<div id="mqttStatus"
-class="status">
-Connecting to MQTT
-</div>
+                <div style="margin-top: 30px; font-size: 13px; color: var(--text-muted); line-height: 1.8;">
+                    <strong>System Info:</strong><br>
+                    Broker: test.mosquitto.org<br>
+                    ID: 4027A9C1<br>
+                    Relay: Normally Closed (NC)<br>
+                </div>
+            </div>
+        </div>
+    </div>
 
-</div>
+    <script>
+        // --- Configuration ---
+        const mqttBroker = "wss://test.mosquitto.org:8081";
+        const baseTopic = "soham/acs712/";
+        const id = "4027A9C1";
+        
+        const topics = {
+            current: baseTopic + "current/" + id,
+            voltage: baseTopic + "voltage/" + id, // Optional: if not sent, uses 230V default
+            control: baseTopic + "control/" + id,
+            status: baseTopic + "status/" + id
+        };
 
+        // --- State Variables ---
+        let mqttClient = null;
+        let currentV = 230.0; // Default AC Voltage
+        let currentI = 0.0;
+        let lastUpdateTime = Date.now();
+        
+        // Load persistent energy from browser storage
+        let totalEnergy_kWh = parseFloat(localStorage.getItem('savedEnergy_' + id)) || 0.0;
+        document.getElementById('valEnergy').innerText = totalEnergy_kWh.toFixed(3);
 
-<div class="card">
+        // --- Chart.js Setup ---
+        const ctx = document.getElementById('liveChart').getContext('2d');
+        const liveChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [], // Timestamps
+                datasets: [
+                    {
+                        label: 'Power (VA)',
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        data: [],
+                        yAxisID: 'y',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Current (A)',
+                        borderColor: '#3b82f6',
+                        data: [],
+                        yAxisID: 'y1',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Voltage (V)',
+                        borderColor: '#f59e0b',
+                        data: [],
+                        yAxisID: 'y',
+                        borderDash: [5, 5],
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false, // Turn off animation for better live performance
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    x: {
+                        grid: { display: false }
+                    },
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'Voltage (V) / Power (VA)' },
+                        min: 0
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: 'Current (A)' },
+                        min: 0,
+                        grid: { drawOnChartArea: false } // Avoid overlapping grid lines
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top' }
+                }
+            }
+        });
 
-<div class="title">
-Current Measurement
-</div>
-
-<div id="current"
-class="current">
-Waiting
-</div>
-
-<div id="deviceStatus"
-class="status">
-Waiting for ESP8266
-</div>
-
-</div>
-
-
-<div class="card">
-
-<div class="title">
-Load Control
-</div>
-
-<div id="loadState"
-class="load-state">
-UNKNOWN
-</div>
-
-<div class="buttons">
-
-<button
-class="on"
-onclick="loadOn()">
-LOAD ON
-</button>
-
-<button
-class="off"
-onclick="loadOff()">
-LOAD OFF
-</button>
-
-</div>
-
-<div class="small">
-NC relay configuration
-</div>
-
-</div>
-
-
-<div class="card">
-
-<div class="title">
-System Information
-</div>
-
-<div class="info">
-Controller: Arduino UNO
-</div>
-
-<div class="info">
-Receiver: ESP8266
-</div>
-
-<div class="info">
-Current Sensor: ACS712 20A
-</div>
-
-<div class="info">
-Relay Output: D7
-</div>
-
-<div class="info">
-Relay Contact: NC
-</div>
-
-<div class="info">
-MQTT Broker: test.mosquitto.org
-</div>
-
-<div class="info">
-Protocol: MQTT
-</div>
-
-</div>
-
-</div>
-
-
-<script>
-
-const mqttBroker =
-"wss://test.mosquitto.org:8081";
-
-const controlTopic =
-"soham/acs712/control/4027A9C1";
-
-const currentTopic =
-"soham/acs712/current/4027A9C1";
-
-const statusTopic =
-"soham/acs712/status/4027A9C1";
-
-let mqttClient = null;
-
-
-function setMQTTStatus(message)
-{
-    document.getElementById("mqttStatus").innerHTML =
-        message;
-}
-
-
-function setDeviceStatus(message)
-{
-    document.getElementById("deviceStatus").innerHTML =
-        message;
-}
-
-
-function connectMQTT()
-{
-    setMQTTStatus("Connecting to MQTT");
-
-    const clientID =
-        "github_web_" +
-        Math.random()
-        .toString(16)
-        .substring(2);
-
-    mqttClient = mqtt.connect(
-        mqttBroker,
-        {
-            clientId: clientID,
-            clean: true,
-            reconnectPeriod: 3000,
-            connectTimeout: 10000
-        }
-    );
-
-
-    mqttClient.on("connect", function()
-    {
-        setMQTTStatus("MQTT Connected");
-
-        mqttClient.subscribe(
-            currentTopic
-        );
-
-        mqttClient.subscribe(
-            statusTopic
-        );
-    });
-
-
-    mqttClient.on("message",
-    function(topic, message)
-    {
-        const value =
-            message.toString().trim();
-
-
-        if (topic === currentTopic)
-        {
-            document.getElementById(
-                "current"
-            ).innerHTML = value;
-
-            setDeviceStatus(
-                "ESP8266 Online"
-            );
+        // --- Functions ---
+        function updateUIStatus(elementId, dotId, message, state) {
+            document.getElementById(elementId).innerText = message;
+            const dot = document.getElementById(dotId);
+            dot.className = 'dot'; // reset
+            if (state === 'ok') dot.classList.add('connected');
+            if (state === 'error') dot.classList.add('error');
         }
 
+        function calculateAndPlot(voltage, current) {
+            const now = Date.now();
+            
+            // 1. Calculate Apparent Power (S = V * I)
+            const powerVA = voltage * current;
+            
+            // 2. Calculate Energy (kWh)
+            const timeDiffHours = (now - lastUpdateTime) / (1000 * 60 * 60);
+            if (timeDiffHours < 1) { // Ignore huge jumps on first load
+                const powerKW = powerVA / 1000;
+                totalEnergy_kWh += (powerKW * timeDiffHours);
+                localStorage.setItem('savedEnergy_' + id, totalEnergy_kWh.toString());
+            }
+            lastUpdateTime = now;
 
-        if (topic === statusTopic)
-        {
+            // 3. Update DOM Metrics
+            document.getElementById('valVoltage').innerText = voltage.toFixed(1);
+            document.getElementById('valCurrent').innerText = current.toFixed(2);
+            document.getElementById('valPower').innerText = Math.round(powerVA);
+            document.getElementById('valEnergy').innerText = totalEnergy_kWh.toFixed(3);
 
-            if (value === "ONLINE")
-            {
-                setDeviceStatus(
-                    "ESP8266 Online"
-                );
+            // 4. Update Chart (Rolling 5 minutes)
+            const timeLabel = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const fiveMinsAgo = now - (5 * 60 * 1000);
+            
+            // Add new data
+            liveChart.data.labels.push({ time: now, label: timeLabel });
+            liveChart.data.datasets[0].data.push(powerVA);
+            liveChart.data.datasets[1].data.push(current);
+            liveChart.data.datasets[2].data.push(voltage);
+
+            // Remove data older than 5 minutes
+            while (liveChart.data.labels.length > 0 && liveChart.data.labels[0].time < fiveMinsAgo) {
+                liveChart.data.labels.shift();
+                liveChart.data.datasets.forEach(dataset => dataset.data.shift());
             }
 
-
-            if (value === "LOAD_ON")
-            {
-                document.getElementById(
-                    "loadState"
-                ).innerHTML = "LOAD ON";
-
-                setDeviceStatus(
-                    "ESP8266 Online"
-                );
-            }
-
-
-            if (value === "LOAD_OFF")
-            {
-                document.getElementById(
-                    "loadState"
-                ).innerHTML = "LOAD OFF";
-
-                setDeviceStatus(
-                    "ESP8266 Online"
-                );
-            }
-
+            // Map back labels for Chart.js
+            liveChart.config.data.labels = liveChart.data.labels.map(l => l.label);
+            liveChart.update();
         }
 
-    });
+        function resetEnergy() {
+            if(confirm("Are you sure you want to reset the accumulated energy to 0?")) {
+                totalEnergy_kWh = 0;
+                localStorage.setItem('savedEnergy_' + id, '0');
+                document.getElementById('valEnergy').innerText = "0.000";
+            }
+        }
 
+        function connectMQTT() {
+            updateUIStatus('mqttStatus', 'mqttDot', 'Connecting...', '');
 
-    mqttClient.on("reconnect",
-    function()
-    {
-        setMQTTStatus(
-            "Reconnecting to MQTT"
-        );
-    });
+            const clientID = "web_dash_" + Math.random().toString(16).substring(2);
+            mqttClient = mqtt.connect(mqttBroker, {
+                clientId: clientID, clean: true, reconnectPeriod: 3000, connectTimeout: 10000
+            });
 
+            mqttClient.on("connect", function() {
+                updateUIStatus('mqttStatus', 'mqttDot', 'Connected', 'ok');
+                mqttClient.subscribe([topics.current, topics.voltage, topics.status]);
+            });
 
-    mqttClient.on("offline",
-    function()
-    {
-        setMQTTStatus(
-            "MQTT Offline"
-        );
-    });
+            mqttClient.on("message", function(topic, message) {
+                const valueStr = message.toString().trim();
 
+                // Handle Data Topics
+                if (topic === topics.current) {
+                    currentI = parseFloat(valueStr) || 0;
+                    updateUIStatus('deviceStatus', 'deviceDot', 'Online & Transmitting', 'ok');
+                    calculateAndPlot(currentV, currentI);
+                } 
+                else if (topic === topics.voltage) {
+                    currentV = parseFloat(valueStr) || 230.0;
+                }
+                
+                // Handle Status Topics
+                if (topic === topics.status) {
+                    const loadElement = document.getElementById("loadState");
+                    if (valueStr === "ONLINE") {
+                        updateUIStatus('deviceStatus', 'deviceDot', 'Online', 'ok');
+                    } else if (valueStr === "LOAD_ON") {
+                        loadElement.innerText = "LOAD IS ON";
+                        loadElement.style.color = "var(--green)";
+                    } else if (valueStr === "LOAD_OFF") {
+                        loadElement.innerText = "LOAD IS OFF";
+                        loadElement.style.color = "var(--red)";
+                    }
+                }
+            });
 
-    mqttClient.on("error",
-    function()
-    {
-        setMQTTStatus(
-            "MQTT Connection Error"
-        );
-    });
+            mqttClient.on("reconnect", () => updateUIStatus('mqttStatus', 'mqttDot', 'Reconnecting...', 'error'));
+            mqttClient.on("offline", () => updateUIStatus('mqttStatus', 'mqttDot', 'Offline', 'error'));
+            mqttClient.on("error", () => updateUIStatus('mqttStatus', 'mqttDot', 'Error', 'error'));
+        }
 
-}
+        // --- Control Functions ---
+        function loadOn() {
+            if (mqttClient?.connected) mqttClient.publish(topics.control, "LOAD_ON");
+            else alert("MQTT not connected!");
+        }
 
+        function loadOff() {
+            if (mqttClient?.connected) mqttClient.publish(topics.control, "LOAD_OFF");
+            else alert("MQTT not connected!");
+        }
 
-function loadOn()
-{
+        // Start Application
+        connectMQTT();
 
-    if (!mqttClient ||
-        !mqttClient.connected)
-    {
-        setMQTTStatus(
-            "MQTT Not Connected"
-        );
+        // Push data to chart every 2 seconds even if current doesn't change, 
+        // to keep the time-graph flowing naturally.
+        setInterval(() => {
+            if(mqttClient && mqttClient.connected) {
+               calculateAndPlot(currentV, currentI); 
+            }
+        }, 2000);
 
-        return;
-    }
-
-
-    mqttClient.publish(
-        controlTopic,
-        "LOAD_ON"
-    );
-
-}
-
-
-function loadOff()
-{
-
-    if (!mqttClient ||
-        !mqttClient.connected)
-    {
-        setMQTTStatus(
-            "MQTT Not Connected"
-        );
-
-        return;
-    }
-
-
-    mqttClient.publish(
-        controlTopic,
-        "LOAD_OFF"
-    );
-
-}
-
-
-connectMQTT();
-
-</script>
-
+    </script>
 </body>
-
 </html>
