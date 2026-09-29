@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metro TPC - Advanced SCADA</title>
+    <title>Remote Motor Monitoring System</title>
     
     <!-- External Libraries -->
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
@@ -177,9 +177,158 @@
             .nav-item.active { border-left: none; border-bottom-color: var(--neon-blue); }
             .sidebar-footer { display: none; }
         }
-    </style>
+    
+/* ===== PREMIUM SCADA UI ===== */
+:root{
+ --bg-base:#060a0f; --bg-panel:#0c131b; --bg-sidebar:#03070b;
+ --border-color:#223140; --text-main:#e8f0f7; --text-muted:#7f91a2;
+ --neon-green:#32f078; --neon-red:#ff3d5f; --neon-blue:#22d9ff; --neon-amber:#ffc247;
+ --btn-on-bg:#092c1b; --btn-on-border:#25b866; --btn-off-bg:#321019; --btn-off-border:#f03b58;
+}
+body{
+ background:radial-gradient(circle at 80% -10%,rgba(34,217,255,.10),transparent 34%),
+            radial-gradient(circle at 10% 110%,rgba(50,240,120,.06),transparent 30%),var(--bg-base);
+}
+body:before{
+ content:"";position:fixed;inset:0;pointer-events:none;opacity:.025;
+ background-image:linear-gradient(rgba(255,255,255,.7) 1px,transparent 1px),
+ linear-gradient(90deg,rgba(255,255,255,.7) 1px,transparent 1px);
+ background-size:32px 32px;
+}
+.sidebar{
+ width:275px;background:linear-gradient(180deg,#05090e,#020508);
+ border-right:1px solid #1b2a37;box-shadow:18px 0 50px rgba(0,0,0,.25);
+}
+.brand{padding:25px 18px 22px;background:linear-gradient(180deg,rgba(34,217,255,.07),transparent)}
+.brand h1{font-size:25px;letter-spacing:3px;text-shadow:0 0 20px rgba(34,217,255,.28)}
+.system-clock{font-size:17px;margin-top:12px}
+.nav-menu{padding:18px 10px}
+.nav-item{margin:5px 0;padding:14px 18px;border:1px solid transparent;border-left:3px solid transparent;border-radius:9px;font-size:12px}
+.nav-item:hover{background:rgba(255,255,255,.035);border-color:#1c2b38}
+.nav-item.active{background:linear-gradient(90deg,rgba(34,217,255,.14),rgba(34,217,255,.025));border-color:#1b4250;border-left-color:var(--neon-blue);box-shadow:inset 0 0 25px rgba(34,217,255,.035)}
+.main-content{background:transparent}
+.tab-pane{padding:30px}
+.panel{
+ background:linear-gradient(145deg,rgba(14,22,30,.97),rgba(8,13,18,.97));
+ border:1px solid #21313f;border-radius:14px;padding:28px;margin-bottom:28px;
+ box-shadow:0 15px 45px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.025);
+}
+.panel-title{top:-9px;background:#080e14;border:1px solid #243543;border-radius:5px;padding:3px 11px;color:#91a5b6}
+.grid-4{gap:15px}
+.meter{
+ padding:23px 12px;border:1px solid #1e2e3b;border-radius:12px;
+ background:linear-gradient(160deg,#0a1118,#060a0f);position:relative;overflow:hidden;
+}
+.meter:after{content:"";position:absolute;left:12%;right:12%;bottom:0;height:1px;background:currentColor;opacity:.15}
+.meter-title{font-size:11px;letter-spacing:1.7px}
+.meter-value{font-size:39px}
+.meter-unit{font-size:15px}
+.btn-group{gap:12px}
+.btn{
+ padding:17px;border-radius:10px;letter-spacing:1.5px;
+ box-shadow:0 5px 18px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.06);
+}
+.btn-on:hover:not(:disabled){box-shadow:0 0 25px rgba(50,240,120,.22)}
+.btn-off:hover:not(:disabled){box-shadow:0 0 25px rgba(255,61,95,.22)}
+.btn-action{border-radius:8px;background:#101923;border-color:#2a3b49}
+.sld-container{height:220px;border-radius:11px;background:#050a0e}
+.sld-svg{max-width:500px}
+.input-group input{border-radius:8px;background:#060b10;border-color:#243746}
+.data-table th{background:#080e14}
+.sidebar-footer{background:rgba(0,0,0,.12)}
+.status-dot{box-shadow:0 0 0 3px rgba(255,61,95,.07)}
+.status-dot.online{box-shadow:0 0 0 3px rgba(50,240,120,.08),0 0 12px var(--neon-green)}
+#tripAlarmOverlay{backdrop-filter:blur(5px);background:rgba(255,20,55,.10);border-radius:14px}
+.trip-text{font-size:30px}
+
+
+/* ===== CLOSE SAFETY MODAL ===== */
+.safety-modal{
+ position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+ background:rgba(2,6,10,.78);backdrop-filter:blur(9px);z-index:10000;padding:20px;
+}
+.safety-modal.show{display:flex}
+.safety-card{
+ width:min(620px,94vw);background:linear-gradient(145deg,#101923,#070c11);
+ border:1px solid #2b4050;border-radius:18px;padding:26px;
+ box-shadow:0 25px 90px rgba(0,0,0,.65),0 0 50px rgba(34,217,255,.07);
+}
+.safety-top{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;margin-bottom:20px}
+.safety-kicker{font:11px 'Share Tech Mono';color:var(--neon-blue);letter-spacing:2px}
+.safety-title{font-size:23px;font-weight:800;margin-top:5px}
+.safety-state{font:12px 'Share Tech Mono';color:var(--neon-amber);border:1px solid #5a4a25;border-radius:20px;padding:7px 11px}
+.safety-warning{
+ display:flex;gap:13px;align-items:center;padding:13px;border:1px solid #55451e;
+ background:rgba(255,194,71,.06);border-radius:10px;margin-bottom:16px;
+}
+.warning-icon{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--neon-amber);color:#111;font-weight:900}
+.safety-warning span{display:block;color:var(--text-muted);font-size:12px;margin-top:3px}
+.check-list{border:1px solid #20303d;border-radius:10px;overflow:hidden}
+.check-row{display:flex;justify-content:space-between;padding:11px 14px;border-bottom:1px solid #1a2732;font-size:13px}
+.check-row:last-child{border-bottom:0}
+.check-row b{font:11px 'Share Tech Mono';color:var(--neon-amber)}
+.check-row b.ok{color:var(--neon-green)}
+.check-row b.fail{color:var(--neon-red)}
+.countdown-area{text-align:center;padding:18px 10px;margin-top:15px;border:1px solid #5b4520;border-radius:11px;background:rgba(255,194,71,.055)}
+.countdown-label{font:11px 'Share Tech Mono';letter-spacing:1.5px;color:var(--neon-amber)}
+#closeCountdown{font:56px 'Share Tech Mono';font-weight:bold;color:var(--neon-amber);line-height:1.1;text-shadow:0 0 20px rgba(255,194,71,.25)}
+.countdown-note{font-size:11px;color:var(--text-muted)}
+.safety-result{margin-top:14px;padding:11px;border-radius:9px;background:#071016;color:var(--text-muted);font-size:12px;text-align:center}
+.safety-actions{display:flex;gap:10px;margin-top:16px}
+.safety-actions button{flex:1}
+.safety-cancel{border-color:#3b4a57}
+.safety-confirm{font-size:12px}
+@keyframes countdownPulse{50%{transform:scale(1.06);opacity:.7}}
+.countdown-pulse{animation:countdownPulse .8s infinite}
+
+
+.operator-note{margin:0 0 13px;padding:9px 12px;border-left:3px solid var(--neon-amber);background:rgba(255,194,71,.045);color:var(--text-muted);font-size:11px;line-height:1.5;border-radius:0 7px 7px 0}
+</style>
 </head>
 <body>
+
+<!-- CLOSE OPERATION SAFETY CHECK -->
+<div id="closeSafetyModal" class="safety-modal" aria-hidden="true">
+  <div class="safety-card">
+    <div class="safety-top">
+      <div>
+        <div class="safety-kicker">CB-01 / OPERATOR CONTROL</div>
+        <div class="safety-title" id="safetyTitle">PRE-CLOSE SAFETY CHECK</div>
+      </div>
+      <div class="safety-state" id="safetyState">CHECKING</div>
+    </div>
+
+    <div class="safety-warning">
+      <div class="warning-icon">!</div>
+      <div>
+        <strong>CONTROLLED OPERATION</strong>
+        <span>Verify all conditions before energizing the load.</span>
+      </div>
+    </div>
+
+    <div class="check-list">
+      <div class="check-row"><span>MQTT broker link</span><b id="checkMqtt">CHECKING</b></div>
+      <div class="check-row"><span>RTU / ESP8266 communication</span><b id="checkRtu">CHECKING</b></div>
+      <div class="check-row"><span>Protection relay</span><b id="checkProtection">CHECKING</b></div>
+      <div class="check-row"><span>Current below trip threshold</span><b id="checkCurrent">CHECKING</b></div>
+      <div class="check-row"><span>System fault / trip state</span><b id="checkFault">CHECKING</b></div>
+    </div>
+
+    <div id="countdownArea" class="countdown-area" style="display:none">
+      <div class="countdown-label">CLOSE COMMAND WILL BE SENT IN</div>
+      <div id="closeCountdown">5</div>
+      <div class="countdown-note">Do not leave this screen during the countdown.</div>
+    </div>
+
+    <div id="safetyResult" class="safety-result">Running pre-check...</div>
+
+    <div class="safety-actions">
+      <button class="btn-action safety-cancel" id="cancelCloseBtn" onclick="cancelCloseSequence()">CANCEL</button>
+      <button class="btn btn-on safety-confirm" id="confirmCloseBtn" onclick="startCloseCountdown()" disabled>START 5-SECOND COUNTDOWN</button>
+    </div>
+  </div>
+</div>
+
 
     <!-- 1. SCADA BOOT SCREEN -->
     <div id="splashScreen">
@@ -198,7 +347,7 @@
     <!-- 2. SIDEBAR NAVIGATION -->
     <div class="sidebar">
         <div class="brand">
-            <h1>METRO TPC</h1>
+            <h1>REMOTE MOTOR<br>MONITORING SYSTEM</h1>
             <div class="system-clock" id="clock">00:00:00</div>
         </div>
         <ul class="nav-menu">
@@ -255,8 +404,8 @@
                     </div>
                     <div id="breakerStatus" class="breaker-status-text">STATUS: UNKNOWN</div>
                     <div class="btn-group">
-                        <button id="btnOn" class="btn btn-on" onclick="loadOn()">CLOSE (ON)</button>
-                        <button class="btn btn-off" onclick="loadOff()">OPEN (OFF)</button>
+                        <button id="btnOn" class="btn btn-on" onclick="loadOn()">✓ CLOSE / ENERGIZE</button>
+                        <button class="btn btn-off" onclick="loadOff()">⏻ OPEN / ISOLATE</button>
                     </div>
                 </div>
 
@@ -574,17 +723,145 @@
         }
 
         // --- CONTROLS ---
-        function loadOn() { 
-            if (mqttClient?.connected && !systemTripped) {
-                mqttClient.publish(getTopic('control'), "LOAD_ON");
-                addLog("OPERATOR", "log-type-cmd", "Issued CLOSE (ON) command to breaker");
-            } 
+        // --- CONTROLLED BREAKER OPERATION ---
+        let closeCountdownTimer = null;
+        let closeSequenceActive = false;
+
+        function setSafetyCheck(id, ok, text) {
+            const el = document.getElementById(id);
+            el.innerText = text || (ok ? "OK" : "NOT OK");
+            el.classList.toggle("ok", !!ok);
+            el.classList.toggle("fail", !ok);
         }
-        function loadOff() { 
+
+        function runClosePreCheck() {
+            const mqttOK = !!mqttClient?.connected;
+            const rtuOK = !!isDeviceOnline;
+            const protectionOK = Number.isFinite(tripThresholdAmps) && tripThresholdAmps > 0;
+            const currentOK = Number.isFinite(currentI) && currentI < tripThresholdAmps;
+            const faultOK = !systemTripped;
+
+            setSafetyCheck("checkMqtt", mqttOK);
+            setSafetyCheck("checkRtu", rtuOK);
+            setSafetyCheck("checkProtection", protectionOK);
+            setSafetyCheck("checkCurrent", currentOK, currentOK ? "OK" : `${currentI.toFixed(2)} A >= ${tripThresholdAmps.toFixed(2)} A`);
+            setSafetyCheck("checkFault", faultOK);
+
+            const allOK = mqttOK && rtuOK && protectionOK && currentOK && faultOK;
+            const confirm = document.getElementById("confirmCloseBtn");
+            confirm.disabled = !allOK;
+            document.getElementById("safetyState").innerText = allOK ? "READY" : "BLOCKED";
+            document.getElementById("safetyState").style.color = allOK ? "var(--neon-green)" : "var(--neon-red)";
+            document.getElementById("safetyResult").innerText =
+                allOK ? "PRE-CHECK PASSED. All required conditions are normal." :
+                "CLOSE BLOCKED. Resolve the failed condition(s) before proceeding.";
+            document.getElementById("safetyResult").style.color = allOK ? "var(--neon-green)" : "var(--neon-red)";
+            return allOK;
+        }
+
+        function loadOn() {
+            if (systemTripped) {
+                addLog("OPERATOR", "log-type-trip", "CLOSE request blocked: system is tripped.");
+                return;
+            }
+            if (!mqttClient?.connected) {
+                addLog("OPERATOR", "log-type-trip", "CLOSE request blocked: MQTT broker is offline.");
+                alert("CLOSE BLOCKED\\n\\nMQTT broker connection is not available.");
+                return;
+            }
+
+            closeSequenceActive = false;
+            document.getElementById("closeSafetyModal").classList.add("show");
+            document.getElementById("closeSafetyModal").setAttribute("aria-hidden","false");
+            document.getElementById("countdownArea").style.display = "none";
+            document.getElementById("confirmCloseBtn").style.display = "block";
+            document.getElementById("cancelCloseBtn").disabled = false;
+            document.getElementById("safetyTitle").innerText = "PRE-CLOSE SAFETY CHECK";
+            document.getElementById("safetyResult").innerText = "Running pre-check...";
+            runClosePreCheck();
+            addLog("OPERATOR", "log-type-cmd", "CLOSE request initiated. Safety pre-check started.");
+        }
+
+        function startCloseCountdown() {
+            if (!runClosePreCheck() || closeSequenceActive) return;
+
+            closeSequenceActive = true;
+            let remaining = 5;
+            const countdownArea = document.getElementById("countdownArea");
+            const counter = document.getElementById("closeCountdown");
+            const confirm = document.getElementById("confirmCloseBtn");
+
+            countdownArea.style.display = "block";
+            confirm.style.display = "none";
+            document.getElementById("cancelCloseBtn").disabled = false;
+            document.getElementById("safetyTitle").innerText = "CLOSE WARNING ACTIVE";
+            document.getElementById("safetyState").innerText = "WARNING";
+            document.getElementById("safetyState").style.color = "var(--neon-amber)";
+            document.getElementById("safetyResult").innerText =
+                "5-second mandatory warning. CANCEL if any unsafe condition is observed.";
+
+            counter.innerText = remaining;
+            counter.classList.add("countdown-pulse");
+            addLog("OPERATOR", "log-type-cmd", "5-second mandatory CLOSE warning started.");
+
+            closeCountdownTimer = setInterval(() => {
+                remaining--;
+                counter.innerText = remaining;
+
+                // Re-check safety during the countdown.
+                if (!runClosePreCheck()) {
+                    cancelCloseSequence("CLOSE countdown stopped: safety pre-check failed.");
+                    return;
+                }
+
+                if (remaining <= 0) {
+                    clearInterval(closeCountdownTimer);
+                    closeCountdownTimer = null;
+                    counter.classList.remove("countdown-pulse");
+
+                    // Final check immediately before issuing MQTT command.
+                    if (!runClosePreCheck()) {
+                        cancelCloseSequence("CLOSE command cancelled: final safety check failed.");
+                        return;
+                    }
+
+                    mqttClient.publish(getTopic('control'), "LOAD_ON");
+                    addLog("OPERATOR", "log-type-cmd", "Mandatory warning completed. CLOSE (ON) command issued.");
+                    document.getElementById("safetyResult").innerText = "CLOSE COMMAND SENT. Waiting for RTU status confirmation.";
+                    document.getElementById("safetyResult").style.color = "var(--neon-green)";
+
+                    setTimeout(() => {
+                        closeSequenceActive = false;
+                        document.getElementById("closeSafetyModal").classList.remove("show");
+                        document.getElementById("closeSafetyModal").setAttribute("aria-hidden","true");
+                    }, 900);
+                }
+            }, 1000);
+        }
+
+        function cancelCloseSequence(reason) {
+            if (closeCountdownTimer) {
+                clearInterval(closeCountdownTimer);
+                closeCountdownTimer = null;
+            }
+            closeSequenceActive = false;
+            document.getElementById("closeCountdown").classList.remove("countdown-pulse");
+            document.getElementById("countdownArea").style.display = "none";
+            document.getElementById("confirmCloseBtn").style.display = "block";
+            document.getElementById("cancelCloseBtn").disabled = false;
+            document.getElementById("closeSafetyModal").classList.remove("show");
+            document.getElementById("closeSafetyModal").setAttribute("aria-hidden","true");
+            if (reason) addLog("OPERATOR", "log-type-cmd", reason);
+        }
+
+        function loadOff() {
+            // OPEN remains direct and uses the existing MQTT command/topic.
             if (mqttClient?.connected) {
                 mqttClient.publish(getTopic('control'), "LOAD_OFF");
                 addLog("OPERATOR", "log-type-cmd", "Issued OPEN (OFF) command to breaker");
-            } 
+            } else {
+                addLog("OPERATOR", "log-type-trip", "OPEN request blocked: MQTT broker is offline.");
+            }
         }
         function reconfigureMQTT() {
             deviceId = document.getElementById('setDeviceId').value;
@@ -599,6 +876,9 @@
         initMQTT();
         setInterval(() => { processTelemetry(currentV, currentI); }, 2000);
 
+    document.getElementById("closeSafetyModal").addEventListener("click", function(e){
+            if(e.target === this) cancelCloseSequence("CLOSE sequence cancelled by operator.");
+        });
     </script>
 </body>
 </html>
