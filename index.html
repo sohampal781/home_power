@@ -3,472 +3,506 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AC Power & Current Dashboard</title>
+    <title>AC Current & Power Monitor</title>
     
-    <!-- MQTT & Chart.js Libraries -->
+    <!-- External Libraries -->
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Modern Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
-        :root {
-            --bg-color: #f0f2f5;
-            --card-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --primary: #0f172a;
-            --blue: #3b82f6;
-            --orange: #f59e0b;
-            --purple: #8b5cf6;
-            --green: #10b981;
-            --red: #ef4444;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg-color);
-            color: var(--text-main);
+            font-family: 'Inter', Arial, sans-serif;
+            background: #eef2f6;
+            color: #17202a;
+            overflow-x: hidden;
         }
 
-        .header {
-            background: var(--primary);
-            color: white;
-            padding: 20px;
+        /* --- SPLASH / LOADING SCREEN --- */
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #eef2f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease-in-out, visibility 0.8s;
+        }
+
+        .loader-card {
+            background: white;
+            border-radius: 18px;
+            padding: 40px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        .header h1 { font-size: 24px; font-weight: 600; margin-bottom: 5px; }
-        .header p { font-size: 14px; color: #cbd5e1; }
+        .loader-card h2 {
+            margin-bottom: 30px;
+            color: #17202a;
+        }
+
+        .step-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #ffc107;
+            transition: all 0.3s ease;
+        }
+
+        .step-container.success {
+            border-left-color: #2e7d32;
+            background: #e8f5e9;
+        }
+
+        .step-text {
+            font-weight: 600;
+            color: #555;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-top: 3px solid #1565c0;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .checkmark {
+            display: none;
+            color: #2e7d32;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- MAIN DASHBOARD (HIDDEN BY DEFAULT) --- */
+        #mainDashboard {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.8s ease-in-out, visibility 0.8s;
+            display: none; /* Changed via JS */
+        }
+
+        /* Original Style Header */
+        .header {
+            background: #17202a;
+            color: white;
+            text-align: center;
+            padding: 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: 0.5px;
+        }
 
         .container {
-            width: 95%;
-            max-width: 1200px;
-            margin: 20px auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+            width: 92%;
+            max-width: 1000px;
+            margin: 30px auto;
         }
 
-        /* Top Status Bar */
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            background: var(--card-bg);
-            padding: 15px 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        .status-indicator { display: flex; align-items: center; gap: 8px; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--orange); }
-        .dot.connected { background: var(--green); }
-        .dot.error { background: var(--red); }
-
-        /* Metrics Grid */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-        }
-
-        .metric-card {
-            background: var(--card-bg);
-            padding: 25px 20px;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-            text-align: center;
-            border-bottom: 4px solid transparent;
-        }
-
-        .metric-card.voltage { border-bottom-color: var(--orange); }
-        .metric-card.current { border-bottom-color: var(--blue); }
-        .metric-card.power { border-bottom-color: var(--purple); }
-        .metric-card.energy { border-bottom-color: var(--green); }
-
-        .metric-title {
-            font-size: 14px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-
-        .metric-value {
-            font-size: 38px;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .metric-unit { font-size: 18px; color: var(--text-muted); font-weight: 500; }
-
-        /* Chart & Controls Layout */
-        .main-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-        }
-
+        /* Original Style Cards */
         .card {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            background: white;
+            border-radius: 18px;
+            padding: 30px;
+            margin-bottom: 22px;
+            box-shadow: 0 7px 25px rgba(0,0,0,0.08);
         }
 
-        .card-title {
+        .title {
             font-size: 18px;
-            font-weight: 600;
+            color: #555;
             margin-bottom: 20px;
-            color: var(--text-main);
-            border-bottom: 2px solid var(--bg-color);
+            font-weight: 600;
+            border-bottom: 2px solid #eef2f6;
             padding-bottom: 10px;
         }
 
-        /* Chart Container */
-        .chart-container {
+        /* Grid for Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .metric-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #eef2f6;
+        }
+
+        .metric-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .metric-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1565c0;
+        }
+
+        .metric-unit {
+            font-size: 16px;
+            color: #777;
+        }
+
+        /* Chart Area */
+        .chart-wrapper {
             position: relative;
             height: 350px;
             width: 100%;
         }
 
-        /* Controls */
-        .load-status {
+        /* Load Control (Original Style) */
+        .load-state {
             text-align: center;
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 32px;
+            font-weight: bold;
             margin: 20px 0;
-            padding: 15px;
-            border-radius: 8px;
-            background: var(--bg-color);
+            color: #17202a;
         }
 
-        .btn-group { display: flex; flex-direction: column; gap: 12px; }
+        .buttons {
+            text-align: center;
+        }
 
         button {
-            padding: 16px;
-            border: none;
+            width: 190px;
+            padding: 17px;
+            margin: 8px;
+            border: 0;
             border-radius: 10px;
-            font-size: 16px;
-            font-weight: 700;
+            font-size: 18px;
+            font-weight: bold;
             cursor: pointer;
-            transition: transform 0.1s, opacity 0.2s;
+            transition: opacity 0.2s, transform 0.1s;
         }
 
-        button:active { transform: scale(0.98); }
+        button:active { transform: scale(0.96); }
         button:hover { opacity: 0.9; }
 
-        .btn-on { background: var(--green); color: white; }
-        .btn-off { background: var(--red); color: white; }
-        .btn-reset { background: var(--text-muted); color: white; margin-top: 15px;}
+        .on { background: #2e7d32; color: white; }
+        .off { background: #c62828; color: white; }
+        .reset-btn { background: #555; color: white; width: 100%; max-width: 400px; margin-top: 20px; }
 
-        /* Responsive */
-        @media (max-width: 900px) {
-            .main-content { grid-template-columns: 1fr; }
-            .btn-group { flex-direction: row; }
-            .btn-group button { flex: 1; }
+        /* System Info (Original Style) */
+        .info {
+            padding: 13px 0;
+            border-bottom: 1px solid #eeeeee;
+            font-size: 15px;
+            display: flex;
+            justify-content: space-between;
         }
+        
+        .info span:first-child { font-weight: 600; color: #555; }
+        .info span:last-child { color: #1565c0; font-weight: 600; }
 
         @media (max-width: 600px) {
-            .metrics-grid { grid-template-columns: 1fr 1fr; }
+            button { width: 100%; margin: 8px 0; }
             .metric-value { font-size: 28px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>AC Power & Energy Monitor</h1>
-        <p>Real-time Apparent Power Dashboard</p>
-    </div>
-
-    <div class="container">
-        
-        <!-- Status Bar -->
-        <div class="status-bar">
-            <div class="status-indicator">
-                <div class="dot" id="mqttDot"></div>
-                <span id="mqttStatus">Connecting Broker...</span>
-            </div>
-            <div class="status-indicator">
-                <div class="dot" id="deviceDot"></div>
-                <span id="deviceStatus">Waiting for Sensor...</span>
-            </div>
-        </div>
-
-        <!-- Metric Cards -->
-        <div class="metrics-grid">
-            <div class="metric-card voltage">
-                <div class="metric-title">Voltage</div>
-                <div class="metric-value"><span id="valVoltage">230.0</span> <span class="metric-unit">V</span></div>
-            </div>
-            <div class="metric-card current">
-                <div class="metric-title">Current</div>
-                <div class="metric-value"><span id="valCurrent">0.00</span> <span class="metric-unit">A</span></div>
-            </div>
-            <div class="metric-card power">
-                <div class="metric-title">Apparent Power</div>
-                <div class="metric-value"><span id="valPower">0</span> <span class="metric-unit">VA</span></div>
-            </div>
-            <div class="metric-card energy">
-                <div class="metric-title">Energy (Stored)</div>
-                <div class="metric-value"><span id="valEnergy">0.000</span> <span class="metric-unit">kWh</span></div>
-            </div>
-        </div>
-
-        <!-- Main Content Layout -->
-        <div class="main-content">
+    <!-- 1. SPLASH / LOADING SCREEN -->
+    <div id="splashScreen">
+        <div class="loader-card">
+            <h2>Initializing System</h2>
             
-            <!-- Graph Section -->
-            <div class="card">
-                <div class="card-title">Live Trend (Last 5 Minutes)</div>
-                <div class="chart-container">
-                    <canvas id="liveChart"></canvas>
-                </div>
+            <div class="step-container" id="stepMqtt">
+                <span class="step-text" id="textMqtt">Connecting to MQTT Broker...</span>
+                <div class="spinner" id="spinMqtt"></div>
+                <div class="checkmark" id="checkMqtt">✔</div>
             </div>
 
-            <!-- Control & Info Section -->
-            <div class="card">
-                <div class="card-title">Load Control</div>
-                
-                <div id="loadState" class="load-status" style="color: var(--text-muted);">
-                    UNKNOWN
-                </div>
-
-                <div class="btn-group">
-                    <button class="btn-on" onclick="loadOn()">TURN LOAD ON</button>
-                    <button class="btn-off" onclick="loadOff()">TURN LOAD OFF</button>
-                </div>
-                
-                <button class="btn-reset" style="width: 100%;" onclick="resetEnergy()">Reset Energy Meter</button>
-
-                <div style="margin-top: 30px; font-size: 13px; color: var(--text-muted); line-height: 1.8;">
-                    <strong>System Info:</strong><br>
-                    Broker: test.mosquitto.org<br>
-                    ID: 4027A9C1<br>
-                    Relay: Normally Closed (NC)<br>
-                </div>
+            <div class="step-container" id="stepDevice">
+                <span class="step-text" id="textDevice">Waiting for ESP8266 Sensor...</span>
+                <div class="spinner" id="spinDevice"></div>
+                <div class="checkmark" id="checkDevice">✔</div>
             </div>
+            
+            <p style="margin-top: 20px; font-size: 12px; color: #888;">
+                The dashboard will open automatically when communication is established.
+            </p>
+            <button onclick="forceStart()" style="background:transparent; color:#1565c0; border:1px solid #1565c0; width:auto; padding: 10px 20px; font-size: 14px; margin-top:15px;">Skip & View Dashboard</button>
         </div>
     </div>
 
-    <script>
-        // --- Configuration ---
-        const mqttBroker = "wss://test.mosquitto.org:8081";
-        const baseTopic = "soham/acs712/";
-        const id = "4027A9C1";
-        
-        const topics = {
-            current: baseTopic + "current/" + id,
-            voltage: baseTopic + "voltage/" + id, // Optional: if not sent, uses 230V default
-            control: baseTopic + "control/" + id,
-            status: baseTopic + "status/" + id
-        };
+    <!-- 2. MAIN DASHBOARD -->
+    <div id="mainDashboard">
+        <div class="header">
+            <h1>Remote AC Power Monitor</h1>
+        </div>
 
-        // --- State Variables ---
+        <div class="container">
+            
+            <!-- Live Measurements Card -->
+            <div class="card">
+                <div class="title">Live Measurements</div>
+                
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-title">Voltage</div>
+                        <div class="metric-value"><span id="valV">230.0</span> <span class="metric-unit">V</span></div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Current</div>
+                        <div class="metric-value" style="color: #c62828;"><span id="valI">0.00</span> <span class="metric-unit">A</span></div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Apparent Power</div>
+                        <div class="metric-value" style="color: #ff8f00;"><span id="valP">0</span> <span class="metric-unit">VA</span></div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Energy Consumed</div>
+                        <div class="metric-value" style="color: #2e7d32;"><span id="valE">0.000</span> <span class="metric-unit">kWh</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graph Card -->
+            <div class="card">
+                <div class="title">Real-Time Trend (Last 5 Minutes)</div>
+                <div class="chart-wrapper">
+                    <canvas id="historyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Load Control Card (Original Style) -->
+            <div class="card">
+                <div class="title">Load Control</div>
+                <div id="loadState" class="load-state">UNKNOWN</div>
+                
+                <div class="buttons">
+                    <button class="on" onclick="loadOn()">LOAD ON</button>
+                    <button class="off" onclick="loadOff()">LOAD OFF</button>
+                    <br>
+                    <button class="reset-btn" onclick="resetEnergy()">Reset Energy Meter</button>
+                </div>
+            </div>
+
+            <!-- System Information (Original Style tweaked for alignment) -->
+            <div class="card">
+                <div class="title">System Information</div>
+                <div class="info"><span>Controller</span> <span>Arduino UNO</span></div>
+                <div class="info"><span>Receiver</span> <span>ESP8266</span></div>
+                <div class="info"><span>Sensor</span> <span>ACS712 20A</span></div>
+                <div class="info"><span>Relay Output</span> <span>D7 (NC)</span></div>
+                <div class="info"><span>MQTT Broker</span> <span>test.mosquitto.org</span></div>
+                <div class="info"><span>Device ID</span> <span>4027A9C1</span></div>
+                <div style="text-align:center; color: #2e7d32; font-weight:bold; margin-top:15px;">● SYSTEM ONLINE</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 3. APPLICATION LOGIC -->
+    <script>
+        // --- Configuration & Topics ---
+        const mqttBroker = "wss://test.mosquitto.org:8081";
+        const id = "4027A9C1";
+        const controlTopic = `soham/acs712/control/${id}`;
+        const currentTopic = `soham/acs712/current/${id}`;
+        const voltageTopic = `soham/acs712/voltage/${id}`;
+        const statusTopic  = `soham/acs712/status/${id}`;
+
         let mqttClient = null;
-        let currentV = 230.0; // Default AC Voltage
+        
+        // --- Connection State Trackers ---
+        let isMqttConnected = false;
+        let isDeviceOnline = false;
+        let appStarted = false;
+
+        // --- Data Variables ---
+        let currentV = 230.0;
         let currentI = 0.0;
         let lastUpdateTime = Date.now();
-        
-        // Load persistent energy from browser storage
-        let totalEnergy_kWh = parseFloat(localStorage.getItem('savedEnergy_' + id)) || 0.0;
-        document.getElementById('valEnergy').innerText = totalEnergy_kWh.toFixed(3);
+        let totalEnergy = parseFloat(localStorage.getItem('energy_' + id)) || 0.0;
+        document.getElementById('valE').innerText = totalEnergy.toFixed(3);
 
-        // --- Chart.js Setup ---
-        const ctx = document.getElementById('liveChart').getContext('2d');
-        const liveChart = new Chart(ctx, {
+        // --- Chart.js Initialization ---
+        const ctx = document.getElementById('historyChart').getContext('2d');
+        const historyChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: [], // Timestamps
+                labels: [],
                 datasets: [
-                    {
-                        label: 'Power (VA)',
-                        borderColor: '#8b5cf6',
-                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                        data: [],
-                        yAxisID: 'y',
-                        fill: true,
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Current (A)',
-                        borderColor: '#3b82f6',
-                        data: [],
-                        yAxisID: 'y1',
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Voltage (V)',
-                        borderColor: '#f59e0b',
-                        data: [],
-                        yAxisID: 'y',
-                        borderDash: [5, 5],
-                        tension: 0.4
-                    }
+                    { label: 'Power (VA)', borderColor: '#ff8f00', backgroundColor: 'rgba(255, 143, 0, 0.1)', data: [], yAxisID: 'y', fill: true, tension: 0.4 },
+                    { label: 'Current (A)', borderColor: '#c62828', data: [], yAxisID: 'y1', tension: 0.4 },
+                    { label: 'Voltage (V)', borderColor: '#1565c0', data: [], yAxisID: 'y', borderDash: [5, 5], tension: 0.4 }
                 ]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: false, // Turn off animation for better live performance
+                responsive: true, maintainAspectRatio: false, animation: false,
                 interaction: { mode: 'index', intersect: false },
                 scales: {
-                    x: {
-                        grid: { display: false }
-                    },
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        title: { display: true, text: 'Voltage (V) / Power (VA)' },
-                        min: 0
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        title: { display: true, text: 'Current (A)' },
-                        min: 0,
-                        grid: { drawOnChartArea: false } // Avoid overlapping grid lines
-                    }
-                },
-                plugins: {
-                    legend: { position: 'top' }
+                    x: { grid: { display: false } },
+                    y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Voltage / Power' }, min: 0 },
+                    y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Current (A)' }, min: 0, grid: { drawOnChartArea: false } }
                 }
             }
         });
 
-        // --- Functions ---
-        function updateUIStatus(elementId, dotId, message, state) {
-            document.getElementById(elementId).innerText = message;
-            const dot = document.getElementById(dotId);
-            dot.className = 'dot'; // reset
-            if (state === 'ok') dot.classList.add('connected');
-            if (state === 'error') dot.classList.add('error');
+        // --- UI Transition Functions ---
+        function markStepSuccess(stepId) {
+            document.getElementById(`step${stepId}`).classList.add('success');
+            document.getElementById(`text${stepId}`).innerText = stepId === 'Mqtt' ? "MQTT Broker Connected" : "ESP8266 Sensor Online";
+            document.getElementById(`spin${stepId}`).style.display = 'none';
+            document.getElementById(`check${stepId}`).style.display = 'block';
         }
 
-        function calculateAndPlot(voltage, current) {
+        function checkReadiness() {
+            if (isMqttConnected && isDeviceOnline && !appStarted) {
+                appStarted = true;
+                setTimeout(() => {
+                    document.getElementById('splashScreen').style.opacity = '0';
+                    document.getElementById('splashScreen').style.visibility = 'hidden';
+                    
+                    const dashboard = document.getElementById('mainDashboard');
+                    dashboard.style.display = 'block';
+                    setTimeout(() => {
+                        dashboard.style.opacity = '1';
+                        dashboard.style.visibility = 'visible';
+                    }, 100);
+                }, 1000); // 1 second delay so user sees the green checkmarks
+            }
+        }
+
+        function forceStart() {
+            isMqttConnected = true; isDeviceOnline = true;
+            checkReadiness();
+        }
+
+        // --- Data Calculation ---
+        function calculateMetrics(voltage, current) {
             const now = Date.now();
-            
-            // 1. Calculate Apparent Power (S = V * I)
             const powerVA = voltage * current;
             
-            // 2. Calculate Energy (kWh)
-            const timeDiffHours = (now - lastUpdateTime) / (1000 * 60 * 60);
-            if (timeDiffHours < 1) { // Ignore huge jumps on first load
-                const powerKW = powerVA / 1000;
-                totalEnergy_kWh += (powerKW * timeDiffHours);
-                localStorage.setItem('savedEnergy_' + id, totalEnergy_kWh.toString());
+            // Energy calculation
+            const timeDiff = (now - lastUpdateTime) / 3600000; // hours
+            if (timeDiff < 1) { 
+                totalEnergy += ((powerVA / 1000) * timeDiff);
+                localStorage.setItem('energy_' + id, totalEnergy.toString());
             }
             lastUpdateTime = now;
 
-            // 3. Update DOM Metrics
-            document.getElementById('valVoltage').innerText = voltage.toFixed(1);
-            document.getElementById('valCurrent').innerText = current.toFixed(2);
-            document.getElementById('valPower').innerText = Math.round(powerVA);
-            document.getElementById('valEnergy').innerText = totalEnergy_kWh.toFixed(3);
+            // Update UI Numbers
+            document.getElementById('valV').innerText = voltage.toFixed(1);
+            document.getElementById('valI').innerText = current.toFixed(2);
+            document.getElementById('valP').innerText = Math.round(powerVA);
+            document.getElementById('valE').innerText = totalEnergy.toFixed(3);
 
-            // 4. Update Chart (Rolling 5 minutes)
+            // Update Chart
             const timeLabel = new Date().toLocaleTimeString('en-US', { hour12: false });
-            const fiveMinsAgo = now - (5 * 60 * 1000);
-            
-            // Add new data
-            liveChart.data.labels.push({ time: now, label: timeLabel });
-            liveChart.data.datasets[0].data.push(powerVA);
-            liveChart.data.datasets[1].data.push(current);
-            liveChart.data.datasets[2].data.push(voltage);
+            historyChart.data.labels.push({ time: now, label: timeLabel });
+            historyChart.data.datasets[0].data.push(powerVA);
+            historyChart.data.datasets[1].data.push(current);
+            historyChart.data.datasets[2].data.push(voltage);
 
-            // Remove data older than 5 minutes
-            while (liveChart.data.labels.length > 0 && liveChart.data.labels[0].time < fiveMinsAgo) {
-                liveChart.data.labels.shift();
-                liveChart.data.datasets.forEach(dataset => dataset.data.shift());
+            // Keep only last 5 minutes (300,000 ms)
+            const fiveMinsAgo = now - 300000;
+            while (historyChart.data.labels.length > 0 && historyChart.data.labels[0].time < fiveMinsAgo) {
+                historyChart.data.labels.shift();
+                historyChart.data.datasets.forEach(d => d.data.shift());
             }
 
-            // Map back labels for Chart.js
-            liveChart.config.data.labels = liveChart.data.labels.map(l => l.label);
-            liveChart.update();
+            historyChart.config.data.labels = historyChart.data.labels.map(l => l.label);
+            historyChart.update();
         }
 
         function resetEnergy() {
-            if(confirm("Are you sure you want to reset the accumulated energy to 0?")) {
-                totalEnergy_kWh = 0;
-                localStorage.setItem('savedEnergy_' + id, '0');
-                document.getElementById('valEnergy').innerText = "0.000";
+            if(confirm("Reset accumulated energy to 0?")) {
+                totalEnergy = 0;
+                localStorage.setItem('energy_' + id, '0');
+                document.getElementById('valE').innerText = "0.000";
             }
         }
 
-        function connectMQTT() {
-            updateUIStatus('mqttStatus', 'mqttDot', 'Connecting...', '');
+        // --- MQTT Setup ---
+        function startSystem() {
+            const clientID = "web_" + Math.random().toString(16).substring(2);
+            mqttClient = mqtt.connect(mqttBroker, { clientId: clientID, clean: true });
 
-            const clientID = "web_dash_" + Math.random().toString(16).substring(2);
-            mqttClient = mqtt.connect(mqttBroker, {
-                clientId: clientID, clean: true, reconnectPeriod: 3000, connectTimeout: 10000
+            mqttClient.on("connect", () => {
+                isMqttConnected = true;
+                markStepSuccess('Mqtt');
+                checkReadiness();
+                mqttClient.subscribe([currentTopic, voltageTopic, statusTopic]);
             });
 
-            mqttClient.on("connect", function() {
-                updateUIStatus('mqttStatus', 'mqttDot', 'Connected', 'ok');
-                mqttClient.subscribe([topics.current, topics.voltage, topics.status]);
-            });
+            mqttClient.on("message", (topic, message) => {
+                const val = message.toString().trim();
 
-            mqttClient.on("message", function(topic, message) {
-                const valueStr = message.toString().trim();
-
-                // Handle Data Topics
-                if (topic === topics.current) {
-                    currentI = parseFloat(valueStr) || 0;
-                    updateUIStatus('deviceStatus', 'deviceDot', 'Online & Transmitting', 'ok');
-                    calculateAndPlot(currentV, currentI);
-                } 
-                else if (topic === topics.voltage) {
-                    currentV = parseFloat(valueStr) || 230.0;
+                // If we receive ANY message from the device, it means it is online
+                if (!isDeviceOnline) {
+                    isDeviceOnline = true;
+                    markStepSuccess('Device');
+                    checkReadiness();
                 }
-                
-                // Handle Status Topics
-                if (topic === topics.status) {
-                    const loadElement = document.getElementById("loadState");
-                    if (valueStr === "ONLINE") {
-                        updateUIStatus('deviceStatus', 'deviceDot', 'Online', 'ok');
-                    } else if (valueStr === "LOAD_ON") {
-                        loadElement.innerText = "LOAD IS ON";
-                        loadElement.style.color = "var(--green)";
-                    } else if (valueStr === "LOAD_OFF") {
-                        loadElement.innerText = "LOAD IS OFF";
-                        loadElement.style.color = "var(--red)";
+
+                if (topic === currentTopic) {
+                    currentI = parseFloat(val) || 0;
+                    calculateMetrics(currentV, currentI);
+                } 
+                else if (topic === voltageTopic) {
+                    currentV = parseFloat(val) || 230.0;
+                }
+                else if (topic === statusTopic) {
+                    const ls = document.getElementById("loadState");
+                    if (val === "LOAD_ON") {
+                        ls.innerText = "LOAD IS ON";
+                        ls.style.color = "#2e7d32";
+                    } else if (val === "LOAD_OFF") {
+                        ls.innerText = "LOAD IS OFF";
+                        ls.style.color = "#c62828";
                     }
                 }
             });
-
-            mqttClient.on("reconnect", () => updateUIStatus('mqttStatus', 'mqttDot', 'Reconnecting...', 'error'));
-            mqttClient.on("offline", () => updateUIStatus('mqttStatus', 'mqttDot', 'Offline', 'error'));
-            mqttClient.on("error", () => updateUIStatus('mqttStatus', 'mqttDot', 'Error', 'error'));
         }
 
-        // --- Control Functions ---
-        function loadOn() {
-            if (mqttClient?.connected) mqttClient.publish(topics.control, "LOAD_ON");
-            else alert("MQTT not connected!");
-        }
+        // --- Controls ---
+        function loadOn() { if (mqttClient?.connected) mqttClient.publish(controlTopic, "LOAD_ON"); }
+        function loadOff() { if (mqttClient?.connected) mqttClient.publish(controlTopic, "LOAD_OFF"); }
 
-        function loadOff() {
-            if (mqttClient?.connected) mqttClient.publish(topics.control, "LOAD_OFF");
-            else alert("MQTT not connected!");
-        }
+        // Boot up
+        startSystem();
 
-        // Start Application
-        connectMQTT();
-
-        // Push data to chart every 2 seconds even if current doesn't change, 
-        // to keep the time-graph flowing naturally.
-        setInterval(() => {
-            if(mqttClient && mqttClient.connected) {
-               calculateAndPlot(currentV, currentI); 
-            }
-        }, 2000);
-
+        // Push to chart every 2s to keep graph moving
+        setInterval(() => { if (appStarted) calculateMetrics(currentV, currentI); }, 2000);
     </script>
 </body>
 </html>
