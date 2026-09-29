@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metro TPC - SCADA Dashboard</title>
+    <title>Metro TPC - Advanced SCADA</title>
     
     <!-- External Libraries -->
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
@@ -14,102 +14,153 @@
 
     <style>
         :root {
-            --scada-bg: #0d1117;
-            --scada-panel: #161b22;
-            --scada-border: #30363d;
-            --scada-text: #c9d1d9;
+            --bg-base: #090c10;
+            --bg-panel: #161b22;
+            --bg-sidebar: #010409;
+            --border-color: #30363d;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            
             --neon-green: #39ff14;
             --neon-red: #ff073a;
             --neon-blue: #0ff;
             --neon-amber: #ffbf00;
+            
+            --btn-on-bg: #1a472a;
+            --btn-on-border: #2ea043;
+            --btn-off-bg: #4a151b;
+            --btn-off-border: #f85149;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Inter', sans-serif;
-            background: var(--scada-bg);
-            color: var(--scada-text);
-            overflow-x: hidden;
+            background: var(--bg-base);
+            color: var(--text-main);
+            overflow: hidden; /* Prevent body scroll, use inner scrolls */
+            display: flex;
+            height: 100vh;
         }
 
-        /* --- SCADA INITIALIZATION SCREEN --- */
-        #splashScreen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: var(--scada-bg); display: flex; justify-content: center; align-items: center;
-            z-index: 9999; transition: opacity 0.5s ease;
+        /* --- SIDEBAR NAVIGATION --- */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
         }
-        .scada-boot {
-            font-family: 'Share Tech Mono', monospace; color: var(--neon-green);
-            text-align: left; width: 400px; max-width: 90%;
+
+        .brand {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
         }
-        .boot-line { margin: 10px 0; border-bottom: 1px dashed #333; padding-bottom: 5px; }
-        .blink { animation: blink 1s step-end infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
 
-        /* --- MAIN DASHBOARD --- */
-        #mainDashboard { display: none; opacity: 0; transition: opacity 0.8s; }
-
-        .header {
-            background: #090c10; padding: 15px 25px; border-bottom: 2px solid var(--scada-border);
-            display: flex; justify-content: space-between; align-items: center;
+        .brand h1 {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 22px;
+            color: #fff;
+            letter-spacing: 2px;
         }
-        .header h1 { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #fff; letter-spacing: 2px; margin:0;}
-        .system-clock { font-family: 'Share Tech Mono', monospace; color: var(--neon-blue); font-size: 18px; }
 
-        .container { width: 96%; max-width: 1400px; margin: 20px auto; display: flex; flex-direction: column; gap: 20px; }
+        .system-clock {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--neon-blue);
+            font-size: 16px;
+            margin-top: 10px;
+        }
 
+        .nav-menu {
+            flex: 1;
+            padding: 20px 0;
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 15px 25px;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+        }
+
+        .nav-item.active {
+            background: rgba(0, 255, 255, 0.1);
+            color: var(--neon-blue);
+            border-left-color: var(--neon-blue);
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .status-dot {
+            display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+            background: var(--neon-red); margin-right: 8px;
+        }
+        .status-dot.online { background: var(--neon-green); box-shadow: 0 0 8px var(--neon-green); }
+
+        /* --- MAIN CONTENT AREA --- */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .tab-pane {
+            display: none;
+            padding: 25px;
+            animation: fadeIn 0.4s ease;
+        }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- SCADA PANELS --- */
         .panel {
-            background: var(--scada-panel); border: 1px solid var(--scada-border);
-            border-radius: 8px; padding: 20px; position: relative;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px;
+            position: relative;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
+
         .panel-title {
-            position: absolute; top: -10px; left: 15px; background: var(--scada-bg);
-            padding: 0 10px; font-size: 12px; font-weight: 800; color: #8b949e; letter-spacing: 1.5px; text-transform: uppercase;
+            position: absolute; top: -10px; left: 15px; background: var(--bg-base);
+            padding: 0 10px; font-size: 12px; font-weight: 800; color: var(--text-muted);
+            letter-spacing: 1.5px; text-transform: uppercase;
         }
 
-        /* --- TOP ROW: CONTROLS & PROTECTION --- */
-        .top-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        /* --- GRID LAYOUTS --- */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 
-        /* Breaker Control */
-        .breaker-status-text { text-align: center; font-size: 28px; font-weight: 800; font-family: 'Share Tech Mono'; margin-bottom: 20px; color: #888; }
-        .btn-group { display: flex; gap: 15px; justify-content: center; }
-        .btn {
-            flex: 1; padding: 18px; font-size: 18px; font-weight: 800; border: none; border-radius: 6px;
-            cursor: pointer; text-transform: uppercase; font-family: 'Inter', sans-serif; letter-spacing: 1px;
-            transition: all 0.2s; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        /* --- TELEMETRY METERS --- */
+        .meter {
+            text-align: center; padding: 25px 10px; background: var(--bg-sidebar);
+            border: 1px solid var(--border-color); border-radius: 6px;
         }
-        .btn:active { transform: translateY(2px); }
-        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
-        .btn-on { background: #1a472a; color: #4af626; border: 2px solid #2ea043; }
-        .btn-on:hover:not(:disabled) { background: #2ea043; color: white; box-shadow: 0 0 15px var(--neon-green); }
-        .btn-off { background: #4a151b; color: #ff6b6b; border: 2px solid #f85149; }
-        .btn-off:hover:not(:disabled) { background: #f85149; color: white; box-shadow: 0 0 15px var(--neon-red); }
-
-        /* Trip Alarm Overlay */
-        #tripAlarmOverlay {
-            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 7, 58, 0.15); border: 3px solid var(--neon-red); border-radius: 8px;
-            flex-direction: column; justify-content: center; align-items: center; z-index: 10;
-        }
-        .trip-text { font-size: 28px; font-weight: 900; color: var(--neon-red); animation: blink 1s infinite; font-family: 'Share Tech Mono'; }
-        .btn-reset { margin-top: 15px; background: var(--neon-red); color: white; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 4px; }
-
-        /* Protection Relay Settings */
-        .relay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 12px; color: #8b949e; margin-bottom: 5px; }
-        .input-group input {
-            width: 100%; background: #010409; border: 1px solid var(--scada-border);
-            color: var(--neon-amber); font-family: 'Share Tech Mono'; font-size: 20px; padding: 10px; text-align: center; border-radius: 4px;
-        }
-        .btn-set { background: #21262d; color: #c9d1d9; border: 1px solid var(--scada-border); padding: 12px; width: 100%; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-set:hover { background: #30363d; }
-
-        /* --- MIDDLE ROW: TELEMETRY --- */
-        .telemetry-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .meter { text-align: center; padding: 25px 10px; background: #010409; border: 1px solid var(--scada-border); border-radius: 6px; }
-        .meter-title { font-size: 13px; color: #8b949e; margin-bottom: 10px; font-weight: 600; letter-spacing: 1px;}
-        .meter-value { font-family: 'Share Tech Mono', monospace; font-size: 42px; font-weight: 400; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        .meter-title { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; font-weight: 600; letter-spacing: 1px;}
+        .meter-value { font-family: 'Share Tech Mono', monospace; font-size: 42px; font-weight: 400; text-shadow: 0 0 10px rgba(255,255,255,0.1); }
         .meter-unit { font-size: 18px; color: #666; }
         
         .val-v { color: var(--neon-amber); }
@@ -117,78 +168,111 @@
         .val-p { color: var(--neon-blue); }
         .val-e { color: var(--neon-green); }
 
-        /* --- BOTTOM ROW: CHART --- */
-        .chart-wrapper { height: 350px; width: 100%; padding-top: 10px;}
+        /* --- CONTROLS --- */
+        .breaker-status-text { text-align: center; font-size: 28px; font-weight: 800; font-family: 'Share Tech Mono'; margin-bottom: 20px; color: #888; }
+        .btn-group { display: flex; gap: 15px; justify-content: center; }
+        .btn {
+            flex: 1; padding: 18px; font-size: 16px; font-weight: 800; border: none; border-radius: 6px;
+            cursor: pointer; text-transform: uppercase; font-family: 'Inter', sans-serif; letter-spacing: 1px;
+            transition: all 0.2s; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        .btn:active { transform: translateY(2px); }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn-on { background: var(--btn-on-bg); color: var(--neon-green); border: 2px solid var(--btn-on-border); }
+        .btn-on:hover:not(:disabled) { background: var(--btn-on-border); color: white; box-shadow: 0 0 15px var(--neon-green); }
+        .btn-off { background: var(--btn-off-bg); color: var(--neon-red); border: 2px solid var(--btn-off-border); }
+        .btn-off:hover:not(:disabled) { background: var(--btn-off-border); color: white; box-shadow: 0 0 15px var(--neon-red); }
+        
+        .btn-action { background: #21262d; color: var(--text-main); border: 1px solid var(--border-color); padding: 12px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-action:hover { background: #30363d; }
 
-        @media (max-width: 900px) {
-            .top-row { grid-template-columns: 1fr; }
-            .telemetry-grid { grid-template-columns: 1fr 1fr; }
+        /* --- TRIP ALARM OVERLAY --- */
+        #tripAlarmOverlay {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 7, 58, 0.15); border: 3px solid var(--neon-red); border-radius: 8px;
+            flex-direction: column; justify-content: center; align-items: center; z-index: 10;
+        }
+        .trip-text { font-size: 28px; font-weight: 900; color: var(--neon-red); animation: blink 1s infinite; font-family: 'Share Tech Mono'; }
+        .btn-reset { margin-top: 15px; background: var(--neon-red); color: white; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* --- SINGLE LINE DIAGRAM (SLD) --- */
+        .sld-container {
+            height: 200px; background: var(--bg-sidebar); border: 1px solid var(--border-color);
+            border-radius: 6px; display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+        .sld-svg { width: 100%; max-width: 400px; height: 100%; overflow: visible; }
+        .sld-line { stroke: var(--text-muted); stroke-width: 4; fill: none; transition: stroke 0.3s; }
+        .sld-line.live { stroke: var(--neon-green); filter: drop-shadow(0 0 5px var(--neon-green)); }
+        .sld-breaker-arm { stroke: var(--text-muted); stroke-width: 4; fill: none; transform-origin: 50% 50%; transition: transform 0.5s ease, stroke 0.3s; }
+        .sld-breaker-arm.closed { transform: rotate(0deg); stroke: var(--neon-green); }
+        .sld-breaker-arm.open { transform: rotate(-35deg); stroke: var(--neon-red); }
+        .sld-node { fill: var(--text-main); }
+        .sld-text { fill: var(--text-muted); font-family: 'Share Tech Mono'; font-size: 14px; }
+
+        /* --- FORMS & TABLES --- */
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;}
+        .input-group input {
+            width: 100%; background: var(--bg-sidebar); border: 1px solid var(--border-color);
+            color: var(--neon-amber); font-family: 'Share Tech Mono'; font-size: 18px; padding: 12px; border-radius: 4px;
+        }
+
+        .data-table { width: 100%; border-collapse: collapse; font-family: 'Share Tech Mono'; font-size: 14px; }
+        .data-table th { background: var(--bg-sidebar); color: var(--text-muted); padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color); }
+        .data-table td { padding: 12px; border-bottom: 1px solid var(--border-color); }
+        .data-table tr:hover { background: rgba(255,255,255,0.02); }
+        .log-type-trip { color: var(--neon-red); font-weight: bold; }
+        .log-type-sys { color: var(--neon-blue); }
+        .log-type-cmd { color: var(--neon-amber); }
+
+        /* --- CHART WRAPPER --- */
+        .chart-wrapper { height: 400px; width: 100%; padding-top: 10px; }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 1024px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .grid-4 { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border-color); }
+            .nav-menu { display: flex; overflow-x: auto; padding: 0; }
+            .nav-item { padding: 15px; white-space: nowrap; border-left: none; border-bottom: 4px solid transparent; }
+            .nav-item.active { border-left: none; border-bottom-color: var(--neon-blue); }
+            .sidebar-footer { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. SCADA BOOT SCREEN -->
-    <div id="splashScreen">
-        <div class="scada-boot">
-            <div class="boot-line" id="b1">System Boot... [OK]</div>
-            <div class="boot-line" id="b2" style="display:none;">Establishing MQTT Uplink... <span class="blink">Wait</span></div>
-            <div class="boot-line" id="b3" style="display:none; color:var(--neon-blue);">Connecting to RTU (ESP8266)... <span class="blink">Wait</span></div>
-            <div class="boot-line" id="b4" style="display:none;">Initialization Complete. Entering TPC Mode.</div>
+    <!-- 1. SIDEBAR NAVIGATION -->
+    <div class="sidebar">
+        <div class="brand">
+            <h1>METRO TPC</h1>
+            <div class="system-clock" id="clock">00:00:00</div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item active" onclick="switchTab('tab-overview')">Live Dashboard</li>
+            <li class="nav-item" onclick="switchTab('tab-analytics')">Power Analytics</li>
+            <li class="nav-item" onclick="switchTab('tab-logs')">Event Logs</li>
+            <li class="nav-item" onclick="switchTab('tab-settings')">System Settings</li>
+        </ul>
+        <div class="sidebar-footer">
+            <div><span class="status-dot" id="dotMqtt"></span> Broker Link</div>
+            <div style="margin-top: 10px;"><span class="status-dot" id="dotRtu"></span> RTU Status</div>
         </div>
     </div>
 
-    <!-- 2. MAIN SCADA DASHBOARD -->
-    <div id="mainDashboard">
-        <div class="header">
-            <h1>TPC // SUBSTATION ALPHA</h1>
-            <div class="system-clock" id="clock">00:00:00</div>
-        </div>
+    <!-- 2. MAIN CONTENT AREA -->
+    <div class="main-content">
 
-        <div class="container">
+        <!-- TAB 1: OVERVIEW -->
+        <div id="tab-overview" class="tab-pane active">
             
-            <div class="top-row">
-                <!-- MAIN BREAKER CONTROL -->
-                <div class="panel">
-                    <div class="panel-title">Main Breaker (CB-01)</div>
-                    
-                    <!-- Trip Alarm Overlay -->
-                    <div id="tripAlarmOverlay">
-                        <div class="trip-text">⚠ TRIPPED: OVERCURRENT FAULT ⚠</div>
-                        <button class="btn-reset" onclick="resetTrip()">ACKNOWLEDGE & RESET FAULT</button>
-                    </div>
-
-                    <div id="breakerStatus" class="breaker-status-text">STATUS: UNKNOWN</div>
-                    <div class="btn-group">
-                        <button id="btnOn" class="btn btn-on" onclick="loadOn()">CLOSE BREAKER (ON)</button>
-                        <button class="btn btn-off" onclick="loadOff()">OPEN BREAKER (OFF)</button>
-                    </div>
-                </div>
-
-                <!-- OVERCURRENT PROTECTION RELAY -->
-                <div class="panel">
-                    <div class="panel-title">Protection Relay (Software Trip)</div>
-                    <div class="relay-grid">
-                        <div class="input-group">
-                            <label>Trip Threshold (Amps)</label>
-                            <input type="number" id="setAmps" value="5.0" step="0.1" min="0">
-                        </div>
-                        <div class="input-group">
-                            <label>Trip Delay (Milliseconds)</label>
-                            <input type="number" id="setMs" value="500" step="50" min="0">
-                        </div>
-                    </div>
-                    <button class="btn-set" onclick="applyTripSettings()">APPLY PROTECTION SETTINGS</button>
-                    <div id="relayStatus" style="text-align: center; margin-top: 10px; font-size: 12px; color: var(--neon-amber);">
-                        Relay Active: Trip at 5.0A after 500ms
-                    </div>
-                </div>
-            </div>
-
-            <!-- LIVE TELEMETRY -->
             <div class="panel">
-                <div class="panel-title">Live Telemetry</div>
-                <div class="telemetry-grid">
+                <div class="panel-title">Real-Time Telemetry</div>
+                <div class="grid-4">
                     <div class="meter">
                         <div class="meter-title">BUS VOLTAGE</div>
                         <div class="meter-value val-v"><span id="valV">230.0</span><span class="meter-unit">V</span></div>
@@ -204,44 +288,202 @@
                     <div class="meter">
                         <div class="meter-title">ENERGY EXPORT</div>
                         <div class="meter-value val-e"><span id="valE">0.000</span><span class="meter-unit">kWh</span></div>
-                        <button onclick="resetEnergy()" style="background:none; border:none; color:#555; text-decoration:underline; font-size:10px; cursor:pointer; margin-top:5px;">Reset Meter</button>
                     </div>
                 </div>
             </div>
 
-            <!-- TREND ANALYSIS -->
+            <div class="grid-2">
+                <!-- MAIN BREAKER CONTROL -->
+                <div class="panel">
+                    <div class="panel-title">Main Breaker (CB-01)</div>
+                    
+                    <div id="tripAlarmOverlay">
+                        <div class="trip-text">⚠ TRIPPED: OVERCURRENT ⚠</div>
+                        <button class="btn-reset" onclick="resetTrip()">ACKNOWLEDGE & RESET</button>
+                    </div>
+
+                    <div id="breakerStatus" class="breaker-status-text">STATUS: UNKNOWN</div>
+                    <div class="btn-group">
+                        <button id="btnOn" class="btn btn-on" onclick="loadOn()">CLOSE (ON)</button>
+                        <button class="btn btn-off" onclick="loadOff()">OPEN (OFF)</button>
+                    </div>
+                </div>
+
+                <!-- SINGLE LINE DIAGRAM -->
+                <div class="panel">
+                    <div class="panel-title">Circuit Topology (SLD)</div>
+                    <div class="sld-container">
+                        <svg class="sld-svg" viewBox="0 0 400 150">
+                            <!-- Source Bus -->
+                            <line x1="0" y1="75" x2="100" y2="75" class="sld-line live" />
+                            <circle cx="100" cy="75" r="5" class="sld-node" />
+                            <text x="10" y="65" class="sld-text">BUS 230V</text>
+
+                            <!-- Breaker Arm (Animated) -->
+                            <line id="sldArm" x1="100" y1="75" x2="200" y2="75" class="sld-breaker-arm open" />
+                            
+                            <!-- Load Bus -->
+                            <circle cx="200" cy="75" r="5" class="sld-node" />
+                            <line id="sldLoadLine" x1="200" y1="75" x2="300" y2="75" class="sld-line" />
+                            <rect x="300" y="50" width="50" height="50" fill="none" stroke="#8b949e" stroke-width="2" />
+                            <text x="310" y="80" class="sld-text">LOAD</text>
+                            
+                            <!-- ACS712 Sensor Icon -->
+                            <circle cx="250" cy="75" r="15" fill="#161b22" stroke="#0ff" stroke-width="2" />
+                            <text x="246" y="80" fill="#0ff" font-family="Share Tech Mono" font-size="12px">A</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: ANALYTICS -->
+        <div id="tab-analytics" class="tab-pane">
             <div class="panel">
-                <div class="panel-title">Power Trend (Last 5 Mins)</div>
+                <div class="panel-title">Telemetry Analytics (Last 100 Points)</div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                    <div style="color: var(--text-muted); font-size: 14px;">
+                        <strong>MAX Amps:</strong> <span id="statMaxI" style="color:var(--neon-red);">0.00</span> A | 
+                        <strong>AVG Power:</strong> <span id="statAvgP" style="color:var(--neon-blue);">0</span> VA
+                    </div>
+                    <button class="btn-action" onclick="exportDataCSV()">Download CSV</button>
+                </div>
                 <div class="chart-wrapper">
                     <canvas id="scadaChart"></canvas>
                 </div>
             </div>
-
         </div>
+
+        <!-- TAB 3: EVENT LOGS -->
+        <div id="tab-logs" class="tab-pane">
+            <div class="panel">
+                <div class="panel-title">System Event Register</div>
+                <div style="max-height: 600px; overflow-y: auto;">
+                    <table class="data-table" id="logTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">TIMESTAMP</th>
+                                <th style="width: 15%;">SOURCE</th>
+                                <th>EVENT DESCRIPTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logBody">
+                            <!-- Logs injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: SETTINGS -->
+        <div id="tab-settings" class="tab-pane">
+            <div class="grid-2">
+                <!-- Protection Relay Settings -->
+                <div class="panel">
+                    <div class="panel-title">Protection Relay (Software Trip)</div>
+                    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+                        Configure software-based overcurrent limits. System will automatically issue OPEN command if limit is breached.
+                    </p>
+                    <div class="input-group">
+                        <label>Trip Threshold (Amps)</label>
+                        <input type="number" id="setAmps" value="5.0" step="0.1" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Trip Delay (Milliseconds)</label>
+                        <input type="number" id="setMs" value="500" step="50" min="0">
+                    </div>
+                    <button class="btn-action" style="width: 100%;" onclick="applyTripSettings()">APPLY PROTECTION SETTINGS</button>
+                    <div id="relayStatus" style="text-align: center; margin-top: 15px; font-size: 14px; color: var(--neon-amber); font-weight: bold;">
+                        Relay Active: Trip at 5.0A after 500ms
+                    </div>
+                </div>
+
+                <!-- MQTT Configuration -->
+                <div class="panel">
+                    <div class="panel-title">Communication Parameters</div>
+                    <div class="input-group">
+                        <label>Device ID / Topic Suffix</label>
+                        <input type="text" id="setDeviceId" value="4027A9C1">
+                    </div>
+                    <div class="input-group">
+                        <label>MQTT Broker WSS URL</label>
+                        <input type="text" id="setBroker" value="wss://test.mosquitto.org:8081">
+                    </div>
+                    <button class="btn-action" style="width: 100%; margin-bottom: 15px;" onclick="reconfigureMQTT()">RECONNECT WITH NEW PARAMS</button>
+                    
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;">
+                    
+                    <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">Maintenance</label>
+                    <button class="btn-action" style="width: 100%; border-color: var(--neon-red); color: var(--neon-red);" onclick="resetEnergy()">ZERO ENERGY METER (kWh)</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- 3. APPLICATION LOGIC -->
     <script>
-        // --- Clock Update ---
-        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', {hour12:false}); }, 1000);
+        // --- UI & TAB MANAGEMENT ---
+        function switchTab(tabId) {
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            // Update active pane
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
 
-        // --- Configuration & Topics ---
-        const mqttBroker = "wss://test.mosquitto.org:8081";
-        const id = "4027A9C1";
-        const controlTopic = `soham/acs712/control/${id}`;
-        const currentTopic = `soham/acs712/current/${id}`;
-        const voltageTopic = `soham/acs712/voltage/${id}`;
-        const statusTopic  = `soham/acs712/status/${id}`;
+            // Resize chart if analytics tab clicked (fixes canvas rendering bugs)
+            if(tabId === 'tab-analytics' && historyChart) {
+                historyChart.resize();
+            }
+        }
+
+        // --- CLOCK ---
+        setInterval(() => { 
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', {hour12:false}); 
+        }, 1000);
+
+        // --- EVENT LOGGING SYSTEM ---
+        let eventLogs = [];
+        function addLog(source, typeClass, message) {
+            const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+            eventLogs.unshift({ timestamp, source, typeClass, message });
+            
+            // Keep array size manageable
+            if (eventLogs.length > 100) eventLogs.pop();
+            
+            // Render table
+            const tbody = document.getElementById('logBody');
+            tbody.innerHTML = '';
+            eventLogs.forEach(log => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${log.timestamp}</td>
+                    <td class="${log.typeClass}">${log.source}</td>
+                    <td>${log.message}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- CONFIGURATION & STATE ---
+        let mqttBroker = "wss://test.mosquitto.org:8081";
+        let deviceId = "4027A9C1";
+        let getTopic = (type) => `soham/acs712/${type}/${deviceId}`;
 
         let mqttClient = null;
-        let isMqttConnected = false, isDeviceOnline = false, appStarted = false;
+        let isDeviceOnline = false;
 
-        // --- Data Variables ---
         let currentV = 230.0, currentI = 0.0, lastUpdateTime = Date.now();
-        let totalEnergy = parseFloat(localStorage.getItem('energy_' + id)) || 0.0;
+        let totalEnergy = parseFloat(localStorage.getItem('energy_' + deviceId)) || 0.0;
         document.getElementById('valE').innerText = totalEnergy.toFixed(3);
 
-        // --- PROTECTION RELAY VARIABLES (TRIP LOGIC) ---
+        // Data Storage for Chart & CSV Export
+        let timeData = [], vData = [], iData = [], pData = [];
+        const MAX_DATAPOINTS = 100;
+
+        // --- PROTECTION RELAY VARIABLES ---
         let tripThresholdAmps = 5.0;
         let tripDelayMs = 500;
         let tripTimer = null;
@@ -251,22 +493,27 @@
             tripThresholdAmps = parseFloat(document.getElementById('setAmps').value);
             tripDelayMs = parseInt(document.getElementById('setMs').value);
             document.getElementById('relayStatus').innerText = `Relay Active: Trip at ${tripThresholdAmps}A after ${tripDelayMs}ms`;
+            addLog("SYS_CONFIG", "log-type-sys", `Protection Relay updated: ${tripThresholdAmps}A / ${tripDelayMs}ms`);
         }
 
         function triggerTrip() {
-            if (systemTripped) return; // Prevent multiple triggers
+            if (systemTripped) return;
             systemTripped = true;
             
-            // 1. Send hardware cutoff command via MQTT
-            if (mqttClient && mqttClient.connected) {
-                mqttClient.publish(controlTopic, "LOAD_OFF");
-            }
+            if (mqttClient?.connected) mqttClient.publish(getTopic('control'), "LOAD_OFF");
             
-            // 2. Lock UI
             document.getElementById('tripAlarmOverlay').style.display = 'flex';
             document.getElementById('btnOn').disabled = true;
-            document.getElementById('breakerStatus').innerText = "TRIPPED";
-            document.getElementById('breakerStatus').style.color = "var(--neon-red)";
+            
+            const statusText = document.getElementById('breakerStatus');
+            statusText.innerText = "TRIPPED";
+            statusText.style.color = "var(--neon-red)";
+            
+            updateSLD("LOAD_OFF");
+            addLog("PROTECTION", "log-type-trip", `OVERCURRENT TRIP TRIGGERED at ${currentI}A`);
+            
+            // Force jump to overview tab so user sees the alarm
+            document.querySelector('.nav-item').click(); // Clicks the first nav item (Overview)
         }
 
         function resetTrip() {
@@ -275,163 +522,222 @@
             tripTimer = null;
             document.getElementById('tripAlarmOverlay').style.display = 'none';
             document.getElementById('btnOn').disabled = false;
-            // Load remains OFF until user explicitly presses 'CLOSE BREAKER'
+            addLog("OPERATOR", "log-type-cmd", "Fault Acknowledged and Reset");
         }
 
-        // --- Chart.js Initialization (SCADA Dark Theme) ---
+        // --- CHART.JS CONFIGURATION ---
         Chart.defaults.color = '#8b949e';
         Chart.defaults.font.family = 'Share Tech Mono';
-        
         const ctx = document.getElementById('scadaChart').getContext('2d');
         const historyChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: [],
+                labels: timeData,
                 datasets: [
-                    { label: 'Power (VA)', borderColor: '#0ff', backgroundColor: 'rgba(0, 255, 255, 0.1)', data: [], yAxisID: 'y', fill: true, tension: 0.1, borderWidth: 2 },
-                    { label: 'Current (A)', borderColor: '#ff073a', data: [], yAxisID: 'y1', tension: 0.1, borderWidth: 2 },
-                    { label: 'Voltage (V)', borderColor: '#ffbf00', data: [], yAxisID: 'y', borderDash: [5, 5], tension: 0.1, borderWidth: 1 }
+                    { label: 'Power (VA)', borderColor: '#0ff', backgroundColor: 'rgba(0, 255, 255, 0.1)', data: pData, yAxisID: 'y', fill: true, tension: 0.1, borderWidth: 2, pointRadius: 0 },
+                    { label: 'Current (A)', borderColor: '#ff073a', data: iData, yAxisID: 'y1', tension: 0.1, borderWidth: 2, pointRadius: 0 },
+                    { label: 'Voltage (V)', borderColor: '#ffbf00', data: vData, yAxisID: 'y', borderDash: [5, 5], tension: 0.1, borderWidth: 1, pointRadius: 0 }
                 ]
             },
             options: {
                 responsive: true, maintainAspectRatio: false, animation: false,
                 interaction: { mode: 'index', intersect: false },
                 scales: {
-                    x: { grid: { color: '#30363d' } },
+                    x: { grid: { color: '#30363d' }, ticks: { maxTicksLimit: 10 } },
                     y: { type: 'linear', display: true, position: 'left', min: 0, grid: { color: '#30363d' } },
                     y1: { type: 'linear', display: true, position: 'right', min: 0, grid: { drawOnChartArea: false } }
                 }
             }
         });
 
-        // --- Boot Sequence Animations ---
-        setTimeout(() => { document.getElementById('b2').style.display = 'block'; }, 500);
-
-        function checkReadiness() {
-            if (isMqttConnected && isDeviceOnline && !appStarted) {
-                appStarted = true;
-                document.getElementById('b4').style.display = 'block';
-                setTimeout(() => {
-                    document.getElementById('splashScreen').style.opacity = '0';
-                    setTimeout(() => {
-                        document.getElementById('splashScreen').style.display = 'none';
-                        document.getElementById('mainDashboard').style.display = 'block';
-                        setTimeout(() => { document.getElementById('mainDashboard').style.opacity = '1'; }, 100);
-                    }, 500);
-                }, 1500);
+        // --- SINGLE LINE DIAGRAM (SLD) LOGIC ---
+        function updateSLD(state) {
+            const arm = document.getElementById('sldArm');
+            const loadLine = document.getElementById('sldLoadLine');
+            if(state === "LOAD_ON") {
+                arm.classList.remove('open');
+                arm.classList.add('closed');
+                loadLine.classList.add('live');
+            } else {
+                arm.classList.remove('closed');
+                arm.classList.add('open');
+                loadLine.classList.remove('live');
             }
         }
 
-        // --- Data Calculation & Metrics ---
-        function calculateMetrics(voltage, current) {
+        // --- TELEMETRY PROCESSING ---
+        function processTelemetry(voltage, current) {
             const now = Date.now();
             const powerVA = voltage * current;
             
-            // Energy Calculation
+            // Energy Math
             const timeDiff = (now - lastUpdateTime) / 3600000;
             if (timeDiff < 1) { 
                 totalEnergy += ((powerVA / 1000) * timeDiff);
-                localStorage.setItem('energy_' + id, totalEnergy.toString());
+                localStorage.setItem('energy_' + deviceId, totalEnergy.toString());
             }
             lastUpdateTime = now;
 
-            // Update UI Numbers (Fix decimal places to mimic rigid SCADA formatting)
+            // Update UI Displays
             document.getElementById('valV').innerText = voltage.toFixed(1);
             document.getElementById('valI').innerText = current.toFixed(2).padStart(5, '0');
             document.getElementById('valP').innerText = Math.round(powerVA).toString().padStart(4, '0');
             document.getElementById('valE').innerText = totalEnergy.toFixed(3).padStart(6, '0');
 
-            // Update Chart (5 mins max)
+            // Append to Data Arrays
             const timeLabel = new Date().toLocaleTimeString('en-US', { hour12: false });
-            historyChart.data.labels.push({ time: now, label: timeLabel });
-            historyChart.data.datasets[0].data.push(powerVA);
-            historyChart.data.datasets[1].data.push(current);
-            historyChart.data.datasets[2].data.push(voltage);
+            timeData.push(timeLabel);
+            vData.push(voltage);
+            iData.push(current);
+            pData.push(powerVA);
 
-            const fiveMinsAgo = now - 300000;
-            while (historyChart.data.labels.length > 0 && historyChart.data.labels[0].time < fiveMinsAgo) {
-                historyChart.data.labels.shift();
-                historyChart.data.datasets.forEach(d => d.data.shift());
+            // Shift arrays if they exceed max points
+            if (timeData.length > MAX_DATAPOINTS) {
+                timeData.shift(); vData.shift(); iData.shift(); pData.shift();
             }
-            historyChart.config.data.labels = historyChart.data.labels.map(l => l.label);
             historyChart.update();
+
+            // Calculate Analytics (Stats)
+            const maxI = Math.max(...iData);
+            const sumP = pData.reduce((a, b) => a + b, 0);
+            const avgP = (sumP / pData.length) || 0;
+            document.getElementById('statMaxI').innerText = maxI.toFixed(2);
+            document.getElementById('statAvgP').innerText = Math.round(avgP);
         }
 
         function resetEnergy() {
-            if(confirm("Zero the Energy Meter?")) {
-                totalEnergy = 0; localStorage.setItem('energy_' + id, '0');
+            if(confirm("DANGER: Are you sure you want to ZERO the Energy Meter?")) {
+                totalEnergy = 0; localStorage.setItem('energy_' + deviceId, '0');
                 document.getElementById('valE').innerText = "0.000";
+                addLog("SYS_MAINT", "log-type-sys", "Energy Meter Zeroed manually.");
             }
         }
 
-        // --- MQTT Setup ---
-        function startSystem() {
+        // --- CSV EXPORT ---
+        function exportDataCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Timestamp,Voltage(V),Current(A),Power(VA)\n";
+            
+            for(let i=0; i < timeData.length; i++){
+                csvContent += `${timeData[i]},${vData[i]},${iData[i]},${pData[i]}\n`;
+            }
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `SCADA_Export_${new Date().getTime()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            addLog("DATA_EXPORT", "log-type-sys", "Telemetry downloaded as CSV");
+        }
+
+        // --- MQTT ENGINE ---
+        function initMQTT() {
+            if (mqttClient) {
+                mqttClient.end(true); // Kill existing connection if reconfiguring
+            }
+
             const clientID = "tpc_" + Math.random().toString(16).substring(2);
-            mqttClient = mqtt.connect(mqttBroker, { clientId: clientID, clean: true });
+            mqttClient = mqtt.connect(mqttBroker, { clientId: clientID, clean: true, reconnectPeriod: 5000 });
+
+            addLog("COMM_LINK", "log-type-sys", `Initiating connection to ${mqttBroker}`);
 
             mqttClient.on("connect", () => {
-                isMqttConnected = true;
-                document.getElementById('b2').innerHTML = "Establishing MQTT Uplink... [OK]";
-                document.getElementById('b3').style.display = 'block';
-                mqttClient.subscribe([currentTopic, voltageTopic, statusTopic]);
+                document.getElementById('dotMqtt').classList.add('online');
+                addLog("COMM_LINK", "log-type-sys", "Broker Connected Successfully");
+                
+                // Subscribe to dynamic topics
+                mqttClient.subscribe([getTopic('current'), getTopic('voltage'), getTopic('status')]);
+            });
+
+            mqttClient.on("offline", () => {
+                document.getElementById('dotMqtt').classList.remove('online');
+                document.getElementById('dotRtu').classList.remove('online');
+                isDeviceOnline = false;
             });
 
             mqttClient.on("message", (topic, message) => {
                 const val = message.toString().trim();
 
+                // Mark device online on first message received
                 if (!isDeviceOnline) {
                     isDeviceOnline = true;
-                    document.getElementById('b3').innerHTML = "Connecting to RTU (ESP8266)... [OK]";
-                    checkReadiness();
+                    document.getElementById('dotRtu').classList.add('online');
+                    addLog("RTU_LINK", "log-type-sys", `RTU ${deviceId} is Online and Transmitting`);
                 }
 
-                if (topic === currentTopic) {
+                // Handle Data
+                if (topic === getTopic('current')) {
                     currentI = parseFloat(val) || 0;
-                    calculateMetrics(currentV, currentI);
-
-                    // --- TRIP LOGIC EXECUTION ---
+                    
+                    // TRIP LOGIC EVALUATION
                     if (!systemTripped && currentI >= tripThresholdAmps) {
-                        // Current breached limit! Start timer if not already running
                         if (!tripTimer) {
+                            addLog("PROTECTION", "log-type-cmd", `WARNING: Current (${currentI}A) exceeded threshold. Trip imminent.`);
                             tripTimer = setTimeout(triggerTrip, tripDelayMs);
                         }
-                    } else if (currentI < tripThresholdAmps) {
-                        // Current dropped to safe levels before time ran out. Cancel timer.
-                        if (tripTimer) {
-                            clearTimeout(tripTimer);
-                            tripTimer = null;
-                        }
+                    } else if (currentI < tripThresholdAmps && tripTimer) {
+                        clearTimeout(tripTimer);
+                        tripTimer = null;
+                        addLog("PROTECTION", "log-type-cmd", "WARNING CLEARED: Current normalized.");
                     }
                 } 
-                else if (topic === voltageTopic) {
+                else if (topic === getTopic('voltage')) {
                     currentV = parseFloat(val) || 230.0;
                 }
-                else if (topic === statusTopic) {
+                
+                // Handle Status
+                else if (topic === getTopic('status')) {
                     const statusText = document.getElementById("breakerStatus");
                     if (val === "LOAD_ON") {
                         if(!systemTripped) {
                             statusText.innerText = "ENERGIZED (CLOSED)";
                             statusText.style.color = "var(--neon-green)";
+                            updateSLD("LOAD_ON");
                         }
                     } else if (val === "LOAD_OFF") {
                         if(!systemTripped) {
                             statusText.innerText = "ISOLATED (OPEN)";
-                            statusText.style.color = "#8b949e";
+                            statusText.style.color = "var(--text-muted)";
+                            updateSLD("LOAD_OFF");
                         }
                     }
                 }
             });
         }
 
-        // --- Controls ---
-        function loadOn() { if (mqttClient?.connected && !systemTripped) mqttClient.publish(controlTopic, "LOAD_ON"); }
-        function loadOff() { if (mqttClient?.connected) mqttClient.publish(controlTopic, "LOAD_OFF"); }
+        // --- CONTROLS & DYNAMIC SETTINGS ---
+        function loadOn() { 
+            if (mqttClient?.connected && !systemTripped) {
+                mqttClient.publish(getTopic('control'), "LOAD_ON");
+                addLog("OPERATOR", "log-type-cmd", "Issued CLOSE (ON) command to breaker");
+            } 
+        }
+        
+        function loadOff() { 
+            if (mqttClient?.connected) {
+                mqttClient.publish(getTopic('control'), "LOAD_OFF");
+                addLog("OPERATOR", "log-type-cmd", "Issued OPEN (OFF) command to breaker");
+            } 
+        }
 
-        // Start Boot
-        startSystem();
+        function reconfigureMQTT() {
+            deviceId = document.getElementById('setDeviceId').value;
+            mqttBroker = document.getElementById('setBroker').value;
+            document.getElementById('dotRtu').classList.remove('online');
+            isDeviceOnline = false;
+            addLog("SYS_CONFIG", "log-type-sys", `Reconfiguring ID: ${deviceId}`);
+            initMQTT();
+        }
 
-        // Push to chart every 2s to keep graph moving
-        setInterval(() => { if (appStarted) calculateMetrics(currentV, currentI); }, 2000);
+        // Start Application
+        addLog("SYSTEM_BOOT", "log-type-sys", "SCADA Interface Initialized");
+        initMQTT();
+
+        // Heartbeat for Chart & Calculations
+        setInterval(() => { processTelemetry(currentV, currentI); }, 2000);
+
     </script>
 </body>
 </html>
